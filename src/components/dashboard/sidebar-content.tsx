@@ -5,19 +5,12 @@ import {
   ChevronsLeft,
   Clock,
   Code2,
-  File,
-  FileText,
   Folder,
-  Image,
   LayoutGrid,
-  Link as LinkIcon,
   Pin,
   Plus,
   Search,
-  Sparkles,
   Star,
-  Terminal,
-  type LucideIcon,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -29,32 +22,15 @@ import {
   currentUser,
   itemTypes,
   items,
-  type ItemType,
 } from "@/lib/mock-data";
+import {
+  itemTypeColors,
+  itemTypeIcons,
+} from "@/lib/item-type-styles";
 import { cn } from "@/lib/utils";
 
 import { SidebarSection } from "./sidebar-section";
 import { useSidebar } from "./sidebar-context";
-
-const typeIcons: Record<ItemType["icon"], LucideIcon> = {
-  code: Code2,
-  sparkles: Sparkles,
-  terminal: Terminal,
-  "file-text": FileText,
-  file: File,
-  image: Image,
-  link: LinkIcon,
-};
-
-const typeColors: Record<ItemType["color"], string> = {
-  blue: "text-blue-400",
-  purple: "text-purple-400",
-  orange: "text-orange-400",
-  yellow: "text-yellow-400",
-  gray: "text-muted-foreground",
-  pink: "text-pink-400",
-  cyan: "text-cyan-400",
-};
 
 function getTypeSlug(name: string) {
   return name.toLowerCase();
@@ -210,7 +186,7 @@ export function SidebarContent({
           <SidebarSection title="Item Types" collapsed={collapsed}>
             <div className="grid grid-cols-2 gap-1 px-1">
               {itemTypes.map((type) => {
-                const Icon = typeIcons[type.icon];
+                const Icon = itemTypeIcons[type.icon];
                 return (
                   <Link
                     key={type.id}
@@ -219,7 +195,7 @@ export function SidebarContent({
                     className="flex flex-col items-center gap-1 rounded-lg px-2 py-2 text-center text-xs transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   >
                     <Icon
-                      className={cn("size-4 shrink-0", typeColors[type.color])}
+                      className={cn("size-4 shrink-0", itemTypeColors[type.color])}
                     />
                     <span className="truncate">{getTypeLabel(type.name)}</span>
                   </Link>
