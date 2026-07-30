@@ -1,21 +1,16 @@
 # Current Feature
 
-<!-- Feature Name -->
+None
 
 ## Status
 
-<!-- Not Started|In Progress|Completed -->
-
-Not Started
-
-## Goals
-
-<!-- Goals & requirements -->
+None
 
 ## Notes
 
-<!-- Any extra notes -->
+- Next up: @context/features/dashboard-phase-2-spec.md
 
 ## History
 
-<!-- Keep this updated. Earliest to latest -->
+- 2026-07-30: Completed **Dashboard UI Phase 1** — shadcn/ui init (button, input), `/dashboard` route, dark mode by default, top bar with search and New Item button (display only), sidebar and main placeholders
+- 2026-07-30: Started Dashboard UI Phase 1
