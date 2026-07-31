@@ -5,22 +5,16 @@ import {
   getDashboardStats,
   getRecentCollections,
 } from "@/lib/db/collections";
+import { getPinnedItems, getRecentItems } from "@/lib/db/items";
 import { getDashboardUserId } from "@/lib/db/user";
-import { items } from "@/lib/mock-data";
-
-const pinnedItems = items.filter((item) => item.isPinned);
-const recentItems = [...items]
-  .sort(
-    (a, b) =>
-      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
-  )
-  .slice(0, 10);
 
 export default async function DashboardPage() {
   const userId = await getDashboardUserId();
-  const [collections, stats] = await Promise.all([
+  const [collections, stats, pinnedItems, recentItems] = await Promise.all([
     getRecentCollections(userId),
     getDashboardStats(userId),
+    getPinnedItems(userId),
+    getRecentItems(userId),
   ]);
 
   return (
