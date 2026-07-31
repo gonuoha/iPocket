@@ -1,17 +1,28 @@
 import { CollectionsGrid } from "@/components/dashboard/collection-card";
 import { ItemRow } from "@/components/dashboard/item-row";
 import { StatsCards } from "@/components/dashboard/stats-cards";
-import { collections, items } from "@/lib/mock-data";
+import {
+  getDashboardStats,
+  getRecentCollections,
+} from "@/lib/db/collections";
+import { getDashboardUserId } from "@/lib/db/user";
+import { items } from "@/lib/mock-data";
 
 const pinnedItems = items.filter((item) => item.isPinned);
 const recentItems = [...items]
   .sort(
     (a, b) =>
-      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+      new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
   )
   .slice(0, 10);
 
-export default function DashboardPage() {
+export default async function DashboardPage() {
+  const userId = await getDashboardUserId();
+  const [collections, stats] = await Promise.all([
+    getRecentCollections(userId),
+    getDashboardStats(userId),
+  ]);
+
   return (
     <div className="space-y-8">
       <div>
@@ -20,7 +31,7 @@ export default function DashboardPage() {
         </p>
       </div>
 
-      <StatsCards />
+      <StatsCards {...stats} />
 
       <section className="space-y-4">
         <div className="flex items-center justify-between gap-3">

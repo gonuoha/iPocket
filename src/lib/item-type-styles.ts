@@ -1,17 +1,20 @@
+import type { CSSProperties } from "react";
 import {
+  Code,
   Code2,
   File,
   FileText,
   Image,
   Link as LinkIcon,
   Sparkles,
+  StickyNote,
   Terminal,
   type LucideIcon,
 } from "lucide-react";
 
 import type { ItemType } from "@/lib/mock-data";
 
-export const itemTypeIcons: Record<ItemType["icon"], LucideIcon> = {
+const legacyItemTypeIcons: Record<ItemType["icon"], LucideIcon> = {
   code: Code2,
   sparkles: Sparkles,
   terminal: Terminal,
@@ -20,6 +23,18 @@ export const itemTypeIcons: Record<ItemType["icon"], LucideIcon> = {
   image: Image,
   link: LinkIcon,
 };
+
+const dbItemTypeIcons: Record<string, LucideIcon> = {
+  Code,
+  Sparkles,
+  Terminal,
+  StickyNote,
+  File,
+  Image,
+  Link: LinkIcon,
+};
+
+export const itemTypeIcons = legacyItemTypeIcons;
 
 export const itemTypeColors: Record<ItemType["color"], string> = {
   blue: "text-blue-400",
@@ -40,3 +55,45 @@ export const itemTypeBgColors: Record<ItemType["color"], string> = {
   pink: "bg-pink-500/10",
   cyan: "bg-cyan-500/10",
 };
+
+export function getItemTypeIcon(icon: string | null): LucideIcon {
+  if (!icon) {
+    return File;
+  }
+
+  return (
+    dbItemTypeIcons[icon] ??
+    legacyItemTypeIcons[icon as ItemType["icon"]] ??
+    File
+  );
+}
+
+type ItemTypeStyle = {
+  textClassName?: string;
+  bgClassName?: string;
+  textStyle?: CSSProperties;
+  bgStyle?: CSSProperties;
+};
+
+export function getItemTypeStyles(color: string | null): ItemTypeStyle {
+  if (!color) {
+    return {
+      textClassName: itemTypeColors.gray,
+      bgClassName: itemTypeBgColors.gray,
+    };
+  }
+
+  if (color.startsWith("#")) {
+    return {
+      textStyle: { color },
+      bgStyle: { backgroundColor: `${color}1a` },
+    };
+  }
+
+  const namedColor = color as ItemType["color"];
+
+  return {
+    textClassName: itemTypeColors[namedColor] ?? itemTypeColors.gray,
+    bgClassName: itemTypeBgColors[namedColor] ?? itemTypeBgColors.gray,
+  };
+}

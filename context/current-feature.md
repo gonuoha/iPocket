@@ -12,6 +12,8 @@ _No active feature._
 
 ## History
 
+- 2026-07-31: Completed **Dashboard Collections** — real collection data and stats from Prisma, dominant type border colors, type badges on cards
+- 2026-07-31: Started **Dashboard Collections**
 - 2026-07-31: Completed **Seed Data** — demo user, system item types, 5 collections, 18 sample items, bcrypt password hashing, ESLint eol-last rule
 - 2026-07-31: Started **Seed Data**
 - 2026-07-31: Completed **Prisma + PostgreSQL Setup** — Prisma 7 with PostgreSQL, initial schema, NextAuth models, Docker Compose, migrations, seed for system item types
