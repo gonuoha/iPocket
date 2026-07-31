@@ -4,29 +4,17 @@ import Link from "next/link";
 import {
   ChevronsLeft,
   Clock,
-  Code2,
-  Folder,
   LayoutGrid,
+  PanelLeftClose,
   Pin,
-  Plus,
-  Search,
   Star,
 } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import {
-  collections,
-  currentUser,
-  itemTypes,
-  items,
-} from "@/lib/mock-data";
-import {
-  itemTypeColors,
-  itemTypeIcons,
-} from "@/lib/item-type-styles";
+import type { SidebarData } from "@/lib/db/sidebar";
+import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
 import { cn } from "@/lib/utils";
 
 import { SidebarSection } from "./sidebar-section";
@@ -37,8 +25,11 @@ function getTypeSlug(name: string) {
 }
 
 function getTypeLabel(name: string) {
-  if (name === "Links") return "URL";
-  return name.replace(/s$/, "");
+  if (name === "link") {
+    return "URL";
+  }
+
+  return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
 function getUserInitials(name: string) {
@@ -50,19 +41,20 @@ function getUserInitials(name: string) {
     .toUpperCase();
 }
 
-const favoriteCount = items.filter((item) => item.isFavorite).length;
-const pinnedCount = items.filter((item) => item.isPinned).length;
-
 type SidebarContentProps = {
+  sidebarData: SidebarData;
   collapsed?: boolean;
   onNavigate?: () => void;
 };
 
 export function SidebarContent({
+  sidebarData,
   collapsed = false,
   onNavigate,
 }: SidebarContentProps) {
   const { toggleSidebar } = useSidebar();
+  const { user, itemTypes, favoriteCollections, recentCollections, itemCounts } =
+    sidebarData;
 
   const navItems = [
     { href: "/dashboard", label: "All Items", icon: LayoutGrid, count: null },
@@ -70,9 +62,14 @@ export function SidebarContent({
       href: "/dashboard/favorites",
       label: "Favorites",
       icon: Star,
-      count: favoriteCount,
+      count: itemCounts.favoriteCount,
     },
-    { href: "/dashboard/pinned", label: "Pinned", icon: Pin, count: pinnedCount },
+    {
+      href: "/dashboard/pinned",
+      label: "Pinned",
+      icon: Pin,
+      count: itemCounts.pinnedCount,
+    },
     { href: "/dashboard/recents", label: "Recents", icon: Clock, count: null },
   ];
 
@@ -81,22 +78,12 @@ export function SidebarContent({
       <div
         className={cn(
           "flex shrink-0 items-center p-3",
-          collapsed ? "flex-col gap-2 px-2" : "justify-between"
+          collapsed ? "justify-center px-2" : "justify-between"
         )}
       >
-        <Link
-          href="/dashboard"
-          onClick={onNavigate}
-          className={cn(
-            "flex min-w-0 items-center gap-2 font-semibold",
-            collapsed && "justify-center"
-          )}
-        >
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Code2 className="size-4" />
-          </div>
-          {!collapsed && <span className="truncate">iPocket</span>}
-        </Link>
+        {!collapsed ? (
+          <span className="px-2 text-sm font-medium">Navigation</span>
+        ) : null}
         <Button
           variant="ghost"
           size="icon-sm"
@@ -104,53 +91,16 @@ export function SidebarContent({
           aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
           className="hidden shrink-0 md:inline-flex"
         >
-          <ChevronsLeft className={cn(collapsed && "rotate-180")} />
+          {collapsed ? (
+            <ChevronsLeft className="rotate-180" />
+          ) : (
+            <PanelLeftClose className="size-4" />
+          )}
         </Button>
       </div>
 
       <ScrollArea className="min-h-0 flex-1 px-2">
         <div className="space-y-3 pb-4">
-          {!collapsed ? (
-            <>
-              <Button
-                disabled
-                className="w-full bg-gradient-to-r from-emerald-500 to-cyan-500 text-white hover:from-emerald-500/90 hover:to-cyan-500/90"
-              >
-                <Plus />
-                Add New
-              </Button>
-
-              <div className="relative">
-                <Search className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground" />
-                <Input
-                  type="search"
-                  placeholder="Quick search..."
-                  className="pl-8"
-                  disabled
-                />
-              </div>
-            </>
-          ) : (
-            <div className="flex flex-col items-center gap-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled
-                aria-label="Add New"
-              >
-                <Plus />
-              </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                disabled
-                aria-label="Search"
-              >
-                <Search />
-              </Button>
-            </div>
-          )}
-
           <nav className="space-y-0.5">
             {navItems.map((item) => {
               const Icon = item.icon;
@@ -186,7 +136,9 @@ export function SidebarContent({
           <SidebarSection title="Item Types" collapsed={collapsed}>
             <div className="grid grid-cols-2 gap-1 px-1">
               {itemTypes.map((type) => {
-                const Icon = itemTypeIcons[type.icon];
+                const Icon = getItemTypeIcon(type.icon);
+                const styles = getItemTypeStyles(type.color);
+
                 return (
                   <Link
                     key={type.id}
@@ -195,7 +147,8 @@ export function SidebarContent({
                     className="flex flex-col items-center gap-1 rounded-lg px-2 py-2 text-center text-xs transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   >
                     <Icon
-                      className={cn("size-4 shrink-0", itemTypeColors[type.color])}
+                      className={cn("size-4 shrink-0", styles.textClassName)}
+                      style={styles.textStyle}
                     />
                     <span className="truncate">{getTypeLabel(type.name)}</span>
                   </Link>
@@ -205,22 +158,70 @@ export function SidebarContent({
           </SidebarSection>
 
           <SidebarSection title="Collections" collapsed={collapsed}>
-            <nav className="space-y-0.5">
-              {collections.map((collection) => (
-                <Link
-                  key={collection.id}
-                  href={`/collections/${collection.id}`}
-                  onClick={onNavigate}
-                  className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                >
-                  <Folder className="size-4 shrink-0 text-muted-foreground" />
-                  <span className="flex-1 truncate">{collection.name}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {collection.itemCount}
-                  </span>
-                </Link>
-              ))}
-            </nav>
+            <div className="space-y-2">
+              {favoriteCollections.length > 0 ? (
+                <div className="space-y-0.5">
+                  <p className="px-2 text-xs font-medium text-muted-foreground">
+                    Favorites
+                  </p>
+                  <nav className="space-y-0.5">
+                    {favoriteCollections.map((collection) => (
+                      <Link
+                        key={collection.id}
+                        href={`/collections/${collection.id}`}
+                        onClick={onNavigate}
+                        className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      >
+                        <Star className="size-4 shrink-0 fill-yellow-400 text-yellow-400" />
+                        <span className="flex-1 truncate">{collection.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {collection.itemCount}
+                        </span>
+                      </Link>
+                    ))}
+                  </nav>
+                </div>
+              ) : null}
+
+              {recentCollections.length > 0 ? (
+                <div className="space-y-0.5">
+                  <p className="px-2 text-xs font-medium text-muted-foreground">
+                    Recent
+                  </p>
+                  <nav className="space-y-0.5">
+                    {recentCollections.map((collection) => (
+                      <Link
+                        key={collection.id}
+                        href={`/collections/${collection.id}`}
+                        onClick={onNavigate}
+                        className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                      >
+                        <span
+                          className="size-2.5 shrink-0 rounded-full bg-muted-foreground"
+                          style={
+                            collection.dominantTypeColor
+                              ? { backgroundColor: collection.dominantTypeColor }
+                              : undefined
+                          }
+                        />
+                        <span className="flex-1 truncate">{collection.name}</span>
+                        <span className="text-xs text-muted-foreground">
+                          {collection.itemCount}
+                        </span>
+                      </Link>
+                    ))}
+                  </nav>
+                </div>
+              ) : null}
+
+              <Link
+                href="/collections"
+                onClick={onNavigate}
+                className="block px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:text-sidebar-accent-foreground"
+              >
+                View all collections
+              </Link>
+            </div>
           </SidebarSection>
         </div>
       </ScrollArea>
@@ -238,18 +239,18 @@ export function SidebarContent({
           )}
         >
           <Avatar size="sm">
-            <AvatarFallback>{getUserInitials(currentUser.name)}</AvatarFallback>
+            <AvatarFallback>{getUserInitials(user.name)}</AvatarFallback>
           </Avatar>
           {!collapsed && (
             <div className="min-w-0 flex-1">
               <p className="truncate text-sm font-medium">
-                {currentUser.name}
-                {currentUser.isPro ? (
+                {user.name}
+                {user.isPro ? (
                   <span className="text-muted-foreground"> (Pro)</span>
                 ) : null}
               </p>
               <p className="truncate text-xs text-muted-foreground">
-                {currentUser.email}
+                {user.email}
               </p>
             </div>
           )}

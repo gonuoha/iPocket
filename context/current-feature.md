@@ -12,6 +12,8 @@ _No active feature._
 
 ## History
 
+- 2026-07-31: Completed **Stats & Sidebar** — dashboard stats and sidebar from Prisma (item types, favorite/recent collections, nav counts, user profile)
+- 2026-07-31: Started **Stats & Sidebar**
 - 2026-07-31: Completed **Dashboard Items** — pinned and recent items from Prisma, type-derived icon and border styling, tag display
 - 2026-07-31: Started **Dashboard Items**
 - 2026-07-31: Completed **Dashboard Collections** — real collection data and stats from Prisma, dominant type border colors, type badges on cards

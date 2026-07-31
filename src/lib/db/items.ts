@@ -84,3 +84,39 @@ export async function getRecentItems(
 
   return items.map(mapItem);
 }
+
+export type SystemItemType = {
+  id: string;
+  name: string;
+  icon: string | null;
+  color: string | null;
+};
+
+export type SidebarItemCounts = {
+  favoriteCount: number;
+  pinnedCount: number;
+};
+
+export async function getSystemItemTypes(): Promise<SystemItemType[]> {
+  return prisma.itemType.findMany({
+    where: { isSystem: true },
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+      icon: true,
+      color: true,
+    },
+  });
+}
+
+export async function getSidebarItemCounts(
+  userId: string,
+): Promise<SidebarItemCounts> {
+  const [favoriteCount, pinnedCount] = await Promise.all([
+    prisma.item.count({ where: { userId, isFavorite: true } }),
+    prisma.item.count({ where: { userId, isPinned: true } }),
+  ]);
+
+  return { favoriteCount, pinnedCount };
+}

@@ -24,6 +24,32 @@ export type DashboardStats = {
   favoriteCollectionCount: number;
 };
 
+export type SidebarCollection = {
+  id: string;
+  name: string;
+  itemCount: number;
+  dominantTypeColor: string | null;
+};
+
+const collectionItemsInclude = {
+  _count: {
+    select: { items: true },
+  },
+  items: {
+    select: {
+      typeId: true,
+      type: {
+        select: {
+          id: true,
+          name: true,
+          icon: true,
+          color: true,
+        },
+      },
+    },
+  },
+} as const;
+
 function getDominantTypeColor(
   items: { typeId: string; type: CollectionItemType }[],
 ): string | null {
@@ -72,6 +98,43 @@ function getUniqueTypes(
   return [...typesById.values()];
 }
 
+function mapToDashboardCollection(
+  collection: {
+    id: string;
+    name: string;
+    description: string | null;
+    isFavorite: boolean;
+    _count: { items: number };
+    items: { typeId: string; type: CollectionItemType }[];
+  },
+): DashboardCollection {
+  return {
+    id: collection.id,
+    name: collection.name,
+    description: collection.description,
+    isFavorite: collection.isFavorite,
+    itemCount: collection._count.items,
+    types: getUniqueTypes(collection.items),
+    dominantTypeColor: getDominantTypeColor(collection.items),
+  };
+}
+
+function mapToSidebarCollection(
+  collection: {
+    id: string;
+    name: string;
+    _count: { items: number };
+    items: { typeId: string; type: CollectionItemType }[];
+  },
+): SidebarCollection {
+  return {
+    id: collection.id,
+    name: collection.name,
+    itemCount: collection._count.items,
+    dominantTypeColor: getDominantTypeColor(collection.items),
+  };
+}
+
 export async function getRecentCollections(
   userId: string,
   limit = 6,
@@ -80,22 +143,23 @@ export async function getRecentCollections(
     where: { userId },
     orderBy: { updatedAt: "desc" },
     take: limit,
+    include: collectionItemsInclude,
+  });
+
+  return collections.map(mapToDashboardCollection);
+}
+
+export async function getFavoriteCollections(
+  userId: string,
+  limit = 10,
+): Promise<SidebarCollection[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId, isFavorite: true },
+    orderBy: { name: "asc" },
+    take: limit,
     include: {
       _count: {
         select: { items: true },
-      },
-      items: {
-        select: {
-          typeId: true,
-          type: {
-            select: {
-              id: true,
-              name: true,
-              icon: true,
-              color: true,
-            },
-          },
-        },
       },
     },
   });
@@ -103,12 +167,23 @@ export async function getRecentCollections(
   return collections.map((collection) => ({
     id: collection.id,
     name: collection.name,
-    description: collection.description,
-    isFavorite: collection.isFavorite,
     itemCount: collection._count.items,
-    types: getUniqueTypes(collection.items),
-    dominantTypeColor: getDominantTypeColor(collection.items),
+    dominantTypeColor: null,
   }));
+}
+
+export async function getSidebarRecentCollections(
+  userId: string,
+  limit = 10,
+): Promise<SidebarCollection[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId, isFavorite: false },
+    orderBy: { updatedAt: "desc" },
+    take: limit,
+    include: collectionItemsInclude,
+  });
+
+  return collections.map(mapToSidebarCollection);
 }
 
 export async function getDashboardStats(userId: string): Promise<DashboardStats> {
