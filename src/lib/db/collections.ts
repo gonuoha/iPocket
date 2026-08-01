@@ -31,71 +31,69 @@ export type SidebarCollection = {
   dominantTypeColor: string | null;
 };
 
-const collectionItemsInclude = {
-  _count: {
-    select: { items: true },
-  },
-  items: {
+type CollectionTypeAggregation = {
+  types: CollectionItemType[];
+  dominantTypeColor: string | null;
+};
+
+async function getCollectionTypeAggregations(
+  collectionIds: string[],
+): Promise<Map<string, CollectionTypeAggregation>> {
+  const result = new Map<string, CollectionTypeAggregation>();
+
+  if (collectionIds.length === 0) {
+    return result;
+  }
+
+  const typeCounts = await prisma.item.groupBy({
+    by: ["collectionId", "typeId"],
+    where: { collectionId: { in: collectionIds } },
+    _count: { typeId: true },
+  });
+
+  if (typeCounts.length === 0) {
+    for (const collectionId of collectionIds) {
+      result.set(collectionId, { types: [], dominantTypeColor: null });
+    }
+    return result;
+  }
+
+  const typeIds = [...new Set(typeCounts.map((row) => row.typeId))];
+  const types = await prisma.itemType.findMany({
+    where: { id: { in: typeIds } },
     select: {
-      typeId: true,
-      type: {
-        select: {
-          id: true,
-          name: true,
-          icon: true,
-          color: true,
-        },
-      },
+      id: true,
+      name: true,
+      icon: true,
+      color: true,
     },
-  },
-} as const;
+  });
+  const typeById = new Map(types.map((type) => [type.id, type]));
 
-function getDominantTypeColor(
-  items: { typeId: string; type: CollectionItemType }[],
-): string | null {
-  if (items.length === 0) {
-    return null;
-  }
+  for (const collectionId of collectionIds) {
+    const rows = typeCounts.filter((row) => row.collectionId === collectionId);
+    const uniqueTypes: CollectionItemType[] = [];
+    let dominantTypeColor: string | null = null;
+    let maxCount = 0;
 
-  const typeCounts = new Map<string, { count: number; color: string | null }>();
+    for (const row of rows) {
+      const type = typeById.get(row.typeId);
+      if (!type) {
+        continue;
+      }
 
-  for (const item of items) {
-    const current = typeCounts.get(item.typeId);
+      uniqueTypes.push(type);
 
-    if (current) {
-      current.count += 1;
-      continue;
+      if (row._count.typeId > maxCount) {
+        maxCount = row._count.typeId;
+        dominantTypeColor = type.color;
+      }
     }
 
-    typeCounts.set(item.typeId, {
-      count: 1,
-      color: item.type.color,
-    });
+    result.set(collectionId, { types: uniqueTypes, dominantTypeColor });
   }
 
-  let dominantColor: string | null = null;
-  let maxCount = 0;
-
-  for (const { count, color } of typeCounts.values()) {
-    if (count > maxCount) {
-      maxCount = count;
-      dominantColor = color;
-    }
-  }
-
-  return dominantColor;
-}
-
-function getUniqueTypes(
-  items: { type: CollectionItemType }[],
-): CollectionItemType[] {
-  const typesById = new Map<string, CollectionItemType>();
-
-  for (const item of items) {
-    typesById.set(item.type.id, item.type);
-  }
-
-  return [...typesById.values()];
+  return result;
 }
 
 function mapToDashboardCollection(
@@ -105,8 +103,8 @@ function mapToDashboardCollection(
     description: string | null;
     isFavorite: boolean;
     _count: { items: number };
-    items: { typeId: string; type: CollectionItemType }[];
   },
+  aggregation: CollectionTypeAggregation,
 ): DashboardCollection {
   return {
     id: collection.id,
@@ -114,8 +112,8 @@ function mapToDashboardCollection(
     description: collection.description,
     isFavorite: collection.isFavorite,
     itemCount: collection._count.items,
-    types: getUniqueTypes(collection.items),
-    dominantTypeColor: getDominantTypeColor(collection.items),
+    types: aggregation.types,
+    dominantTypeColor: aggregation.dominantTypeColor,
   };
 }
 
@@ -124,16 +122,22 @@ function mapToSidebarCollection(
     id: string;
     name: string;
     _count: { items: number };
-    items: { typeId: string; type: CollectionItemType }[];
   },
+  aggregation: CollectionTypeAggregation,
 ): SidebarCollection {
   return {
     id: collection.id,
     name: collection.name,
     itemCount: collection._count.items,
-    dominantTypeColor: getDominantTypeColor(collection.items),
+    dominantTypeColor: aggregation.dominantTypeColor,
   };
 }
+
+const collectionCountInclude = {
+  _count: {
+    select: { items: true },
+  },
+} as const;
 
 export async function getRecentCollections(
   userId: string,
@@ -143,10 +147,19 @@ export async function getRecentCollections(
     where: { userId },
     orderBy: { updatedAt: "desc" },
     take: limit,
-    include: collectionItemsInclude,
+    include: collectionCountInclude,
   });
 
-  return collections.map(mapToDashboardCollection);
+  const aggregations = await getCollectionTypeAggregations(
+    collections.map((collection) => collection.id),
+  );
+
+  return collections.map((collection) =>
+    mapToDashboardCollection(
+      collection,
+      aggregations.get(collection.id) ?? { types: [], dominantTypeColor: null },
+    ),
+  );
 }
 
 export async function getFavoriteCollections(
@@ -157,11 +170,7 @@ export async function getFavoriteCollections(
     where: { userId, isFavorite: true },
     orderBy: { name: "asc" },
     take: limit,
-    include: {
-      _count: {
-        select: { items: true },
-      },
-    },
+    include: collectionCountInclude,
   });
 
   return collections.map((collection) => ({
@@ -180,25 +189,31 @@ export async function getSidebarRecentCollections(
     where: { userId, isFavorite: false },
     orderBy: { updatedAt: "desc" },
     take: limit,
-    include: collectionItemsInclude,
+    include: collectionCountInclude,
   });
 
-  return collections.map(mapToSidebarCollection);
+  const aggregations = await getCollectionTypeAggregations(
+    collections.map((collection) => collection.id),
+  );
+
+  return collections.map((collection) =>
+    mapToSidebarCollection(
+      collection,
+      aggregations.get(collection.id) ?? { types: [], dominantTypeColor: null },
+    ),
+  );
 }
 
-export async function getDashboardStats(userId: string): Promise<DashboardStats> {
-  const [itemCount, collectionCount, favoriteItemCount, favoriteCollectionCount] =
-    await Promise.all([
-      prisma.item.count({ where: { userId } }),
-      prisma.collection.count({ where: { userId } }),
-      prisma.item.count({ where: { userId, isFavorite: true } }),
-      prisma.collection.count({ where: { userId, isFavorite: true } }),
-    ]);
-
+export function toDashboardStats(stats: {
+  itemCount: number;
+  collectionCount: number;
+  favoriteItemCount: number;
+  favoriteCollectionCount: number;
+}): DashboardStats {
   return {
-    itemCount,
-    collectionCount,
-    favoriteItemCount,
-    favoriteCollectionCount,
+    itemCount: stats.itemCount,
+    collectionCount: stats.collectionCount,
+    favoriteItemCount: stats.favoriteItemCount,
+    favoriteCollectionCount: stats.favoriteCollectionCount,
   };
 }

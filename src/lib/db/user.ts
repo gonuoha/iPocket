@@ -1,6 +1,15 @@
+import { cache } from "react";
+
 import { prisma } from "@/lib/prisma";
 
 const DEMO_USER_EMAIL = "demo@ipocket.io";
+
+export class DemoUserNotFoundError extends Error {
+  constructor() {
+    super("Demo user not found. Run npm run db:seed.");
+    this.name = "DemoUserNotFoundError";
+  }
+}
 
 export type DashboardUser = {
   id: string;
@@ -9,20 +18,7 @@ export type DashboardUser = {
   isPro: boolean;
 };
 
-export async function getDashboardUserId(): Promise<string> {
-  const user = await prisma.user.findUnique({
-    where: { email: DEMO_USER_EMAIL },
-    select: { id: true },
-  });
-
-  if (!user) {
-    throw new Error("Demo user not found. Run npm run db:seed.");
-  }
-
-  return user.id;
-}
-
-export async function getDashboardUser(): Promise<DashboardUser> {
+async function fetchDemoUser(): Promise<DashboardUser> {
   const user = await prisma.user.findUnique({
     where: { email: DEMO_USER_EMAIL },
     select: {
@@ -34,7 +30,7 @@ export async function getDashboardUser(): Promise<DashboardUser> {
   });
 
   if (!user?.name) {
-    throw new Error("Demo user not found. Run npm run db:seed.");
+    throw new DemoUserNotFoundError();
   }
 
   return {
@@ -44,3 +40,5 @@ export async function getDashboardUser(): Promise<DashboardUser> {
     isPro: user.isPro,
   };
 }
+
+export const getCurrentUser = cache(fetchDemoUser);

@@ -1,16 +1,32 @@
-# Current Feature
-
-None
+# Current Feature: Dashboard Performance & Data Layer Cleanup
 
 ## Status
 
-None
+In Progress
 
 ## Goals
 
+- Replace collection item over-fetching with aggregation (`groupBy` or denormalized `dominantTypeColor`) so queries no longer load all items for metadata
+- Add a default limit (20) to `getPinnedItems` to prevent unbounded result sets
+- Consolidate dashboard data fetching into a single coordinated call — one user lookup, deduplicated stats and collections between layout and page
+- Fix `getSidebarData` to use the passed `userId` for user profile instead of ignoring it
+- Centralize demo-user resolution in `src/lib/db/user.ts` with a single `getCurrentUser()` API
+- Remove `force-dynamic` from dashboard layout if no longer needed after consolidation
+- Split sidebar into server-rendered static content with a thin client wrapper for interactivity
+- Use `isMobile` hook consistently in `toggleSidebar` (no duplicate `matchMedia`)
+- Add graceful fallback UI when demo user seed data is missing
+
 ## Notes
 
-_No active feature._
+From code-scanner audit (2026-08-01). Priority order:
+
+1. Collection query optimization — biggest scalability risk with Pro-tier unlimited items
+2. Dashboard query deduplication — cuts DB round-trips roughly in half
+3. Pinned items limit — quick guard against unbounded fetches
+
+UI behavior must not change — this is a performance and data-layer refactor only. Auth is out of scope; demo user pattern remains until auth lands. Seed script split is deferred.
+
+Spec: `context/features/dashboard-performance-spec.md`
 
 ## History
 

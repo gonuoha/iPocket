@@ -1,19 +1,17 @@
 "use client";
 
 import { Sheet, SheetContent } from "@/components/ui/sheet";
-import type { SidebarData } from "@/lib/db/sidebar";
 import { cn } from "@/lib/utils";
 
 import { TopBar } from "./top-bar";
-import { SidebarContent } from "./sidebar-content";
 import { SidebarProvider, useSidebar } from "./sidebar-context";
 
 function DashboardShellInner({
   children,
-  sidebarData,
+  sidebar,
 }: {
   children: React.ReactNode;
-  sidebarData: SidebarData;
+  sidebar: React.ReactNode;
 }) {
   const { collapsed, mobileOpen, setMobileOpen } = useSidebar();
 
@@ -23,12 +21,13 @@ function DashboardShellInner({
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <aside
+          data-collapsed={collapsed || undefined}
           className={cn(
-            "hidden h-full min-h-0 shrink-0 flex-col border-r border-border md:flex",
-            collapsed ? "w-16" : "w-64"
+            "group hidden h-full min-h-0 shrink-0 flex-col border-r border-border md:flex",
+            collapsed ? "w-16" : "w-64",
           )}
         >
-          <SidebarContent collapsed={collapsed} sidebarData={sidebarData} />
+          {sidebar}
         </aside>
 
         <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
@@ -36,11 +35,7 @@ function DashboardShellInner({
             side="left"
             className="flex h-svh w-[min(18rem,85vw)] max-w-none flex-col gap-0 border-r p-0 sm:max-w-none"
           >
-            <SidebarContent
-              collapsed={false}
-              sidebarData={sidebarData}
-              onNavigate={() => setMobileOpen(false)}
-            />
+            {sidebar}
           </SheetContent>
         </Sheet>
 
@@ -54,14 +49,14 @@ function DashboardShellInner({
 
 export function DashboardShell({
   children,
-  sidebarData,
+  sidebar,
 }: {
   children: React.ReactNode;
-  sidebarData: SidebarData;
+  sidebar: React.ReactNode;
 }) {
   return (
     <SidebarProvider>
-      <DashboardShellInner sidebarData={sidebarData}>{children}</DashboardShellInner>
+      <DashboardShellInner sidebar={sidebar}>{children}</DashboardShellInner>
     </SidebarProvider>
   );
 }

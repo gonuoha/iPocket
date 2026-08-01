@@ -9,23 +9,19 @@ type SidebarSectionProps = {
   title: string;
   children: React.ReactNode;
   defaultOpen?: boolean;
-  collapsed?: boolean;
+  className?: string;
 };
 
 export function SidebarSection({
   title,
   children,
   defaultOpen = true,
-  collapsed = false,
+  className,
 }: SidebarSectionProps) {
   const [open, setOpen] = useState(defaultOpen);
 
-  if (collapsed) {
-    return null;
-  }
-
   return (
-    <section>
+    <section className={cn(className, "group-data-[collapsed]:hidden")}>
       <button
         type="button"
         onClick={() => setOpen((value) => !value)}
@@ -35,7 +31,7 @@ export function SidebarSection({
         <ChevronDown
           className={cn(
             "size-3.5 transition-transform",
-            open ? "rotate-0" : "-rotate-90"
+            open ? "rotate-0" : "-rotate-90",
           )}
         />
       </button>

@@ -14,15 +14,13 @@ type SidebarContextValue = {
 
 const SidebarContext = createContext<SidebarContextValue | null>(null);
 
-const MOBILE_QUERY = "(max-width: 767px)";
-
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const [collapsed, setCollapsed] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useIsMobile();
 
   const toggleSidebar = () => {
-    if (window.matchMedia(MOBILE_QUERY).matches) {
+    if (isMobile) {
       setMobileOpen((open) => !open);
       return;
     }

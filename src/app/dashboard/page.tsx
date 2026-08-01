@@ -1,21 +1,11 @@
 import { CollectionsGrid } from "@/components/dashboard/collection-card";
 import { ItemRow } from "@/components/dashboard/item-row";
 import { StatsCards } from "@/components/dashboard/stats-cards";
-import {
-  getDashboardStats,
-  getRecentCollections,
-} from "@/lib/db/collections";
-import { getPinnedItems, getRecentItems } from "@/lib/db/items";
-import { getDashboardUserId } from "@/lib/db/user";
+import { getDashboardPageData } from "@/lib/db/dashboard";
 
 export default async function DashboardPage() {
-  const userId = await getDashboardUserId();
-  const [collections, stats, pinnedItems, recentItems] = await Promise.all([
-    getRecentCollections(userId),
-    getDashboardStats(userId),
-    getPinnedItems(userId),
-    getRecentItems(userId),
-  ]);
+  const { collections, stats, pinnedItems, recentItems } =
+    await getDashboardPageData();
 
   return (
     <div className="space-y-8">

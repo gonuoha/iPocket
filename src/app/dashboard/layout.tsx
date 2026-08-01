@@ -1,6 +1,6 @@
 import { DashboardShell } from "@/components/dashboard/dashboard-shell";
-import { getSidebarData } from "@/lib/db/sidebar";
-import { getDashboardUserId } from "@/lib/db/user";
+import { SidebarContent } from "@/components/dashboard/sidebar-content";
+import { getDashboardLayoutData } from "@/lib/db/dashboard";
 
 export const dynamic = "force-dynamic";
 
@@ -9,11 +9,10 @@ export default async function DashboardLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const userId = await getDashboardUserId();
-  const sidebarData = await getSidebarData(userId);
+  const { sidebarData } = await getDashboardLayoutData();
 
   return (
-    <DashboardShell sidebarData={sidebarData}>
+    <DashboardShell sidebar={<SidebarContent sidebarData={sidebarData} />}>
       {children}
     </DashboardShell>
   );

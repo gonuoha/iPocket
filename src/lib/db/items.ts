@@ -1,3 +1,5 @@
+import { cache } from "react";
+
 import { prisma } from "@/lib/prisma";
 
 import type { CollectionItemType } from "./collections";
@@ -11,6 +13,14 @@ export type DashboardItem = {
   updatedAt: Date;
   type: CollectionItemType;
   tags: string[];
+};
+
+export type UserItemStats = {
+  itemCount: number;
+  collectionCount: number;
+  favoriteItemCount: number;
+  favoriteCollectionCount: number;
+  pinnedCount: number;
 };
 
 const itemSelect = {
@@ -61,10 +71,14 @@ function mapItem(item: {
   };
 }
 
-export async function getPinnedItems(userId: string): Promise<DashboardItem[]> {
+export async function getPinnedItems(
+  userId: string,
+  limit = 20,
+): Promise<DashboardItem[]> {
   const items = await prisma.item.findMany({
     where: { userId, isPinned: true },
     orderBy: { updatedAt: "desc" },
+    take: limit,
     select: itemSelect,
   });
 
@@ -110,13 +124,37 @@ export async function getSystemItemTypes(): Promise<SystemItemType[]> {
   });
 }
 
-export async function getSidebarItemCounts(
-  userId: string,
-): Promise<SidebarItemCounts> {
-  const [favoriteCount, pinnedCount] = await Promise.all([
+export const getUserItemStats = cache(
+  async (userId: string): Promise<UserItemStats> => {
+  const [
+    itemCount,
+    collectionCount,
+    favoriteItemCount,
+    favoriteCollectionCount,
+    pinnedCount,
+  ] = await Promise.all([
+    prisma.item.count({ where: { userId } }),
+    prisma.collection.count({ where: { userId } }),
     prisma.item.count({ where: { userId, isFavorite: true } }),
+    prisma.collection.count({ where: { userId, isFavorite: true } }),
     prisma.item.count({ where: { userId, isPinned: true } }),
   ]);
 
-  return { favoriteCount, pinnedCount };
+  return {
+    itemCount,
+    collectionCount,
+    favoriteItemCount,
+    favoriteCollectionCount,
+    pinnedCount,
+  };
+  },
+);
+
+export function toSidebarItemCounts(
+  stats: UserItemStats,
+): SidebarItemCounts {
+  return {
+    favoriteCount: stats.favoriteItemCount,
+    pinnedCount: stats.pinnedCount,
+  };
 }
