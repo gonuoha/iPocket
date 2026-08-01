@@ -2,6 +2,8 @@ import { DashboardShell } from "@/components/dashboard/dashboard-shell";
 import { getSidebarData } from "@/lib/db/sidebar";
 import { getDashboardUserId } from "@/lib/db/user";
 
+export const dynamic = "force-dynamic";
+
 export default async function DashboardLayout({
   children,
 }: {

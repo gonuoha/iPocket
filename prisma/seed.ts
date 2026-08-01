@@ -22,26 +22,31 @@ const collections = [
     id: "coll-react-patterns",
     name: "React Patterns",
     description: "Reusable React patterns and hooks",
+    isFavorite: true,
   },
   {
     id: "coll-ai-workflows",
     name: "AI Workflows",
     description: "AI prompts and workflow automations",
+    isFavorite: true,
   },
   {
     id: "coll-devops",
     name: "DevOps",
     description: "Infrastructure and deployment resources",
+    isFavorite: false,
   },
   {
     id: "coll-terminal-commands",
     name: "Terminal Commands",
     description: "Useful shell commands for everyday development",
+    isFavorite: false,
   },
   {
     id: "coll-design-resources",
     name: "Design Resources",
     description: "UI/UX resources and references",
+    isFavorite: false,
   },
 ] as const;
 
@@ -55,6 +60,7 @@ type SeedItem = {
   url?: string;
   description?: string;
   language?: string;
+  isPinned?: boolean;
 };
 
 const items: SeedItem[] = [
@@ -66,6 +72,7 @@ const items: SeedItem[] = [
     typeId: "type-snippet",
     collectionId: "coll-react-patterns",
     language: "typescript",
+    isPinned: true,
     content: `import { useEffect, useState } from "react";
 
 export function useDebounce<T>(value: T, delay = 300) {
@@ -124,6 +131,7 @@ export function cn(...inputs: ClassValue[]) {
     contentType: "text",
     typeId: "type-prompt",
     collectionId: "coll-ai-workflows",
+    isPinned: true,
     content: `Review this code change as a senior engineer. Focus on:
 1. Correctness and edge cases
 2. Security risks
@@ -171,6 +179,7 @@ Constraints:
     typeId: "type-snippet",
     collectionId: "coll-devops",
     language: "yaml",
+    isPinned: true,
     content: `services:
   db:
     image: postgres:16
@@ -351,11 +360,13 @@ async function main() {
         },
         update: {
           description: collection.description,
+          isFavorite: collection.isFavorite,
         },
         create: {
           id: collection.id,
           name: collection.name,
           description: collection.description,
+          isFavorite: collection.isFavorite,
           userId: user.id,
         },
       });
@@ -396,6 +407,7 @@ async function main() {
           typeId: item.typeId,
           collectionId,
           userId: user.id,
+          isPinned: item.isPinned ?? false,
         },
         create: {
           id: item.id,
@@ -408,6 +420,7 @@ async function main() {
           typeId: item.typeId,
           collectionId,
           userId: user.id,
+          isPinned: item.isPinned ?? false,
         },
       });
     }
