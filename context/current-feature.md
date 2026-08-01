@@ -1,46 +1,16 @@
-# Current Feature: Auth Credentials - Email/Password Provider
+# Current Feature
+
+None
 
 ## Status
 
-In Progress
+None
 
 ## Goals
 
-- Add Credentials provider for email/password authentication with registration
-- Use bcryptjs for password hashing (already installed)
-- Ensure User model has password field (migration if needed)
-- Add Credentials provider placeholder in `auth.config.ts` (`authorize: () => null`)
-- Override Credentials in `auth.ts` with bcrypt validation logic
-- Create registration API route at `POST /api/auth/register`
-- Validate registration input: name, email, password, confirmPassword match
-- Check for existing user before creating account
-- Hash password and create user in database
-- Verify email/password sign-in via NextAuth default sign-in page
-- Verify GitHub OAuth still works after changes
-
 ## Notes
 
-Phase 2 auth — adds email/password alongside existing GitHub OAuth from phase 1.
-
-**Registration API (`POST /api/auth/register`):**
-- Accept: `name`, `email`, `password`, `confirmPassword`
-- Validate passwords match
-- Check if user already exists
-- Hash password with bcryptjs
-- Create user in database
-- Return success/error response
-
-**Credentials provider split pattern:**
-- `auth.config.ts`: Credentials provider with `authorize: () => null` placeholder
-- `auth.ts`: Override Credentials provider with actual bcrypt validation
-
-**Testing:**
-1. Register via curl against `POST /api/auth/register`
-2. Sign in at `/api/auth/signin` with email/password
-3. Confirm redirect to `/dashboard`
-4. Confirm GitHub OAuth still works
-
-Spec: `context/features/auth-phase-2-spec.md`
+_No active feature._
 
 ## History
 
@@ -62,3 +32,4 @@ Spec: `context/features/auth-phase-2-spec.md`
 - 2026-08-01: Completed **Add Pro Badge to Sidebar** — PRO badge on File and Image item types in sidebar using shadcn Badge, subtle outline styling
 - 2026-08-01: Completed **Dashboard Performance & Data Layer Cleanup** — groupBy collection aggregation, cached dashboard data fetches, pinned items limit, server-rendered sidebar with client wrappers, demo-user error UI
 - 2026-08-01: Completed **Auth Setup - NextAuth + GitHub Provider** — NextAuth v5 with GitHub OAuth, Prisma adapter, JWT sessions, API route, and proxy protection for dashboard routes
+- 2026-08-02: Completed **Auth Credentials - Email/Password Provider** — Credentials provider with bcrypt validation, registration API, split config placeholder, GitHub OAuth preserved
