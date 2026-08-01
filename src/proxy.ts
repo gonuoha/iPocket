@@ -3,10 +3,18 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 
 export const proxy = auth((req) => {
-  const isDashboard = req.nextUrl.pathname.startsWith("/dashboard");
+  const { pathname } = req.nextUrl;
+  const isLoggedIn = !!req.auth;
+  const isAuthPage = pathname === "/sign-in" || pathname === "/register";
+  const isDashboard = pathname.startsWith("/dashboard");
+  const isProfile = pathname === "/profile";
 
-  if (isDashboard && !req.auth) {
-    const signInUrl = new URL("/api/auth/signin", req.nextUrl.origin);
+  if (isAuthPage && isLoggedIn) {
+    return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
+  }
+
+  if ((isDashboard || isProfile) && !isLoggedIn) {
+    const signInUrl = new URL("/sign-in", req.nextUrl.origin);
     signInUrl.searchParams.set(
       "callbackUrl",
       `${req.nextUrl.pathname}${req.nextUrl.search}`,
@@ -14,8 +22,16 @@ export const proxy = auth((req) => {
 
     return NextResponse.redirect(signInUrl);
   }
+
+  return NextResponse.next();
 });
 
 export const config = {
-  matcher: ["/dashboard", "/dashboard/:path*"],
+  matcher: [
+    "/dashboard",
+    "/dashboard/:path*",
+    "/sign-in",
+    "/register",
+    "/profile",
+  ],
 };

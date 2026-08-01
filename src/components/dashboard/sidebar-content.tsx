@@ -5,7 +5,6 @@ import {
   Star,
 } from "lucide-react";
 
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { SidebarData } from "@/lib/db/sidebar";
@@ -15,6 +14,7 @@ import { cn } from "@/lib/utils";
 import { SidebarCollapseButton } from "./sidebar-collapse-button";
 import { SidebarLink, SidebarNavLink } from "./sidebar-link";
 import { SidebarSection } from "./sidebar-section";
+import { SidebarUserMenu } from "./sidebar-user-menu";
 
 function getTypeSlug(name: string) {
   return name.toLowerCase();
@@ -32,15 +32,6 @@ const PRO_ITEM_TYPES = new Set(["file", "image"]);
 
 function isProItemType(name: string) {
   return PRO_ITEM_TYPES.has(name.toLowerCase());
-}
-
-function getUserInitials(name: string) {
-  return name
-    .split(" ")
-    .map((part) => part[0])
-    .join("")
-    .slice(0, 2)
-    .toUpperCase();
 }
 
 type SidebarContentProps = {
@@ -200,22 +191,7 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
       </ScrollArea>
 
       <div className="sidebar-footer group-data-[collapsed]:flex group-data-[collapsed]:justify-center group-data-[collapsed]:px-2 shrink-0 border-t border-sidebar-border p-3">
-        <div className="group-data-[collapsed]:justify-center flex items-center gap-3">
-          <Avatar size="sm">
-            <AvatarFallback>{getUserInitials(user.name)}</AvatarFallback>
-          </Avatar>
-          <div className="sidebar-text group-data-[collapsed]:hidden min-w-0 flex-1">
-            <p className="truncate text-sm font-medium">
-              {user.name}
-              {user.isPro ? (
-                <span className="text-muted-foreground"> (Pro)</span>
-              ) : null}
-            </p>
-            <p className="truncate text-xs text-muted-foreground">
-              {user.email}
-            </p>
-          </div>
-        </div>
+        <SidebarUserMenu user={user} />
       </div>
     </div>
   );

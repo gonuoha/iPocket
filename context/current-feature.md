@@ -1,16 +1,46 @@
-# Current Feature
-
-None
+# Current Feature: Auth UI - Sign In, Register & Sign Out
 
 ## Status
 
-None
+In Progress
 
 ## Goals
 
+- Replace NextAuth default pages with custom sign-in and register UI
+- Create `/sign-in` page with email/password fields, GitHub button, register link, validation, and error display
+- Create `/register` page with name, email, password, confirm password, validation (match + email format), submit to `/api/auth/register`, redirect to sign-in on success
+- Update sidebar footer with authenticated user avatar (GitHub image or initials fallback), name, and email
+- Add avatar dropdown on click with "Sign out" action
+- Avatar click navigates to `/profile`
+- Create reusable avatar component handling image vs initials fallback
+- Configure NextAuth to use custom `pages.signIn` at `/sign-in`
+- Verify GitHub sign-in, credentials sign-in, sign-out, and registration flows end-to-end
+
 ## Notes
 
-_No active feature._
+Phase 3 auth UI — builds on phase 1 (GitHub OAuth) and phase 2 (credentials + register API).
+
+**Sign In (`/sign-in`):**
+- Email and password inputs
+- "Sign in with GitHub" button
+- Link to `/register`
+- Form validation and error display
+
+**Register (`/register`):**
+- Name, email, password, confirm password
+- Validate passwords match and email format
+- POST to `/api/auth/register`
+- Redirect to `/sign-in` on success
+
+**Sidebar footer:**
+- Avatar: GitHub `image` if present, else initials from name (e.g. "Brad Traversy" → "BT")
+- Display user name and email
+- Dropdown on avatar click with "Sign out"
+- Avatar navigates to `/profile`
+
+**Reusable component:** Avatar component for image vs initials logic.
+
+Spec: `context/features/auth-phase-3-spec.md`
 
 ## History
 

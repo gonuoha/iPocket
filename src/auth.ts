@@ -11,6 +11,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
+  pages: {
+    signIn: "/sign-in",
+  },
   providers: [
     GitHub,
     Credentials({
@@ -60,6 +63,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.sub = user.id;
+        token.name = user.name;
+        token.email = user.email;
+        token.picture = user.image;
       }
 
       return token;
@@ -67,6 +73,9 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     async session({ session, token }) {
       if (session.user && token.sub) {
         session.user.id = token.sub;
+        session.user.name = (token.name as string | null | undefined) ?? session.user.name;
+        session.user.email = (token.email as string | null | undefined) ?? session.user.email;
+        session.user.image = (token.picture as string | null | undefined) ?? session.user.image;
       }
 
       return session;

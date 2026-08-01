@@ -1,8 +1,8 @@
 import { cache } from "react";
+import { redirect } from "next/navigation";
 
+import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-
-const DEMO_USER_EMAIL = "demo@ipocket.io";
 
 export class DemoUserNotFoundError extends Error {
   constructor() {
@@ -15,30 +15,37 @@ export type DashboardUser = {
   id: string;
   name: string;
   email: string;
+  image: string | null;
   isPro: boolean;
 };
 
-async function fetchDemoUser(): Promise<DashboardUser> {
+export const getCurrentUser = cache(async (): Promise<DashboardUser> => {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    redirect("/sign-in");
+  }
+
   const user = await prisma.user.findUnique({
-    where: { email: DEMO_USER_EMAIL },
+    where: { id: session.user.id },
     select: {
       id: true,
       name: true,
       email: true,
+      image: true,
       isPro: true,
     },
   });
 
-  if (!user?.name) {
-    throw new DemoUserNotFoundError();
+  if (!user?.name || !user.email) {
+    redirect("/api/auth/signout?callbackUrl=/sign-in");
   }
 
   return {
     id: user.id,
     name: user.name,
     email: user.email,
+    image: user.image,
     isPro: user.isPro,
   };
-}
-
-export const getCurrentUser = cache(fetchDemoUser);
+});
