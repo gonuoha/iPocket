@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { SidebarData } from "@/lib/db/sidebar";
@@ -30,6 +31,12 @@ function getTypeLabel(name: string) {
   }
 
   return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+const PRO_ITEM_TYPES = new Set(["file", "image"]);
+
+function isProItemType(name: string) {
+  return PRO_ITEM_TYPES.has(name.toLowerCase());
 }
 
 function getUserInitials(name: string) {
@@ -151,6 +158,14 @@ export function SidebarContent({
                       style={styles.textStyle}
                     />
                     <span className="truncate">{getTypeLabel(type.name)}</span>
+                    {isProItemType(type.name) ? (
+                      <Badge
+                        variant="outline"
+                        className="h-4 border-border/60 px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
+                      >
+                        PRO
+                      </Badge>
+                    ) : null}
                   </Link>
                 );
               })}
