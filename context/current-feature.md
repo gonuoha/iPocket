@@ -1,22 +1,20 @@
-# Current Feature: Add Pro Badge to Sidebar
+# Current Feature
+
+None
 
 ## Status
 
-In Progress
+None
 
 ## Goals
 
-- Add a PRO badge to the Files and Images item types in the sidebar
-- Use the ShadCN UI Badge component
-- Style the badge clean and subtle
-- Display "PRO" in all uppercase
-
 ## Notes
 
-Add a pro badge to the Files and Images type entries in the sidebar to indicate they are pro-tier features.
+_No active feature._
 
 ## History
 
+- 2026-08-01: Completed **Add Pro Badge to Sidebar** — PRO badge on File and Image item types in sidebar using shadcn Badge, subtle outline styling
 - 2026-08-01: Started **Add Pro Badge to Sidebar**
 - 2026-07-31: Completed **Stats & Sidebar** — dashboard stats and sidebar from Prisma (item types, favorite/recent collections, nav counts, user profile)
 - 2026-07-31: Started **Stats & Sidebar**
