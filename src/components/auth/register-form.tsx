@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -10,13 +9,13 @@ import { Label } from "@/components/ui/label";
 import { isValidEmail } from "@/lib/validate-email";
 
 export function RegisterForm() {
-  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isComplete, setIsComplete] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -59,11 +58,28 @@ export function RegisterForm() {
         return;
       }
 
-      router.push("/sign-in?registered=1");
+      setIsComplete(true);
     } catch {
       setError("Unable to create account. Please try again.");
       setIsSubmitting(false);
     }
+  }
+
+  if (isComplete) {
+    return (
+      <div className="space-y-4">
+        <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+          We sent a verification link to <span className="font-medium text-foreground">{email}</span>.
+          Click the link in your email to activate your account.
+        </p>
+        <p className="text-center text-sm text-muted-foreground">
+          Already verified?{" "}
+          <Link href="/sign-in" className="text-foreground underline-offset-4 hover:underline">
+            Sign in
+          </Link>
+        </p>
+      </div>
+    );
   }
 
   return (

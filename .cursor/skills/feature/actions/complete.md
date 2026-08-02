@@ -8,4 +8,5 @@
    - Clear Goals and Notes sections (keep placeholder comments)
    - Add feature summary to the END of History
 5. Commit the reset: `chore: reset current-feature.md after completing [feature]`
+6. Do not use --trailer when running git commit
 6. Push main to origin ONCE (single push with all changes)

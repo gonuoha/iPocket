@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 export function SignInForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
-  const registered = searchParams.get("registered") === "1";
+  const verified = searchParams.get("verified") === "1";
   const authError = searchParams.get("error");
 
   const [email, setEmail] = useState("");
@@ -38,7 +38,11 @@ export function SignInForm() {
     });
 
     if (result?.error) {
-      setError("Invalid email or password.");
+      if (result.url?.includes("email_not_verified")) {
+        setError("Please verify your email before signing in. Check your inbox for the verification link.");
+      } else {
+        setError("Invalid email or password.");
+      }
       setIsSubmitting(false);
       return;
     }
@@ -51,17 +55,19 @@ export function SignInForm() {
   }
 
   const urlError =
-    authError === "CredentialsSignin"
-      ? "Invalid email or password."
-      : authError
-        ? "Unable to sign in. Please try again."
-        : null;
+    authError === "email_not_verified"
+      ? "Please verify your email before signing in. Check your inbox for the verification link."
+      : authError === "CredentialsSignin"
+        ? "Invalid email or password."
+        : authError
+          ? "Unable to sign in. Please try again."
+          : null;
 
   return (
     <div className="space-y-4">
-      {registered ? (
+      {verified ? (
         <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
-          Account created. Sign in to continue.
+          Email verified. Sign in to continue.
         </p>
       ) : null}
 
