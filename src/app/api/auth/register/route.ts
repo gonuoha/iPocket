@@ -1,6 +1,7 @@
 import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 
+import { isEmailVerificationEnabled } from "@/lib/email/config";
 import { sendVerificationEmail } from "@/lib/email/send-verification-email";
 import { createVerificationToken } from "@/lib/email/verification";
 import { prisma } from "@/lib/prisma";
@@ -47,14 +48,20 @@ export async function POST(request: Request) {
   }
 
   const hashedPassword = await bcrypt.hash(password, 12);
+  const verificationRequired = isEmailVerificationEnabled();
 
   const user = await prisma.user.create({
     data: {
       name,
       email,
       password: hashedPassword,
+      ...(verificationRequired ? {} : { emailVerified: new Date() }),
     },
   });
+
+  if (!verificationRequired) {
+    return NextResponse.json({ success: true, verificationRequired: false }, { status: 201 });
+  }
 
   try {
     const token = await createVerificationToken(email);
@@ -68,5 +75,5 @@ export async function POST(request: Request) {
     );
   }
 
-  return NextResponse.json({ success: true }, { status: 201 });
+  return NextResponse.json({ success: true, verificationRequired: true }, { status: 201 });
 }

@@ -5,6 +5,7 @@ import Credentials from "next-auth/providers/credentials";
 import GitHub from "next-auth/providers/github";
 
 import authConfig from "@/auth.config";
+import { isEmailVerificationEnabled } from "@/lib/email/config";
 import { prisma } from "@/lib/prisma";
 
 export const { handlers, auth, signIn, signOut } = NextAuth({
@@ -70,7 +71,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         return true;
       }
 
-      if (account?.provider === "credentials" && user.id) {
+      if (account?.provider === "credentials" && user.id && isEmailVerificationEnabled()) {
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
           select: { emailVerified: true },

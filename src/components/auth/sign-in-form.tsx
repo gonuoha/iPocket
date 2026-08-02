@@ -13,6 +13,7 @@ export function SignInForm() {
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
   const verified = searchParams.get("verified") === "1";
+  const registered = searchParams.get("registered") === "1";
   const authError = searchParams.get("error");
 
   const [email, setEmail] = useState("");
@@ -68,6 +69,12 @@ export function SignInForm() {
       {verified ? (
         <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
           Email verified. Sign in to continue.
+        </p>
+      ) : null}
+
+      {registered ? (
+        <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+          Account created. Sign in to continue.
         </p>
       ) : null}
 

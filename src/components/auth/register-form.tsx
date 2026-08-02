@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 import { Button } from "@/components/ui/button";
@@ -9,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { isValidEmail } from "@/lib/validate-email";
 
 export function RegisterForm() {
+  const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -50,11 +52,19 @@ export function RegisterForm() {
         }),
       });
 
-      const data = (await response.json()) as { error?: string };
+      const data = (await response.json()) as {
+        error?: string;
+        verificationRequired?: boolean;
+      };
 
       if (!response.ok) {
         setError(data.error ?? "Unable to create account.");
         setIsSubmitting(false);
+        return;
+      }
+
+      if (data.verificationRequired === false) {
+        router.push("/sign-in?registered=1");
         return;
       }
 
