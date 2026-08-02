@@ -1,36 +1,32 @@
-import { redirect } from "next/navigation";
-
-import { auth } from "@/auth";
-import { UserAvatar } from "@/components/user-avatar";
-import { getCurrentUser } from "@/lib/db/user";
+import { AccountInformationCard } from "@/components/profile/account-information-card";
+import { UsageStatisticsCard } from "@/components/profile/usage-statistics-card";
+import { getProfileData } from "@/lib/db/profile";
 
 export default async function ProfilePage() {
-  const session = await auth();
-
-  if (!session) {
-    redirect("/sign-in");
-  }
-
-  const user = await getCurrentUser();
+  const { user, stats, itemTypeCounts } = await getProfileData();
 
   return (
-    <div className="mx-auto flex min-h-svh max-w-lg flex-col justify-center gap-6 p-6">
-      <div className="space-y-2">
-        <h1 className="text-2xl font-semibold">Profile</h1>
-        <p className="text-sm text-muted-foreground">
-          Your account details
+    <div className="mx-auto flex w-full max-w-2xl flex-col gap-8">
+      <div>
+        <h1 className="text-2xl font-semibold md:text-3xl">Profile</h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Manage your account settings
         </p>
       </div>
 
-      <div className="flex items-center gap-4 rounded-xl border border-border bg-card p-6">
-        <UserAvatar name={user.name} image={user.image} size="lg" />
-        <div className="min-w-0">
-          <p className="truncate font-medium">{user.name}</p>
-          <p className="truncate text-sm text-muted-foreground">{user.email}</p>
-          {user.isPro ? (
-            <p className="mt-1 text-xs text-muted-foreground">Pro member</p>
-          ) : null}
-        </div>
+      <div className="flex flex-col gap-6">
+        <AccountInformationCard
+          name={user.name}
+          email={user.email}
+          image={user.image}
+          createdAt={user.createdAt.toISOString()}
+          hasPassword={user.hasPassword}
+        />
+        <UsageStatisticsCard
+          itemCount={stats.itemCount}
+          collectionCount={stats.collectionCount}
+          itemTypeCounts={itemTypeCounts}
+        />
       </div>
     </div>
   );

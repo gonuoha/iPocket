@@ -94,7 +94,7 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
           </nav>
 
           <SidebarSection title="Item Types" className="sidebar-section">
-            <div className="grid grid-cols-2 gap-1 px-1">
+            <nav className="space-y-0.5 px-1">
               {itemTypes.map((type) => {
                 const Icon = getItemTypeIcon(type.icon);
                 const styles = getItemTypeStyles(type.color);
@@ -103,17 +103,17 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
                   <SidebarLink
                     key={type.id}
                     href={`/items/${getTypeSlug(type.name)}`}
-                    className="flex flex-col items-center gap-1 rounded-lg px-2 py-2 text-center text-xs transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   >
                     <Icon
-                      className={cn("size-4 shrink-0", styles.textClassName)}
+                      className={cn("size-3.5 shrink-0", styles.textClassName)}
                       style={styles.textStyle}
                     />
-                    <span className="truncate">{getTypeLabel(type.name)}</span>
+                    <span className="flex-1 truncate">{getTypeLabel(type.name)}</span>
                     {isProItemType(type.name) ? (
                       <Badge
                         variant="outline"
-                        className="h-4 border-border/60 px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
+                        className="h-4 shrink-0 border-border/60 px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
                       >
                         PRO
                       </Badge>
@@ -121,7 +121,7 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
                   </SidebarLink>
                 );
               })}
-            </div>
+            </nav>
           </SidebarSection>
 
           <SidebarSection title="Collections" className="sidebar-section">

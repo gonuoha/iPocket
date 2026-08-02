@@ -1,16 +1,38 @@
-# Current Feature
-
-None
+# Current Feature: Profile Page
 
 ## Status
 
-None
+In Progress
 
 ## Goals
 
+- Build out `/profile` with user info: email, name, avatar (GitHub image or initials), and account creation date
+- Show usage stats: total items, total collections, and breakdown by item type (snippets, prompts, notes, commands, links, files, images)
+- Add change password action for email/password users only (not GitHub OAuth)
+- Add delete account action with confirmation dialog to prevent accidental deletion
+- Follow existing codebase patterns for data fetching (server components, `getCurrentUser`, Prisma helpers)
+- Ensure route remains protected (authentication required)
+
 ## Notes
 
-_No active feature._
+Spec: `context/features/profile-spec.md`
+
+**Current state:** `/profile` exists as a minimal placeholder — shows avatar, name, email, and Pro badge only. No stats, creation date, change password, or delete account.
+
+**Avatar logic:** Reuse `UserAvatar` — GitHub image from OAuth if available, otherwise initials from name/email.
+
+**Change password:** Only show for users with a `password` field set (credentials sign-up). Can link to a change-password flow or inline form; reuse bcrypt patterns from register/reset-password.
+
+**Delete account:** Confirmation dialog (shadcn `AlertDialog` if available). Delete user and cascade related data per Prisma schema (`onDelete: Cascade` on relations).
+
+**Stats:** Reuse or extend existing helpers — `getUserItemStats` in `src/lib/db/items.ts` may cover totals; may need collection count and per-type breakdown query.
+
+**Testing:**
+1. Visit `/profile` while logged in — full profile renders
+2. Visit `/profile` while logged out — redirected to sign-in
+3. Stats match actual user data in dashboard
+4. Credentials user sees change password; GitHub-only user does not
+5. Delete account prompts confirmation; on confirm, user is signed out and data removed
 
 ## History
 
