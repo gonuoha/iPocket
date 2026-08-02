@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,22 +15,18 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    setError(null);
-    setSuccess(false);
 
     if (!currentPassword || !newPassword || !confirmPassword) {
-      setError("All fields are required.");
+      toast.error("All fields are required.");
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError("New passwords do not match.");
+      toast.error("New passwords do not match.");
       return;
     }
 
@@ -45,7 +42,7 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
       const data = (await response.json()) as { error?: string };
 
       if (!response.ok) {
-        setError(data.error ?? "Unable to change password.");
+        toast.error(data.error ?? "Unable to change password.");
         setIsSubmitting(false);
         return;
       }
@@ -53,29 +50,17 @@ export function ChangePasswordForm({ onSuccess }: ChangePasswordFormProps) {
       setCurrentPassword("");
       setNewPassword("");
       setConfirmPassword("");
-      setSuccess(true);
-      setIsSubmitting(false);
+      toast.success("Password updated successfully.");
       onSuccess?.();
     } catch {
-      setError("Unable to change password. Please try again.");
+      toast.error("Unable to change password. Please try again.");
+    } finally {
       setIsSubmitting(false);
     }
   }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error ? (
-        <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
-
-      {success ? (
-        <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
-          Password updated successfully.
-        </p>
-      ) : null}
-
       <div className="space-y-2">
         <Label htmlFor="currentPassword">Current password</Label>
         <Input

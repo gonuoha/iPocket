@@ -3,6 +3,7 @@
 import { Trash2 } from "lucide-react";
 import { signOut } from "next-auth/react";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -12,7 +13,11 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+
+const CONFIRMATION_PHRASE = "DELETE";
 
 type DeleteAccountButtonProps = {
   className?: string;
@@ -20,11 +25,25 @@ type DeleteAccountButtonProps = {
 
 export function DeleteAccountButton({ className }: DeleteAccountButtonProps) {
   const [isOpen, setIsOpen] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [confirmation, setConfirmation] = useState("");
   const [isDeleting, setIsDeleting] = useState(false);
 
+  const isConfirmed = confirmation === CONFIRMATION_PHRASE;
+
+  function handleOpenChange(open: boolean) {
+    setIsOpen(open);
+
+    if (!open) {
+      setConfirmation("");
+      setIsDeleting(false);
+    }
+  }
+
   async function handleDelete() {
-    setError(null);
+    if (!isConfirmed) {
+      return;
+    }
+
     setIsDeleting(true);
 
     try {
@@ -32,14 +51,14 @@ export function DeleteAccountButton({ className }: DeleteAccountButtonProps) {
 
       if (!response.ok) {
         const data = (await response.json()) as { error?: string };
-        setError(data.error ?? "Unable to delete account.");
+        toast.error(data.error ?? "Unable to delete account.");
         setIsDeleting(false);
         return;
       }
 
       await signOut({ callbackUrl: "/sign-in" });
     } catch {
-      setError("Unable to delete account. Please try again.");
+      toast.error("Unable to delete account. Please try again.");
       setIsDeleting(false);
     }
   }
@@ -56,7 +75,7 @@ export function DeleteAccountButton({ className }: DeleteAccountButtonProps) {
         Delete Account
       </Button>
 
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Delete account</DialogTitle>
@@ -67,7 +86,20 @@ export function DeleteAccountButton({ className }: DeleteAccountButtonProps) {
           </DialogHeader>
 
           <div className="space-y-4">
-            {error ? <p className="text-sm text-destructive">{error}</p> : null}
+            <div className="space-y-2">
+              <Label htmlFor="deleteConfirmation">
+                Type <span className="font-mono font-medium">{CONFIRMATION_PHRASE}</span> to
+                confirm
+              </Label>
+              <Input
+                id="deleteConfirmation"
+                value={confirmation}
+                onChange={(event) => setConfirmation(event.target.value)}
+                placeholder={CONFIRMATION_PHRASE}
+                disabled={isDeleting}
+                autoComplete="off"
+              />
+            </div>
 
             <div className="flex flex-col gap-2 sm:flex-row">
               <Button
@@ -75,7 +107,7 @@ export function DeleteAccountButton({ className }: DeleteAccountButtonProps) {
                 variant="destructive"
                 className="flex-1"
                 onClick={() => void handleDelete()}
-                disabled={isDeleting}
+                disabled={!isConfirmed || isDeleting}
               >
                 {isDeleting ? "Deleting..." : "Yes, delete my account"}
               </Button>
@@ -83,10 +115,7 @@ export function DeleteAccountButton({ className }: DeleteAccountButtonProps) {
                 type="button"
                 variant="outline"
                 className="flex-1"
-                onClick={() => {
-                  setIsOpen(false);
-                  setError(null);
-                }}
+                onClick={() => handleOpenChange(false)}
                 disabled={isDeleting}
               >
                 Cancel

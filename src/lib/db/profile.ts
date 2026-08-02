@@ -2,7 +2,7 @@ import { cache } from "react";
 import { redirect } from "next/navigation";
 
 import { auth } from "@/auth";
-import { getUserItemStats } from "@/lib/db/items";
+import { getSystemItemTypes, getUserItemStats } from "@/lib/db/items";
 import { prisma } from "@/lib/prisma";
 
 export type ProfileItemTypeCount = {
@@ -60,16 +60,7 @@ export const getProfileData = cache(async (): Promise<ProfileData> => {
       where: { userId: user.id },
       _count: { typeId: true },
     }),
-    prisma.itemType.findMany({
-      where: { isSystem: true },
-      orderBy: { name: "asc" },
-      select: {
-        id: true,
-        name: true,
-        icon: true,
-        color: true,
-      },
-    }),
+    getSystemItemTypes(),
   ]);
 
   const countByTypeId = new Map(

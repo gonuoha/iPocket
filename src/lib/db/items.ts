@@ -1,5 +1,6 @@
 import { cache } from "react";
 
+import { sortItemTypesBySystemOrder } from "@/lib/item-type-styles";
 import { prisma } from "@/lib/prisma";
 
 import type { CollectionItemType } from "./collections";
@@ -112,9 +113,8 @@ export type SidebarItemCounts = {
 };
 
 export async function getSystemItemTypes(): Promise<SystemItemType[]> {
-  return prisma.itemType.findMany({
+  const itemTypes = await prisma.itemType.findMany({
     where: { isSystem: true },
-    orderBy: { name: "asc" },
     select: {
       id: true,
       name: true,
@@ -122,6 +122,8 @@ export async function getSystemItemTypes(): Promise<SystemItemType[]> {
       color: true,
     },
   });
+
+  return sortItemTypesBySystemOrder(itemTypes);
 }
 
 export const getUserItemStats = cache(
