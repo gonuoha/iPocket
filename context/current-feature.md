@@ -1,41 +1,16 @@
-# Current Feature: Email Verification Toggle
+# Current Feature
+
+None
 
 ## Status
 
-In Progress
+None
 
 ## Goals
 
-- Add an environment variable to skip email verification (`SKIP_EMAIL_VERIFICATION`, default `false` — verification on unless explicitly skipped)
-- When disabled: register creates user with `emailVerified` set immediately, no Resend email sent
-- When disabled: credentials sign-in does not block unverified users
-- When enabled: preserve current behavior (send verification email, block sign-in until verified)
-- Centralize the flag in a small helper (e.g. `src/lib/email/config.ts`) so register route and auth callbacks stay in sync
-- Document the env var in `.env.example` with a short comment explaining when to enable
-- Update register API response so the UI can show the correct post-register state (verify email vs sign in)
-- Update register form to handle both flows based on API response
-
 ## Notes
 
-Inline feature request — without a Resend domain linked, only Resend sandbox addresses can receive verification emails. Need an easy toggle to disable verification during local/dev work.
-
-**Recommended approach:** `SKIP_EMAIL_VERIFICATION=true|false`
-
-- Defaults to `false` (verification enabled); set to `true` to skip during local/dev work
-- No DB migration needed — when disabled, set `emailVerified: new Date()` on register
-- GitHub OAuth auto-verify behavior can stay as-is (harmless when verification is off)
-
-**Likely changes:**
-- `src/lib/email/config.ts` — `isEmailVerificationEnabled()` helper
-- `src/app/api/auth/register/route.ts` — branch on flag; return `{ success: true, verificationRequired: boolean }`
-- `src/auth.ts` — skip credentials `emailVerified` check when flag is off
-- `src/components/auth/register-form.tsx` — redirect to sign-in when verification not required
-- `.env.example` — add `SKIP_EMAIL_VERIFICATION=false`
-
-**Testing:**
-1. `SKIP_EMAIL_VERIFICATION=true` → register any email → sign in immediately
-2. `SKIP_EMAIL_VERIFICATION=false` (or unset) → register → verification email sent, sign-in blocked until verified
-3. GitHub sign-in works in both modes
+_No active feature._
 
 ## History
 
@@ -60,3 +35,4 @@ Inline feature request — without a Resend domain linked, only Resend sandbox a
 - 2026-08-02: Completed **Auth Credentials - Email/Password Provider** — Credentials provider with bcrypt validation, registration API, split config placeholder, GitHub OAuth preserved
 - 2026-08-02: Completed **Auth UI - Sign In, Register & Sign Out** — custom sign-in/register pages, UserAvatar component, sidebar dropdown with sign out, profile page, session-based user loading
 - 2026-08-02: Completed **Email Verification on Register** — Resend verification emails on sign-up, `/verify-email` token flow, credentials login blocked until verified, GitHub OAuth auto-verified
+- 2026-08-02: Completed **Email Verification Toggle** — `SKIP_EMAIL_VERIFICATION` env flag to bypass verification in local dev, register/auth/UI branch on flag
