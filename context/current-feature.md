@@ -1,46 +1,16 @@
-# Current Feature: Email Verification on Register
+# Current Feature
+
+None
 
 ## Status
 
-In Progress
+None
 
 ## Goals
 
-- Send a verification email via Resend when a user registers with email/password
-- Generate a secure, expiring verification token and store it (use existing `VerificationToken` model)
-- Include a clickable verification link in the email that confirms the user's address
-- Create a verification route/page (e.g. `/verify-email` or API handler) that validates the token and sets `User.emailVerified`
-- Block credentials sign-in until `emailVerified` is set
-- Update register UX to show a "check your email" confirmation instead of redirecting straight to sign-in
-- Add Resend client using `RESEND_API_KEY` from environment
-- Document any additional env vars needed (e.g. sender address) in `.env.example`
-- Ensure GitHub OAuth users are treated as verified (or set `emailVerified` on first OAuth sign-in)
-- Handle expired/invalid tokens with clear error messaging
-
 ## Notes
 
-Inline feature request — verify email on register using Resend. `RESEND_API_KEY` is configured in `.env`.
-
-**Existing schema support:**
-- `User.emailVerified` (`DateTime?`) — set on successful verification
-- `VerificationToken` model — available for token storage (identifier + token + expires)
-
-**Current register flow:** `POST /api/auth/register` creates user immediately with no verification step.
-
-**Likely changes:**
-- `src/app/api/auth/register/route.ts` — create user with `emailVerified: null`, send Resend email
-- New verification handler — validate token, update user, delete/consume token
-- `src/auth.ts` — reject credentials login if `emailVerified` is null
-- `src/components/auth/register-form.tsx` — post-register "check your email" state
-- `src/lib/email/` or `src/lib/resend.ts` — Resend integration
-- Install `resend` package
-
-**Testing:**
-1. Register new account → receive verification email
-2. Click link → `emailVerified` set, success message
-3. Sign in with credentials before verify → blocked with clear error
-4. Sign in after verify → works
-5. GitHub sign-in still works
+_No active feature._
 
 ## History
 
@@ -64,3 +34,4 @@ Inline feature request — verify email on register using Resend. `RESEND_API_KE
 - 2026-08-01: Completed **Auth Setup - NextAuth + GitHub Provider** — NextAuth v5 with GitHub OAuth, Prisma adapter, JWT sessions, API route, and proxy protection for dashboard routes
 - 2026-08-02: Completed **Auth Credentials - Email/Password Provider** — Credentials provider with bcrypt validation, registration API, split config placeholder, GitHub OAuth preserved
 - 2026-08-02: Completed **Auth UI - Sign In, Register & Sign Out** — custom sign-in/register pages, UserAvatar component, sidebar dropdown with sign out, profile page, session-based user loading
+- 2026-08-02: Completed **Email Verification on Register** — Resend verification emails on sign-up, `/verify-email` token flow, credentials login blocked until verified, GitHub OAuth auto-verified
