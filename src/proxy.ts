@@ -5,7 +5,11 @@ import { auth } from "@/auth";
 export const proxy = auth((req) => {
   const { pathname } = req.nextUrl;
   const isLoggedIn = !!req.auth;
-  const isAuthPage = pathname === "/sign-in" || pathname === "/register";
+  const isAuthPage =
+    pathname === "/sign-in" ||
+    pathname === "/register" ||
+    pathname === "/forgot-password" ||
+    pathname === "/reset-password";
   const isDashboard = pathname.startsWith("/dashboard");
   const isProfile = pathname === "/profile";
 
@@ -32,6 +36,8 @@ export const config = {
     "/dashboard/:path*",
     "/sign-in",
     "/register",
+    "/forgot-password",
+    "/reset-password",
     "/profile",
   ],
 };

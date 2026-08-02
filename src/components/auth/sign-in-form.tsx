@@ -14,6 +14,7 @@ export function SignInForm() {
   const callbackUrl = searchParams.get("callbackUrl") ?? "/dashboard";
   const verified = searchParams.get("verified") === "1";
   const registered = searchParams.get("registered") === "1";
+  const passwordReset = searchParams.get("password_reset") === "1";
   const authError = searchParams.get("error");
 
   const [email, setEmail] = useState("");
@@ -78,6 +79,12 @@ export function SignInForm() {
         </p>
       ) : null}
 
+      {passwordReset ? (
+        <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+          Password reset successfully. Sign in with your new password.
+        </p>
+      ) : null}
+
       {urlError || error ? (
         <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error ?? urlError}
@@ -99,7 +106,15 @@ export function SignInForm() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="password">Password</Label>
+          <div className="flex items-center justify-between">
+            <Label htmlFor="password">Password</Label>
+            <Link
+              href="/forgot-password"
+              className="text-sm text-muted-foreground underline-offset-4 hover:underline"
+            >
+              Forgot password?
+            </Link>
+          </div>
           <Input
             id="password"
             type="password"
