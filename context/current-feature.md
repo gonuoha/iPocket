@@ -1,38 +1,16 @@
-# Current Feature: Profile Page
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Build out `/profile` with user info: email, name, avatar (GitHub image or initials), and account creation date
-- Show usage stats: total items, total collections, and breakdown by item type (snippets, prompts, notes, commands, links, files, images)
-- Add change password action for email/password users only (not GitHub OAuth)
-- Add delete account action with confirmation dialog to prevent accidental deletion
-- Follow existing codebase patterns for data fetching (server components, `getCurrentUser`, Prisma helpers)
-- Ensure route remains protected (authentication required)
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-Spec: `context/features/profile-spec.md`
-
-**Current state:** `/profile` exists as a minimal placeholder — shows avatar, name, email, and Pro badge only. No stats, creation date, change password, or delete account.
-
-**Avatar logic:** Reuse `UserAvatar` — GitHub image from OAuth if available, otherwise initials from name/email.
-
-**Change password:** Only show for users with a `password` field set (credentials sign-up). Can link to a change-password flow or inline form; reuse bcrypt patterns from register/reset-password.
-
-**Delete account:** Confirmation dialog (shadcn `AlertDialog` if available). Delete user and cascade related data per Prisma schema (`onDelete: Cascade` on relations).
-
-**Stats:** Reuse or extend existing helpers — `getUserItemStats` in `src/lib/db/items.ts` may cover totals; may need collection count and per-type breakdown query.
-
-**Testing:**
-1. Visit `/profile` while logged in — full profile renders
-2. Visit `/profile` while logged out — redirected to sign-in
-3. Stats match actual user data in dashboard
-4. Credentials user sees change password; GitHub-only user does not
-5. Delete account prompts confirmation; on confirm, user is signed out and data removed
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -59,3 +37,4 @@ Spec: `context/features/profile-spec.md`
 - 2026-08-02: Completed **Email Verification on Register** — Resend verification emails on sign-up, `/verify-email` token flow, credentials login blocked until verified, GitHub OAuth auto-verified
 - 2026-08-02: Completed **Email Verification Toggle** — `SKIP_EMAIL_VERIFICATION` env flag to bypass verification in local dev, register/auth/UI branch on flag
 - 2026-08-02: Completed **Forgot Password** — forgot/reset password pages, Resend reset emails via namespaced VerificationToken, generic forgot-password response, sign-in success redirect
+- 2026-08-02: Completed **Profile Page** — account info with avatar and member date, usage stats with per-type breakdown, change password for credentials users, delete account with centered confirmation dialog, inline item type display in sidebar
