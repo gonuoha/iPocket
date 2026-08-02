@@ -44,6 +44,12 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
       const data = (await response.json()) as { error?: string };
 
+      if (response.status === 429) {
+        setError(data.error ?? "Too many attempts. Please try again later.");
+        setIsSubmitting(false);
+        return;
+      }
+
       if (!response.ok) {
         setError(data.error ?? "Unable to reset password. Please try again.");
         setIsSubmitting(false);

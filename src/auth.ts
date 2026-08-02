@@ -62,15 +62,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ],
   callbacks: {
     async signIn({ user, account }) {
-      if (account?.provider === "github" && user.id) {
-        await prisma.user.update({
-          where: { id: user.id },
-          data: { emailVerified: new Date() },
-        });
-
-        return true;
-      }
-
       if (account?.provider === "credentials" && user.id && isEmailVerificationEnabled()) {
         const dbUser = await prisma.user.findUnique({
           where: { id: user.id },
@@ -103,6 +94,16 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       }
 
       return session;
+    },
+  },
+  events: {
+    async signIn({ user, account }) {
+      if (account?.provider === "github" && user.id) {
+        await prisma.user.update({
+          where: { id: user.id },
+          data: { emailVerified: new Date() },
+        });
+      }
     },
   },
 });

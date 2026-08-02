@@ -2,6 +2,7 @@ import bcrypt from "bcryptjs";
 import { NextResponse } from "next/server";
 
 import { resetPasswordWithToken } from "@/lib/email/password-reset";
+import { checkResetPasswordRateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 
 type ResetPasswordRequestBody = {
   token?: string;
@@ -10,6 +11,12 @@ type ResetPasswordRequestBody = {
 };
 
 export async function POST(request: Request) {
+  const rateLimit = await checkResetPasswordRateLimit(request);
+
+  if (!rateLimit.success) {
+    return rateLimitedResponse(rateLimit);
+  }
+
   let body: ResetPasswordRequestBody;
 
   try {

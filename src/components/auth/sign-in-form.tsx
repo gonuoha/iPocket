@@ -20,11 +20,16 @@ export function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [resendMessage, setResendMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isResending, setIsResending] = useState(false);
+  const [showResendVerification, setShowResendVerification] = useState(false);
 
   async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError(null);
+    setResendMessage(null);
+    setShowResendVerification(false);
 
     if (!email.trim() || !password) {
       setError("Email and password are required.");
@@ -33,23 +38,83 @@ export function SignInForm() {
 
     setIsSubmitting(true);
 
-    const result = await signIn("credentials", {
-      email: email.trim(),
-      password,
-      redirect: false,
-    });
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: email.trim(),
+          password,
+          callbackUrl,
+        }),
+      });
 
-    if (result?.error) {
-      if (result.url?.includes("email_not_verified")) {
-        setError("Please verify your email before signing in. Check your inbox for the verification link.");
-      } else {
-        setError("Invalid email or password.");
+      const data = (await response.json()) as {
+        error?: string;
+        code?: string;
+        url?: string;
+      };
+
+      if (response.status === 429) {
+        setError(data.error ?? "Too many attempts. Please try again later.");
+        setIsSubmitting(false);
+        return;
       }
+
+      if (!response.ok) {
+        if (data.code === "email_not_verified") {
+          setShowResendVerification(true);
+        }
+
+        setError(data.error ?? "Unable to sign in. Please try again.");
+        setIsSubmitting(false);
+        return;
+      }
+
+      window.location.href = data.url ?? callbackUrl;
+    } catch {
+      setError("Unable to sign in. Please try again.");
       setIsSubmitting(false);
+    }
+  }
+
+  async function handleResendVerification() {
+    if (!email.trim()) {
+      setError("Enter your email address first.");
       return;
     }
 
-    window.location.href = callbackUrl;
+    setError(null);
+    setResendMessage(null);
+    setIsResending(true);
+
+    try {
+      const response = await fetch("/api/auth/resend-verification", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim() }),
+      });
+
+      const data = (await response.json()) as { error?: string; message?: string };
+
+      if (response.status === 429) {
+        setError(data.error ?? "Too many attempts. Please try again later.");
+        setIsResending(false);
+        return;
+      }
+
+      if (!response.ok) {
+        setError(data.error ?? "Unable to resend verification email.");
+        setIsResending(false);
+        return;
+      }
+
+      setResendMessage(data.message ?? "Verification email sent.");
+      setIsResending(false);
+    } catch {
+      setError("Unable to resend verification email.");
+      setIsResending(false);
+    }
   }
 
   function handleGitHubSignIn() {
@@ -89,6 +154,24 @@ export function SignInForm() {
         <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
           {error ?? urlError}
         </p>
+      ) : null}
+
+      {resendMessage ? (
+        <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+          {resendMessage}
+        </p>
+      ) : null}
+
+      {showResendVerification ? (
+        <Button
+          type="button"
+          variant="outline"
+          className="w-full"
+          onClick={handleResendVerification}
+          disabled={isResending}
+        >
+          {isResending ? "Sending..." : "Resend verification email"}
+        </Button>
       ) : null}
 
       <form onSubmit={handleSubmit} className="space-y-4">

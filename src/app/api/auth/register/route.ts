@@ -5,6 +5,7 @@ import { isEmailVerificationEnabled } from "@/lib/email/config";
 import { sendVerificationEmail } from "@/lib/email/send-verification-email";
 import { createVerificationToken } from "@/lib/email/verification";
 import { prisma } from "@/lib/prisma";
+import { checkRegisterRateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 
 type RegisterRequestBody = {
   name?: string;
@@ -14,6 +15,12 @@ type RegisterRequestBody = {
 };
 
 export async function POST(request: Request) {
+  const rateLimit = await checkRegisterRateLimit(request);
+
+  if (!rateLimit.success) {
+    return rateLimitedResponse(rateLimit);
+  }
+
   let body: RegisterRequestBody;
 
   try {

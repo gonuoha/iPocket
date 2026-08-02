@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { createPasswordResetToken } from "@/lib/email/password-reset";
 import { sendPasswordResetEmail } from "@/lib/email/send-password-reset-email";
 import { prisma } from "@/lib/prisma";
+import { checkForgotPasswordRateLimit, rateLimitedResponse } from "@/lib/rate-limit";
 import { isValidEmail } from "@/lib/validate-email";
 
 type ForgotPasswordRequestBody = {
@@ -13,6 +14,12 @@ const GENERIC_SUCCESS_MESSAGE =
   "If an account with that email exists, we've sent password reset instructions.";
 
 export async function POST(request: Request) {
+  const rateLimit = await checkForgotPasswordRateLimit(request);
+
+  if (!rateLimit.success) {
+    return rateLimitedResponse(rateLimit);
+  }
+
   let body: ForgotPasswordRequestBody;
 
   try {

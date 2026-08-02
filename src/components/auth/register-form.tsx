@@ -57,6 +57,12 @@ export function RegisterForm() {
         verificationRequired?: boolean;
       };
 
+      if (response.status === 429) {
+        setError(data.error ?? "Too many attempts. Please try again later.");
+        setIsSubmitting(false);
+        return;
+      }
+
       if (!response.ok) {
         setError(data.error ?? "Unable to create account.");
         setIsSubmitting(false);
