@@ -1,50 +1,16 @@
-# Current Feature: Profile Action Feedback & Safer Account Deletion
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add user-facing notifications (toast) for profile actions such as successful password change and failed actions
-- Replace inline success/error messages in the change password flow with toast notifications where appropriate
-- Require a conscious confirmation step before account deletion (e.g. user must type a specific phrase such as `DELETE` before the delete button is enabled)
-- Keep delete account dialog centered and clearly communicate that the action is irreversible
-- Follow existing UI patterns (shadcn/ui, Dialog, existing profile components)
-- Ensure error states still surface clearly via toast or inline feedback
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-Inline feature request — no separate spec file.
-
-**Current state:**
-- Change password shows inline success/error messages inside the dialog; dialog closes immediately on success via `onSuccess`, so the success message may not be visible
-- Delete account only requires clicking "Yes, delete my account" — no typed confirmation
-- No toast/notification system exists in the project yet (no `sonner` or shadcn toast component)
-
-**Notifications:**
-- Add a toast system (likely shadcn `sonner`) and mount `Toaster` in the root layout
-- Show success toast on password change; show error toasts for API failures
-- Consider toast for delete account errors; success ends with sign-out redirect
-
-**Safer account deletion:**
-- In `DeleteAccountButton` dialog, add an input requiring the user to type `DELETE` (or similar fixed phrase) to enable the destructive confirm button
-- Reset confirmation input when dialog closes
-- Optionally disable delete while input does not match
-
-**Files likely touched:**
-- `src/components/profile/change-password-form.tsx`
-- `src/components/profile/delete-account-button.tsx`
-- `src/app/layout.tsx` (Toaster provider)
-- New: `src/components/ui/sonner.tsx` (or toast component)
-
-**Testing:**
-1. Change password successfully — toast appears, dialog closes
-2. Change password with wrong current password — error toast or inline error shown
-3. Open delete account dialog — confirm button disabled until phrase typed correctly
-4. Type wrong phrase — confirm stays disabled
-5. Type `DELETE` — confirm enabled, deletion proceeds
-6. Cancel/close dialog — confirmation input resets
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -72,3 +38,4 @@ Inline feature request — no separate spec file.
 - 2026-08-02: Completed **Email Verification Toggle** — `SKIP_EMAIL_VERIFICATION` env flag to bypass verification in local dev, register/auth/UI branch on flag
 - 2026-08-02: Completed **Forgot Password** — forgot/reset password pages, Resend reset emails via namespaced VerificationToken, generic forgot-password response, sign-in success redirect
 - 2026-08-02: Completed **Profile Page** — account info with avatar and member date, usage stats with per-type breakdown, change password for credentials users, delete account with centered confirmation dialog, inline item type display in sidebar
+- 2026-08-02: Completed **Profile Action Feedback & Safer Account Deletion** — Sonner toasts for password change success/errors, typed DELETE confirmation before account deletion, consistent item type ordering in sidebar and profile
