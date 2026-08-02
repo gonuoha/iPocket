@@ -1,24 +1,16 @@
-# Current Feature: Rate Limiting for Auth
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add rate limiting to auth-related API routes to prevent brute force, credential stuffing, and email abuse
-- Create reusable `src/lib/rate-limit.ts` utility using Upstash Redis and `@upstash/ratelimit` (sliding window)
-- Protect login (5/15min, IP+email), register (3/hr, IP), forgot-password (3/hr, IP), reset-password (5/15min, IP), and resend-verification (3/15min, IP+email)
-- Return 429 responses with JSON error, `Retry-After` header, and user-friendly toast messages on the frontend
-- Fail open if Upstash is unavailable; extract IP from `x-forwarded-for` or request
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Upstash free tier allows 10k requests/day (sufficient for auth limiting)
-- Login limiting is tricky with NextAuth credentials — may need a custom sign-in handler
-- Rate limit checks should return `{ success, remaining, reset }`
-- Env vars required: `UPSTASH_REDIS_REST_URL`, `UPSTASH_REDIS_REST_TOKEN`
-- Consider adding rate limiting middleware for cleaner implementation later
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -47,3 +39,4 @@ In Progress
 - 2026-08-02: Completed **Forgot Password** — forgot/reset password pages, Resend reset emails via namespaced VerificationToken, generic forgot-password response, sign-in success redirect
 - 2026-08-02: Completed **Profile Page** — account info with avatar and member date, usage stats with per-type breakdown, change password for credentials users, delete account with centered confirmation dialog, inline item type display in sidebar
 - 2026-08-02: Completed **Profile Action Feedback & Safer Account Deletion** — Sonner toasts for password change success/errors, typed DELETE confirmation before account deletion, consistent item type ordering in sidebar and profile
+- 2026-08-02: Completed **Rate Limiting for Auth** — Upstash Redis sliding-window limits on login, register, forgot/reset password, and resend-verification; custom login route, 429 with Retry-After, inline form errors, fail-open when Redis unavailable, GitHub OAuth emailVerified fix via events.signIn
