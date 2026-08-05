@@ -1,21 +1,16 @@
-# Current Feature: Items List View
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create dynamic route `/items/[type]` (e.g., `/items/snippets`, `/items/notes`)
-- Fetch and display items filtered by type
-- Render a responsive grid of ItemCard components
-- Use two columns on medium screens and up
-- Show a left border on each card colored by item type
-- Follow existing codebase patterns
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-Dynamic items listing page at `/items/[type]` that displays type-filtered items.
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -45,3 +40,4 @@ Dynamic items listing page at `/items/[type]` that displays type-filtered items.
 - 2026-08-02: Completed **Profile Page** — account info with avatar and member date, usage stats with per-type breakdown, change password for credentials users, delete account with centered confirmation dialog, inline item type display in sidebar
 - 2026-08-02: Completed **Profile Action Feedback & Safer Account Deletion** — Sonner toasts for password change success/errors, typed DELETE confirmation before account deletion, consistent item type ordering in sidebar and profile
 - 2026-08-02: Completed **Rate Limiting for Auth** — Upstash Redis sliding-window limits on login, register, forgot/reset password, and resend-verification; custom login route, 429 with Retry-After, inline form errors, fail-open when Redis unavailable, GitHub OAuth emailVerified fix via events.signIn
+- 2026-08-05: Completed **Items List View** — dynamic `/items/[type]` route with type-filtered ItemCard grid, db helpers, auth protection, sidebar plural labels with per-type counts, shared `getItemTypeLabel` helper
