@@ -4,17 +4,17 @@ import {
   type SidebarCollection,
 } from "@/lib/db/collections";
 import {
-  getSystemItemTypes,
+  getSidebarItemTypes,
   getUserItemStats,
   toSidebarItemCounts,
   type SidebarItemCounts,
-  type SystemItemType,
+  type SidebarItemType,
 } from "@/lib/db/items";
 import type { DashboardUser } from "@/lib/db/user";
 
 export type SidebarData = {
   user: DashboardUser;
-  itemTypes: SystemItemType[];
+  itemTypes: SidebarItemType[];
   favoriteCollections: SidebarCollection[];
   recentCollections: SidebarCollection[];
   itemCounts: SidebarItemCounts;
@@ -23,7 +23,7 @@ export type SidebarData = {
 export async function getSidebarData(user: DashboardUser): Promise<SidebarData> {
   const [itemTypes, favoriteCollections, recentCollections, stats] =
     await Promise.all([
-      getSystemItemTypes(),
+      getSidebarItemTypes(user.id),
       getFavoriteCollections(user.id),
       getSidebarRecentCollections(user.id),
       getUserItemStats(user.id),

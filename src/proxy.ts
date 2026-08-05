@@ -12,12 +12,13 @@ export const proxy = auth((req) => {
     pathname === "/reset-password";
   const isDashboard = pathname.startsWith("/dashboard");
   const isProfile = pathname === "/profile";
+  const isItems = pathname.startsWith("/items");
 
   if (isAuthPage && isLoggedIn) {
     return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
   }
 
-  if ((isDashboard || isProfile) && !isLoggedIn) {
+  if ((isDashboard || isProfile || isItems) && !isLoggedIn) {
     const signInUrl = new URL("/sign-in", req.nextUrl.origin);
     signInUrl.searchParams.set(
       "callbackUrl",
@@ -39,5 +40,7 @@ export const config = {
     "/forgot-password",
     "/reset-password",
     "/profile",
+    "/items",
+    "/items/:path*",
   ],
 };

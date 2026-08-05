@@ -1,6 +1,6 @@
 import { Code2, Folder } from "lucide-react";
 
-import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
+import { getItemTypeIcon, getItemTypeLabel, getItemTypeStyles } from "@/lib/item-type-styles";
 import type { ProfileItemTypeCount } from "@/lib/db/profile";
 
 type UsageStatisticsCardProps = {
@@ -80,7 +80,7 @@ export function UsageStatisticsCard({
                   style={styles.textStyle}
                 />
                 <span className="min-w-0 truncate text-sm text-muted-foreground">
-                  {type.name}
+                  {getItemTypeLabel(type.name, { plural: true })}
                 </span>
                 <span className="ml-auto shrink-0 text-sm font-semibold tabular-nums">
                   {type.count}

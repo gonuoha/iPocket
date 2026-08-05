@@ -8,7 +8,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import type { SidebarData } from "@/lib/db/sidebar";
-import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
+import { getItemTypeIcon, getItemTypeLabel, getItemTypeStyles } from "@/lib/item-type-styles";
 import { cn } from "@/lib/utils";
 
 import { SidebarCollapseButton } from "./sidebar-collapse-button";
@@ -18,14 +18,6 @@ import { SidebarUserMenu } from "./sidebar-user-menu";
 
 function getTypeSlug(name: string) {
   return name.toLowerCase();
-}
-
-function getTypeLabel(name: string) {
-  if (name === "link") {
-    return "URL";
-  }
-
-  return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
 const PRO_ITEM_TYPES = new Set(["file", "image"]);
@@ -109,15 +101,22 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
                       className={cn("size-3.5 shrink-0", styles.textClassName)}
                       style={styles.textStyle}
                     />
-                    <span className="flex-1 truncate">{getTypeLabel(type.name)}</span>
-                    {isProItemType(type.name) ? (
-                      <Badge
-                        variant="outline"
-                        className="h-4 shrink-0 border-border/60 px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
-                      >
-                        PRO
-                      </Badge>
-                    ) : null}
+                    <div className="flex min-w-0 flex-1 items-center gap-1.5">
+                      <span className="truncate">
+                        {getItemTypeLabel(type.name, { plural: true })}
+                      </span>
+                      {isProItemType(type.name) ? (
+                        <Badge
+                          variant="outline"
+                          className="h-4 shrink-0 border-border/60 px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"
+                        >
+                          PRO
+                        </Badge>
+                      ) : null}
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {type.itemCount}
+                    </span>
                   </SidebarLink>
                 );
               })}

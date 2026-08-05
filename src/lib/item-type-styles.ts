@@ -64,6 +64,27 @@ export function getItemTypeIcon(icon: string | null): LucideIcon {
   return itemTypeIcons[icon] ?? File;
 }
 
+export function getItemTypeLabel(
+  name: string,
+  options?: { plural?: boolean },
+): string {
+  const normalized = name.toLowerCase();
+
+  if (options?.plural) {
+    if (normalized === "link") {
+      return "URLs";
+    }
+
+    return `${normalized.charAt(0).toUpperCase()}${normalized.slice(1)}s`;
+  }
+
+  if (normalized === "link") {
+    return "URL";
+  }
+
+  return normalized.charAt(0).toUpperCase() + normalized.slice(1);
+}
+
 export function getItemTypeStyles(color: string | null): ItemTypeStyle {
   if (!color?.startsWith("#")) {
     return mutedTypeStyle;

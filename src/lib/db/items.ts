@@ -100,11 +100,45 @@ export async function getRecentItems(
   return items.map(mapItem);
 }
 
+export async function getItemTypeBySlug(userId: string, slug: string) {
+  const normalizedSlug = slug.toLowerCase();
+
+  return prisma.itemType.findFirst({
+    where: {
+      name: { equals: normalizedSlug, mode: "insensitive" },
+      OR: [{ isSystem: true }, { userId }],
+    },
+    select: {
+      id: true,
+      name: true,
+      icon: true,
+      color: true,
+    },
+  });
+}
+
+export async function getItemsByType(
+  userId: string,
+  typeId: string,
+): Promise<DashboardItem[]> {
+  const items = await prisma.item.findMany({
+    where: { userId, typeId },
+    orderBy: { updatedAt: "desc" },
+    select: itemSelect,
+  });
+
+  return items.map(mapItem);
+}
+
 export type SystemItemType = {
   id: string;
   name: string;
   icon: string | null;
   color: string | null;
+};
+
+export type SidebarItemType = SystemItemType & {
+  itemCount: number;
 };
 
 export type SidebarItemCounts = {
@@ -124,6 +158,28 @@ export async function getSystemItemTypes(): Promise<SystemItemType[]> {
   });
 
   return sortItemTypesBySystemOrder(itemTypes);
+}
+
+export async function getSidebarItemTypes(
+  userId: string,
+): Promise<SidebarItemType[]> {
+  const [itemTypes, typeCounts] = await Promise.all([
+    getSystemItemTypes(),
+    prisma.item.groupBy({
+      by: ["typeId"],
+      where: { userId },
+      _count: { _all: true },
+    }),
+  ]);
+
+  const countByTypeId = new Map(
+    typeCounts.map((entry) => [entry.typeId, entry._count._all]),
+  );
+
+  return itemTypes.map((type) => ({
+    ...type,
+    itemCount: countByTypeId.get(type.id) ?? 0,
+  }));
 }
 
 export const getUserItemStats = cache(
