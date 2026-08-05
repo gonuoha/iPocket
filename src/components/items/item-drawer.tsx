@@ -34,6 +34,10 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import {
+  CODE_EDITOR_TYPE_NAMES,
+  CodeEditor,
+} from "@/components/code-editor/code-editor";
 import { Textarea } from "@/components/ui/textarea";
 import type { ItemDetail } from "@/lib/db/items";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
@@ -186,9 +190,17 @@ function ItemDrawerContent({
           {item.content ? (
             <section className="space-y-2">
               <h3 className="text-sm font-medium">Content</h3>
-              <pre className="overflow-x-auto rounded-lg border border-border bg-muted/40 p-4 font-mono text-sm leading-relaxed whitespace-pre-wrap">
-                {item.content}
-              </pre>
+              {CODE_EDITOR_TYPE_NAMES.has(item.type.name.toLowerCase()) ? (
+                <CodeEditor
+                  value={item.content}
+                  language={item.language ?? undefined}
+                  readOnly
+                />
+              ) : (
+                <pre className="overflow-x-auto rounded-lg border border-border bg-muted/40 p-4 font-mono text-sm leading-relaxed whitespace-pre-wrap">
+                  {item.content}
+                </pre>
+              )}
             </section>
           ) : null}
 
@@ -278,6 +290,7 @@ function ItemDrawerEditor({
   const showContent = CONTENT_TYPE_NAMES.has(typeName);
   const showLanguage = LANGUAGE_TYPE_NAMES.has(typeName);
   const showUrl = URL_TYPE_NAMES.has(typeName);
+  const useCodeEditor = CODE_EDITOR_TYPE_NAMES.has(typeName);
   const canSave = formState.title.trim().length > 0 && !isSaving;
 
   return (
@@ -324,14 +337,23 @@ function ItemDrawerEditor({
           {showContent ? (
             <div className="space-y-2">
               <Label htmlFor="item-edit-content">Content</Label>
-              <Textarea
-                id="item-edit-content"
-                value={formState.content}
-                onChange={(event) =>
-                  onChange({ content: event.target.value })
-                }
-                className="min-h-40 font-mono text-sm"
-              />
+              {useCodeEditor ? (
+                <CodeEditor
+                  id="item-edit-content"
+                  value={formState.content}
+                  language={formState.language}
+                  onChange={(content) => onChange({ content })}
+                />
+              ) : (
+                <Textarea
+                  id="item-edit-content"
+                  value={formState.content}
+                  onChange={(event) =>
+                    onChange({ content: event.target.value })
+                  }
+                  className="min-h-40 font-mono text-sm"
+                />
+              )}
             </div>
           ) : null}
 

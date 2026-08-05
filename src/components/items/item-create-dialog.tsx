@@ -16,6 +16,10 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import {
+  CODE_EDITOR_TYPE_NAMES,
+  CodeEditor,
+} from "@/components/code-editor/code-editor";
 import { Textarea } from "@/components/ui/textarea";
 import { getItemTypeIcon, getItemTypeLabel } from "@/lib/item-type-styles";
 import { cn } from "@/lib/utils";
@@ -69,6 +73,7 @@ export function ItemCreateDialog({ open, onOpenChange }: ItemCreateDialogProps) 
   const showContent = CONTENT_TYPE_NAMES.has(formState.type);
   const showLanguage = LANGUAGE_TYPE_NAMES.has(formState.type);
   const showUrl = URL_TYPE_NAMES.has(formState.type);
+  const useCodeEditor = CODE_EDITOR_TYPE_NAMES.has(formState.type);
   const canCreate =
     formState.title.trim().length > 0 &&
     (!showUrl || formState.url.trim().length > 0) &&
@@ -185,14 +190,23 @@ export function ItemCreateDialog({ open, onOpenChange }: ItemCreateDialogProps) 
           {showContent ? (
             <div className="space-y-2">
               <Label htmlFor="item-create-content">Content</Label>
-              <Textarea
-                id="item-create-content"
-                value={formState.content}
-                onChange={(event) =>
-                  handleFormChange({ content: event.target.value })
-                }
-                className="min-h-32 font-mono text-sm"
-              />
+              {useCodeEditor ? (
+                <CodeEditor
+                  id="item-create-content"
+                  value={formState.content}
+                  language={formState.language}
+                  onChange={(content) => handleFormChange({ content })}
+                />
+              ) : (
+                <Textarea
+                  id="item-create-content"
+                  value={formState.content}
+                  onChange={(event) =>
+                    handleFormChange({ content: event.target.value })
+                  }
+                  className="min-h-32 font-mono text-sm"
+                />
+              )}
             </div>
           ) : null}
 

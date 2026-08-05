@@ -127,3 +127,12 @@
     @apply font-sans;
     }
 }
+
+.code-editor .monaco-scrollable-element > .scrollbar > .slider {
+  background: oklch(0.708 0 0 / 40%) !important;
+  border-radius: 9999px;
+}
+
+.code-editor .monaco-scrollable-element > .scrollbar > .slider:hover {
+  background: oklch(0.708 0 0 / 60%) !important;
+}
