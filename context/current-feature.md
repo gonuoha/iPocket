@@ -1,31 +1,16 @@
-# Current Feature: Item Drawer — Edit Mode
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Edit button in the item drawer's action bar toggles the drawer into inline edit mode (same drawer, no navigation)
-- Edit mode replaces the action bar with Save and Cancel buttons
-- Cancel discards changes and returns to view mode; Save persists via server action, returns to view mode, and refreshes drawer data
-- Toast notification on save success or error
-- Editable fields for all types: Title (required text input), Description (optional textarea), Tags (comma-separated input → tag array)
-- Type-specific editable fields shown only for relevant item type: Content (textarea) for snippet/prompt/command/note, Language (text input) for snippet/command, URL (text input) for link
-- Item type, collections, and created/updated dates remain display-only in edit mode
-- `updateItem(itemId, data)` server action in `src/actions/items.ts` validates with Zod, checks session via `auth()`, validates ownership, calls query function, returns `{ success, data, error }`
-- `updateItem` query function in `src/lib/db/items.ts`: disconnect all existing tags, connect-or-create new ones, return updated `ItemDetail`
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Zod schema: `title` non-empty trimmed string; `description`, `content`, `url`, `language` string or null (optional); `tags` array of trimmed non-empty strings
-- Return Zod errors in `{ success: false, error }` so the client can display them
-- No form library — controlled inputs with local state
-- Client-side: disable Save button when title is empty
-- Server-side Zod validation is the source of truth
-- Content textarea is plain text, not a code editor (comes later)
-- After save, call `router.refresh()` so the underlying card/row list reflects changes
-- Spec: `context/features/item-drawer-edit-spec.md`
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -58,3 +43,4 @@ In Progress
 - 2026-08-05: Completed **Items List View** — dynamic `/items/[type]` route with type-filtered ItemCard grid, db helpers, auth protection, sidebar plural labels with per-type counts, shared `getItemTypeLabel` helper
 - 2026-08-05: Completed **Three-Column Item Listing** — responsive items grid with three columns on xl screens, matching collections grid breakpoints
 - 2026-08-05: Completed **Item Drawer** — right-side Sheet drawer opens on ItemCard/ItemRow click, full item detail via `/api/items/[id]` with auth check, skeleton loading state, action bar (Favorite, Pin, Copy, Edit, icon-only Delete)
+- 2026-08-05: Completed **Item Drawer — Edit Mode** — Edit toggles inline edit mode with Save/Cancel actions; Title/Description/Tags for all types plus type-specific Content/Language/URL fields; Zod-validated `updateItem` server action (`src/actions/items.ts`) with ownership check and tag disconnect/connect-or-create via new `updateItem` query in `lib/db/items.ts`; toast feedback and `router.refresh()` on save
