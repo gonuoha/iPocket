@@ -19,6 +19,15 @@ export type DashboardUser = {
   isPro: boolean;
 };
 
+export async function getUserIsPro(userId: string): Promise<boolean> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { isPro: true },
+  });
+
+  return user?.isPro ?? false;
+}
+
 export const getCurrentUser = cache(async (): Promise<DashboardUser> => {
   const session = await auth();
 

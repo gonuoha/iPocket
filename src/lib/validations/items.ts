@@ -15,6 +15,8 @@ export const creatableItemTypeSchema = z.enum([
   "command",
   "note",
   "link",
+  "file",
+  "image",
 ]);
 
 export const updateItemSchema = z.object({
@@ -40,6 +42,9 @@ export const createItemSchema = z
       emptyToNull,
       z.string().trim().url("Enter a valid URL").nullable(),
     ).optional(),
+    fileUrl: z.string().trim().min(1).optional(),
+    fileName: z.string().trim().min(1).optional(),
+    fileSize: z.number().int().positive().optional(),
     tags: z.array(z.string().trim().min(1)).default([]),
   })
   .superRefine((data, ctx) => {
@@ -48,6 +53,17 @@ export const createItemSchema = z
         code: "custom",
         message: "URL is required",
         path: ["url"],
+      });
+    }
+
+    if (
+      (data.type === "file" || data.type === "image") &&
+      (!data.fileUrl || !data.fileName || !data.fileSize)
+    ) {
+      ctx.addIssue({
+        code: "custom",
+        message: "File upload is required",
+        path: ["fileUrl"],
       });
     }
   });

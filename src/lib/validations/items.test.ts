@@ -25,13 +25,38 @@ describe("createItemSchema", () => {
     expect(result.error?.issues[0]?.message).toBe("Title is required");
   });
 
-  it("rejects unsupported item types", () => {
+  it("requires a file upload for image items", () => {
     const result = createItemSchema.safeParse({
-      type: "file",
-      title: "Test",
+      type: "image",
+      title: "Screenshot",
     });
 
     expect(result.success).toBe(false);
+    expect(result.error?.issues[0]?.message).toBe("File upload is required");
+  });
+
+  it("accepts an image item with upload metadata", () => {
+    const result = createItemSchema.safeParse({
+      type: "image",
+      title: "Screenshot",
+      fileUrl: "users/user-1/key/photo.png",
+      fileName: "photo.png",
+      fileSize: 1024,
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("accepts a file item with upload metadata", () => {
+    const result = createItemSchema.safeParse({
+      type: "file",
+      title: "Notes",
+      fileUrl: "users/user-1/key/notes.pdf",
+      fileName: "notes.pdf",
+      fileSize: 2048,
+    });
+
+    expect(result.success).toBe(true);
   });
 
   it("requires a URL for link items", () => {

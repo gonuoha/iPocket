@@ -10,11 +10,18 @@ import {
   updateItem as updateItemInDb,
 } from "@/lib/db/items";
 import type { DeleteItemResult, ItemDetail } from "@/lib/db/items";
+import { getUserIsPro } from "@/lib/db/user";
+import { isOwnedFileUrl } from "@/lib/file-upload";
+import { deleteObject } from "@/lib/r2/storage";
 import { createItemSchema, updateItemSchema } from "@/lib/validations/items";
 
 type ActionResult<T> =
   | { success: true; data: T }
   | { success: false; error: string };
+
+function isFileItemType(typeName: string) {
+  return typeName === "file" || typeName === "image";
+}
 
 export async function createItem(
   data: unknown,
@@ -40,6 +47,27 @@ export async function createItem(
     return { success: false, error: "Invalid item type" };
   }
 
+  if (parsed.data.type === "file") {
+    const isPro = await getUserIsPro(session.user.id);
+
+    if (!isPro) {
+      return {
+        success: false,
+        error: "File uploads require a Pro subscription",
+      };
+    }
+  }
+
+  const usesFileContent = isFileItemType(parsed.data.type);
+
+  if (
+    usesFileContent &&
+    parsed.data.fileUrl &&
+    !isOwnedFileUrl(parsed.data.fileUrl, session.user.id)
+  ) {
+    return { success: false, error: "Invalid file reference" };
+  }
+
   const created = await createItemInDb(session.user.id, {
     typeId: itemType.id,
     title: parsed.data.title,
@@ -47,8 +75,11 @@ export async function createItem(
     content: parsed.data.content ?? null,
     url: parsed.data.url ?? null,
     language: parsed.data.language ?? null,
+    fileUrl: usesFileContent ? (parsed.data.fileUrl ?? null) : null,
+    fileName: usesFileContent ? (parsed.data.fileName ?? null) : null,
+    fileSize: usesFileContent ? (parsed.data.fileSize ?? null) : null,
     tags: parsed.data.tags,
-    contentType: "text",
+    contentType: usesFileContent ? "file" : "text",
   });
 
   revalidatePath(`/items/${parsed.data.type}`);
@@ -107,6 +138,14 @@ export async function deleteItem(
 
   if (!deleted) {
     return { success: false, error: "Item not found" };
+  }
+
+  if (deleted.fileUrl) {
+    try {
+      await deleteObject(deleted.fileUrl);
+    } catch {
+      // Item is already removed from the database.
+    }
   }
 
   revalidatePath(`/items/${deleted.typeName.toLowerCase()}`);

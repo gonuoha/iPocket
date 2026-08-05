@@ -13,17 +13,31 @@ vi.mock("@/lib/db/items", () => ({
   deleteItem: vi.fn(),
 }));
 
+vi.mock("@/lib/db/user", () => ({
+  getUserIsPro: vi.fn(),
+}));
+
+vi.mock("@/lib/r2/storage", () => ({
+  deleteObject: vi.fn(),
+}));
+
 import { auth } from "@/auth";
 import {
   createItem as createItemInDb,
+  deleteItem as deleteItemInDb,
   getItemTypeBySlug,
 } from "@/lib/db/items";
+import { getUserIsPro } from "@/lib/db/user";
+import { deleteObject } from "@/lib/r2/storage";
 
-import { createItem } from "./items";
+import { createItem, deleteItem } from "./items";
 
 const mockAuth = vi.mocked(auth);
 const mockGetItemTypeBySlug = vi.mocked(getItemTypeBySlug);
 const mockCreateItemInDb = vi.mocked(createItemInDb);
+const mockDeleteItemInDb = vi.mocked(deleteItemInDb);
+const mockGetUserIsPro = vi.mocked(getUserIsPro);
+const mockDeleteObject = vi.mocked(deleteObject);
 
 const createdItem: ItemDetail = {
   id: "item-1",
@@ -108,8 +122,157 @@ describe("createItem", () => {
       content: null,
       url: null,
       language: null,
+      fileUrl: null,
+      fileName: null,
+      fileSize: null,
       tags: ["js"],
       contentType: "text",
     });
+  });
+
+  it("rejects file references that do not belong to the user", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGetItemTypeBySlug.mockResolvedValue({
+      id: "type-image",
+      name: "image",
+      icon: "Image",
+      color: "#ec4899",
+    });
+
+    const result = await createItem({
+      type: "image",
+      title: "Screenshot",
+      fileUrl: "users/user-2/abc123/photo.png",
+      fileName: "photo.png",
+      fileSize: 1024,
+    });
+
+    expect(result).toEqual({
+      success: false,
+      error: "Invalid file reference",
+    });
+    expect(mockCreateItemInDb).not.toHaveBeenCalled();
+  });
+
+  it("rejects file item creation for non-Pro users", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGetItemTypeBySlug.mockResolvedValue({
+      id: "type-file",
+      name: "file",
+      icon: "File",
+      color: "#64748b",
+    });
+    mockGetUserIsPro.mockResolvedValue(false);
+
+    const result = await createItem({
+      type: "file",
+      title: "Notes",
+      fileUrl: "users/user-1/abc123/notes.pdf",
+      fileName: "notes.pdf",
+      fileSize: 1024,
+    });
+
+    expect(result).toEqual({
+      success: false,
+      error: "File uploads require a Pro subscription",
+    });
+    expect(mockCreateItemInDb).not.toHaveBeenCalled();
+  });
+
+  it("creates a file item for Pro users", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGetItemTypeBySlug.mockResolvedValue({
+      id: "type-file",
+      name: "file",
+      icon: "File",
+      color: "#64748b",
+    });
+    mockGetUserIsPro.mockResolvedValue(true);
+    mockCreateItemInDb.mockResolvedValue(createdItem);
+
+    const result = await createItem({
+      type: "file",
+      title: "Notes",
+      fileUrl: "users/user-1/abc123/notes.pdf",
+      fileName: "notes.pdf",
+      fileSize: 1024,
+    });
+
+    expect(result).toEqual({ success: true, data: createdItem });
+    expect(mockCreateItemInDb).toHaveBeenCalledWith(
+      "user-1",
+      expect.objectContaining({
+        fileUrl: "users/user-1/abc123/notes.pdf",
+        fileName: "notes.pdf",
+        fileSize: 1024,
+        contentType: "file",
+      }),
+    );
+  });
+});
+
+describe("deleteItem", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns unauthorized when there is no session", async () => {
+    mockAuth.mockResolvedValue(null);
+
+    const result = await deleteItem("item-1");
+
+    expect(result).toEqual({ success: false, error: "Unauthorized" });
+    expect(mockDeleteItemInDb).not.toHaveBeenCalled();
+  });
+
+  it("returns an error when the item is not found", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockDeleteItemInDb.mockResolvedValue(null);
+
+    const result = await deleteItem("item-1");
+
+    expect(result).toEqual({ success: false, error: "Item not found" });
+    expect(mockDeleteObject).not.toHaveBeenCalled();
+  });
+
+  it("deletes an item without touching R2 when there is no file", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockDeleteItemInDb.mockResolvedValue({
+      typeName: "snippet",
+      fileUrl: null,
+    });
+
+    const result = await deleteItem("item-1");
+
+    expect(result.success).toBe(true);
+    expect(mockDeleteObject).not.toHaveBeenCalled();
+  });
+
+  it("deletes the R2 object when the item had a file", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockDeleteItemInDb.mockResolvedValue({
+      typeName: "file",
+      fileUrl: "users/user-1/abc123/notes.pdf",
+    });
+
+    const result = await deleteItem("item-1");
+
+    expect(result.success).toBe(true);
+    expect(mockDeleteObject).toHaveBeenCalledWith(
+      "users/user-1/abc123/notes.pdf",
+    );
+  });
+
+  it("still succeeds when deleting the R2 object fails", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockDeleteItemInDb.mockResolvedValue({
+      typeName: "file",
+      fileUrl: "users/user-1/abc123/notes.pdf",
+    });
+    mockDeleteObject.mockRejectedValue(new Error("R2 unavailable"));
+
+    const result = await deleteItem("item-1");
+
+    expect(result.success).toBe(true);
   });
 });

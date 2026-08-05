@@ -17,16 +17,26 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
   CODE_EDITOR_TYPE_NAMES,
   CodeEditor,
 } from "@/components/code-editor/code-editor";
+import {
+  FileUpload,
+  type UploadedFile,
+} from "@/components/items/file-upload";
 import {
   MARKDOWN_EDITOR_TYPE_NAMES,
   MarkdownEditor,
 } from "@/components/markdown-editor/markdown-editor";
 import { Textarea } from "@/components/ui/textarea";
 import { getItemTypeIcon, getItemTypeLabel } from "@/lib/item-type-styles";
-import { cn } from "@/lib/utils";
 import type { CreatableItemType } from "@/lib/validations/items";
 
 const CREATABLE_ITEM_TYPES: {
@@ -38,11 +48,14 @@ const CREATABLE_ITEM_TYPES: {
   { type: "command", icon: "Terminal" },
   { type: "note", icon: "StickyNote" },
   { type: "link", icon: "Link" },
+  { type: "image", icon: "Image" },
+  { type: "file", icon: "File" },
 ];
 
 const CONTENT_TYPE_NAMES = new Set(["snippet", "prompt", "command", "note"]);
 const LANGUAGE_TYPE_NAMES = new Set(["snippet", "command"]);
 const URL_TYPE_NAMES = new Set(["link"]);
+const FILE_TYPE_NAMES = new Set(["file", "image"]);
 
 type CreateFormState = {
   type: CreatableItemType;
@@ -52,6 +65,7 @@ type CreateFormState = {
   url: string;
   language: string;
   tags: string;
+  uploadedFile: UploadedFile | null;
 };
 
 const initialFormState: CreateFormState = {
@@ -62,14 +76,20 @@ const initialFormState: CreateFormState = {
   url: "",
   language: "",
   tags: "",
+  uploadedFile: null,
 };
 
 type ItemCreateDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  isPro: boolean;
 };
 
-export function ItemCreateDialog({ open, onOpenChange }: ItemCreateDialogProps) {
+export function ItemCreateDialog({
+  open,
+  onOpenChange,
+  isPro,
+}: ItemCreateDialogProps) {
   const router = useRouter();
   const [formState, setFormState] = useState<CreateFormState>(initialFormState);
   const [isCreating, startCreating] = useTransition();
@@ -77,11 +97,13 @@ export function ItemCreateDialog({ open, onOpenChange }: ItemCreateDialogProps) 
   const showContent = CONTENT_TYPE_NAMES.has(formState.type);
   const showLanguage = LANGUAGE_TYPE_NAMES.has(formState.type);
   const showUrl = URL_TYPE_NAMES.has(formState.type);
+  const showFileUpload = FILE_TYPE_NAMES.has(formState.type);
   const useCodeEditor = CODE_EDITOR_TYPE_NAMES.has(formState.type);
   const useMarkdownEditor = MARKDOWN_EDITOR_TYPE_NAMES.has(formState.type);
   const canCreate =
     formState.title.trim().length > 0 &&
     (!showUrl || formState.url.trim().length > 0) &&
+    (!showFileUpload || formState.uploadedFile !== null) &&
     !isCreating;
 
   function handleOpenChange(nextOpen: boolean) {
@@ -94,6 +116,14 @@ export function ItemCreateDialog({ open, onOpenChange }: ItemCreateDialogProps) 
 
   function handleFormChange(patch: Partial<CreateFormState>) {
     setFormState((previous) => ({ ...previous, ...patch }));
+  }
+
+  function handleTypeChange(type: CreatableItemType) {
+    setFormState((previous) => ({
+      ...previous,
+      type,
+      uploadedFile: null,
+    }));
   }
 
   function handleCreate() {
@@ -111,6 +141,9 @@ export function ItemCreateDialog({ open, onOpenChange }: ItemCreateDialogProps) 
         content: formState.content,
         url: formState.url,
         language: formState.language,
+        fileUrl: formState.uploadedFile?.fileUrl,
+        fileName: formState.uploadedFile?.fileName,
+        fileSize: formState.uploadedFile?.fileSize,
         tags: formState.tags
           .split(",")
           .map((tag) => tag.trim())
@@ -141,33 +174,37 @@ export function ItemCreateDialog({ open, onOpenChange }: ItemCreateDialogProps) 
 
         <div className="space-y-6">
           <div className="space-y-2">
-            <Label>Type</Label>
-            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-              {CREATABLE_ITEM_TYPES.map(({ type, icon }) => {
-                const isSelected = formState.type === type;
-
-                return (
-                  <Button
+            <Label htmlFor="item-create-type">Type</Label>
+            <Select
+              value={formState.type}
+              onValueChange={(value) =>
+                handleTypeChange(value as CreatableItemType)
+              }
+            >
+              <SelectTrigger id="item-create-type" className="w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {CREATABLE_ITEM_TYPES.map(({ type, icon }) => (
+                  <SelectItem
                     key={type}
-                    type="button"
-                    variant={isSelected ? "default" : "outline"}
-                    size="sm"
-                    className={cn(
-                      "h-auto justify-start gap-2 px-3 py-2",
-                      isSelected && "ring-2 ring-ring ring-offset-2 ring-offset-background",
-                    )}
-                    onClick={() => handleFormChange({ type })}
+                    value={type}
+                    disabled={type === "file" && !isPro}
                   >
                     {createElement(getItemTypeIcon(icon), {
                       className: "size-4 shrink-0",
                     })}
-                    <span className="truncate">
-                      {getItemTypeLabel(type)}
-                    </span>
-                  </Button>
-                );
-              })}
-            </div>
+                    {getItemTypeLabel(type)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {!isPro ? (
+              <p className="text-xs text-muted-foreground">
+                File uploads require Pro. Image uploads are available on the free
+                plan.
+              </p>
+            ) : null}
           </div>
 
           <div className="space-y-2">
@@ -191,6 +228,18 @@ export function ItemCreateDialog({ open, onOpenChange }: ItemCreateDialogProps) 
               rows={3}
             />
           </div>
+
+          {showFileUpload ? (
+            <div className="space-y-2">
+              <Label>{formState.type === "image" ? "Image" : "File"}</Label>
+              <FileUpload
+                category={formState.type === "image" ? "image" : "file"}
+                value={formState.uploadedFile}
+                onChange={(uploadedFile) => handleFormChange({ uploadedFile })}
+                disabled={isCreating}
+              />
+            </div>
+          ) : null}
 
           {showContent ? (
             <div className="space-y-2">

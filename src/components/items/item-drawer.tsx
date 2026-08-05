@@ -4,6 +4,7 @@ import { createElement, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import {
   Copy,
+  Download,
   Pencil,
   Pin,
   Star,
@@ -23,7 +24,7 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -44,6 +45,7 @@ import {
 } from "@/components/markdown-editor/markdown-editor";
 import { Textarea } from "@/components/ui/textarea";
 import type { ItemDetail } from "@/lib/db/items";
+import { formatFileSize } from "@/lib/file-upload";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
 import { cn } from "@/lib/utils";
 
@@ -224,10 +226,43 @@ function ItemDrawerContent({
             </section>
           ) : null}
 
-          {item.fileName ? (
+          {item.fileName && item.type.name.toLowerCase() === "image" ? (
             <section className="space-y-2">
+              <h3 className="text-sm font-medium">Image</h3>
+              <div className="overflow-hidden rounded-lg border border-border bg-muted/20">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={`/api/items/${item.id}/download`}
+                  alt={item.fileName}
+                  className="max-h-80 w-full object-contain"
+                />
+              </div>
+              <p className="text-sm text-muted-foreground">
+                {item.fileName}
+                {item.fileSize ? ` · ${formatFileSize(item.fileSize)}` : ""}
+              </p>
+            </section>
+          ) : null}
+
+          {item.fileName && item.type.name.toLowerCase() === "file" ? (
+            <section className="space-y-3">
               <h3 className="text-sm font-medium">File</h3>
-              <p className="text-sm text-muted-foreground">{item.fileName}</p>
+              <div className="rounded-lg border border-border bg-muted/20 p-4">
+                <p className="text-sm font-medium">{item.fileName}</p>
+                {item.fileSize ? (
+                  <p className="mt-1 text-sm text-muted-foreground">
+                    {formatFileSize(item.fileSize)}
+                  </p>
+                ) : null}
+              </div>
+              <a
+                href={`/api/items/${item.id}/download?download=1`}
+                download={item.fileName}
+                className={buttonVariants({ variant: "outline", size: "sm" })}
+              >
+                <Download />
+                Download
+              </a>
             </section>
           ) : null}
 

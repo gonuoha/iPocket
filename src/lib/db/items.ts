@@ -204,6 +204,9 @@ export type CreateItemData = {
   content: string | null;
   url: string | null;
   language: string | null;
+  fileUrl: string | null;
+  fileName: string | null;
+  fileSize: number | null;
   tags: string[];
   contentType: "text" | "file";
 };
@@ -221,6 +224,9 @@ export async function createItem(
       content: data.content,
       url: data.url,
       language: data.language,
+      fileUrl: data.fileUrl,
+      fileName: data.fileName,
+      fileSize: data.fileSize,
       contentType: data.contentType,
       tags: {
         create: data.tags.map((name) => ({
@@ -281,6 +287,7 @@ export async function updateItem(
 
 export type DeleteItemResult = {
   typeName: string;
+  fileUrl: string | null;
 };
 
 export async function deleteItem(
@@ -291,6 +298,7 @@ export async function deleteItem(
     where: { id: itemId, userId },
     select: {
       id: true,
+      fileUrl: true,
       type: {
         select: {
           name: true,
@@ -307,7 +315,10 @@ export async function deleteItem(
     where: { id: itemId },
   });
 
-  return { typeName: existing.type.name };
+  return {
+    typeName: existing.type.name,
+    fileUrl: existing.fileUrl,
+  };
 }
 
 export async function getPinnedItems(

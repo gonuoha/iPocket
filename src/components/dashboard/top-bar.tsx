@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils";
 
 import { useSidebar } from "./sidebar-context";
 
-export function TopBar() {
+export function TopBar({ isPro }: { isPro: boolean }) {
   const { toggleSidebar } = useSidebar();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
 
@@ -67,7 +67,11 @@ export function TopBar() {
       </div>
     </header>
 
-      <ItemCreateDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+      <ItemCreateDialog
+        open={isCreateOpen}
+        onOpenChange={setIsCreateOpen}
+        isPro={isPro}
+      />
     </>
   );
 }

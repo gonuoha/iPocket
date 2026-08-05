@@ -11,15 +11,17 @@ import { SidebarProvider, useSidebar } from "./sidebar-context";
 function DashboardShellInner({
   children,
   sidebar,
+  isPro,
 }: {
   children: React.ReactNode;
   sidebar: React.ReactNode;
+  isPro: boolean;
 }) {
   const { collapsed, mobileOpen, setMobileOpen } = useSidebar();
 
   return (
     <div className="flex h-svh flex-col overflow-hidden">
-      <TopBar />
+      <TopBar isPro={isPro} />
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <aside
@@ -54,14 +56,18 @@ function DashboardShellInner({
 export function DashboardShell({
   children,
   sidebar,
+  isPro,
 }: {
   children: React.ReactNode;
   sidebar: React.ReactNode;
+  isPro: boolean;
 }) {
   return (
     <SidebarProvider>
       <ItemDrawerProvider>
-        <DashboardShellInner sidebar={sidebar}>{children}</DashboardShellInner>
+        <DashboardShellInner sidebar={sidebar} isPro={isPro}>
+          {children}
+        </DashboardShellInner>
       </ItemDrawerProvider>
     </SidebarProvider>
   );

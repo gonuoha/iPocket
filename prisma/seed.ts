@@ -313,7 +313,7 @@ async function main() {
       update: {
         name: "Demo User",
         password: passwordHash,
-        isPro: false,
+        isPro: true,
         emailVerified: new Date(),
       },
       create: {
@@ -321,7 +321,7 @@ async function main() {
         email: DEMO_EMAIL,
         name: "Demo User",
         password: passwordHash,
-        isPro: false,
+        isPro: true,
         emailVerified: new Date(),
       },
     });

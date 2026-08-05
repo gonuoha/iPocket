@@ -1,0 +1,261 @@
+"use client";
+
+import { useCallback, useEffect, useRef, useState } from "react";
+import { FileIcon, ImageIcon, Upload, X } from "lucide-react";
+import { toast } from "sonner";
+
+import { Button } from "@/components/ui/button";
+import {
+  formatFileSize,
+  type UploadCategory,
+} from "@/lib/file-upload";
+import { cn } from "@/lib/utils";
+
+export type UploadedFile = {
+  fileUrl: string;
+  fileName: string;
+  fileSize: number;
+};
+
+type FileUploadProps = {
+  category: UploadCategory;
+  value: UploadedFile | null;
+  onChange: (value: UploadedFile | null) => void;
+  disabled?: boolean;
+};
+
+function uploadWithProgress(
+  file: File,
+  category: UploadCategory,
+  onProgress: (progress: number) => void,
+) {
+  return new Promise<UploadedFile>((resolve, reject) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("category", category);
+
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", "/api/items/upload");
+    xhr.upload.addEventListener("progress", (event) => {
+      if (event.lengthComputable) {
+        onProgress(Math.round((event.loaded / event.total) * 100));
+      }
+    });
+    xhr.addEventListener("load", () => {
+      if (xhr.status >= 200 && xhr.status < 300) {
+        try {
+          resolve(JSON.parse(xhr.responseText) as UploadedFile);
+        } catch {
+          reject(new Error("Invalid upload response"));
+        }
+        return;
+      }
+
+      try {
+        const payload = JSON.parse(xhr.responseText) as { error?: string };
+        reject(new Error(payload.error ?? "Upload failed"));
+      } catch {
+        reject(new Error("Upload failed"));
+      }
+    });
+    xhr.addEventListener("error", () => {
+      reject(new Error("Upload failed"));
+    });
+    xhr.send(formData);
+  });
+}
+
+export function FileUpload({
+  category,
+  value,
+  onChange,
+  disabled = false,
+}: FileUploadProps) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  const clearPreview = useCallback(() => {
+    setPreviewUrl((current) => {
+      if (current) {
+        URL.revokeObjectURL(current);
+      }
+      return null;
+    });
+  }, []);
+
+  const handleFiles = useCallback(
+    async (files: FileList | null) => {
+      const file = files?.[0];
+
+      if (!file || disabled || isUploading) {
+        return;
+      }
+
+      if (category === "image") {
+        clearPreview();
+        setPreviewUrl(URL.createObjectURL(file));
+      }
+
+      setIsUploading(true);
+      setProgress(0);
+
+      try {
+        const uploaded = await uploadWithProgress(file, category, setProgress);
+        onChange(uploaded);
+        toast.success("File uploaded");
+      } catch (error) {
+        clearPreview();
+        onChange(null);
+        toast.error(error instanceof Error ? error.message : "Upload failed");
+      } finally {
+        setIsUploading(false);
+        setProgress(0);
+      }
+    },
+    [category, clearPreview, disabled, isUploading, onChange],
+  );
+
+  function handleClear() {
+    clearPreview();
+    onChange(null);
+
+    if (inputRef.current) {
+      inputRef.current.value = "";
+    }
+  }
+
+  const Icon = category === "image" ? ImageIcon : FileIcon;
+  const label = category === "image" ? "image" : "file";
+
+  if (value) {
+    return (
+      <div className="space-y-3 rounded-lg border border-border bg-muted/20 p-4">
+        {category === "image" && previewUrl ? (
+          <div className="overflow-hidden rounded-md border border-border bg-background">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={previewUrl}
+              alt={value.fileName}
+              className="max-h-48 w-full object-contain"
+            />
+          </div>
+        ) : null}
+
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 space-y-1">
+            <p className="truncate text-sm font-medium">{value.fileName}</p>
+            <p className="text-xs text-muted-foreground">
+              {formatFileSize(value.fileSize)}
+            </p>
+          </div>
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={handleClear}
+            disabled={disabled || isUploading}
+            aria-label="Remove file"
+          >
+            <X />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-3">
+      <div
+        role="button"
+        tabIndex={disabled || isUploading ? -1 : 0}
+        onKeyDown={(event) => {
+          if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            inputRef.current?.click();
+          }
+        }}
+        onDragEnter={(event) => {
+          event.preventDefault();
+          if (!disabled && !isUploading) {
+            setIsDragging(true);
+          }
+        }}
+        onDragOver={(event) => {
+          event.preventDefault();
+        }}
+        onDragLeave={(event) => {
+          event.preventDefault();
+          setIsDragging(false);
+        }}
+        onDrop={(event) => {
+          event.preventDefault();
+          setIsDragging(false);
+
+          if (disabled || isUploading) {
+            return;
+          }
+
+          void handleFiles(event.dataTransfer.files);
+        }}
+        onClick={() => {
+          if (!disabled && !isUploading) {
+            inputRef.current?.click();
+          }
+        }}
+        className={cn(
+          "flex cursor-pointer flex-col items-center justify-center gap-3 rounded-lg border border-dashed border-border bg-muted/20 px-4 py-8 text-center transition-colors",
+          isDragging && "border-primary bg-primary/5",
+          (disabled || isUploading) && "cursor-not-allowed opacity-60",
+        )}
+      >
+        <div className="flex size-10 items-center justify-center rounded-full bg-muted">
+          {isUploading ? (
+            <Upload className="size-4 animate-pulse" />
+          ) : (
+            <Icon className="size-4" />
+          )}
+        </div>
+        <div className="space-y-1">
+          <p className="text-sm font-medium">
+            {isUploading ? "Uploading..." : `Drop your ${label} here`}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            or click to browse
+          </p>
+        </div>
+        <input
+          ref={inputRef}
+          type="file"
+          className="hidden"
+          disabled={disabled || isUploading}
+          onChange={(event) => {
+            void handleFiles(event.target.files);
+          }}
+        />
+      </div>
+
+      {isUploading ? (
+        <div className="space-y-2">
+          <div className="h-2 overflow-hidden rounded-full bg-muted">
+            <div
+              className="h-full rounded-full bg-primary transition-[width]"
+              style={{ width: `${progress}%` }}
+            />
+          </div>
+          <p className="text-xs text-muted-foreground">{progress}%</p>
+        </div>
+      ) : null}
+    </div>
+  );
+}
