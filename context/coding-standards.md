@@ -95,3 +95,11 @@ Example v4 configuration:
 - No commented-out code unless specified
 - No unused imports or variables
 - Keep functions under 50 lines when possible
+
+## Testing
+
+- Use Vitest for unit tests (`npm test`)
+- Test server actions (`src/actions/`) and utilities (`src/lib/`) only — not React components
+- Co-locate tests as `*.test.ts` next to the source file
+- Mock external dependencies (Prisma, email, rate limiting, Next.js APIs) with `vi.mock`
+- Test happy paths and meaningful error cases; skip tests for trivial pass-through code

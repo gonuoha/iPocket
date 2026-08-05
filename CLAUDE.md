@@ -30,3 +30,4 @@ Read these for full project context:
 npm run dev      # Start dev server
 npm run build    # Build for production
 npm run lint     # Run ESLint
+npm test         # Run unit tests (server actions & utilities)
