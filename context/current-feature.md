@@ -1,28 +1,16 @@
-# Current Feature: Item Create
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add new items via a modal dialog opened from the "New Item" button in the top bar
-- Use shadcn Dialog component for the create flow
-- Provide a type selector for snippet, prompt, command, note, and link
-- Show fields dynamically based on selected type:
-  - All types: title (required), description, tags
-  - snippet/command: content, language
-  - prompt/note: content
-  - link: URL (required)
-- Implement `createItem` server action with Zod validation
-- Add `createItem` query function in `lib/db/items.ts`
-- Show toast on success, close modal, and refresh the view
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Modal is triggered from the existing "New Item" button in the top bar (currently display-only)
-- Follow patterns established by Item Drawer edit mode (`updateItem` action, Zod validation, tag handling)
-- File and image types are not in scope for this feature
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -57,3 +45,4 @@ In Progress
 - 2026-08-05: Completed **Item Drawer** — right-side Sheet drawer opens on ItemCard/ItemRow click, full item detail via `/api/items/[id]` with auth check, skeleton loading state, action bar (Favorite, Pin, Copy, Edit, icon-only Delete)
 - 2026-08-05: Completed **Item Drawer — Edit Mode** — Edit toggles inline edit mode with Save/Cancel actions; Title/Description/Tags for all types plus type-specific Content/Language/URL fields; Zod-validated `updateItem` server action (`src/actions/items.ts`) with ownership check and tag disconnect/connect-or-create via new `updateItem` query in `lib/db/items.ts`; toast feedback and `router.refresh()` on save
 - 2026-08-05: Completed **Item Delete** — AlertDialog confirmation on drawer delete button; `deleteItem` server action and db helper with ownership check; success/error toasts, drawer close, and path revalidation for `/items/[type]` and `/dashboard`
+- 2026-08-05: Completed **Item Create** — Dialog modal from top bar New Item button with type selector (snippet, prompt, command, note, link) and dynamic fields; Zod-validated `createItem` server action and db helper with tag connect-or-create; success toast, modal close, and `router.refresh()`; unit tests for schema and action
