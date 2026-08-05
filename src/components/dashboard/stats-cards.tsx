@@ -40,7 +40,7 @@ export function StatsCards({
         return (
           <div
             key={stat.label}
-            className="rounded-xl border border-border bg-card p-4"
+            className="rounded-lg border border-border bg-muted/40 p-4"
           >
             <div className="flex items-center justify-between gap-2">
               <p className="text-sm text-muted-foreground">{stat.label}</p>

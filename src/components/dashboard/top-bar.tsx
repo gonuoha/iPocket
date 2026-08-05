@@ -2,18 +2,22 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Code2, PanelLeft, Search } from "lucide-react";
 
 import { ItemCreateDialog } from "@/components/items/item-create-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { parseCreatableItemTypeFromPathname } from "@/lib/validations/items";
 import { cn } from "@/lib/utils";
 
 import { useSidebar } from "./sidebar-context";
 
 export function TopBar({ isPro }: { isPro: boolean }) {
   const { toggleSidebar } = useSidebar();
+  const pathname = usePathname();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const defaultType = parseCreatableItemTypeFromPathname(pathname);
 
   return (
     <>
@@ -71,6 +75,7 @@ export function TopBar({ isPro }: { isPro: boolean }) {
         open={isCreateOpen}
         onOpenChange={setIsCreateOpen}
         isPro={isPro}
+        defaultType={defaultType}
       />
     </>
   );

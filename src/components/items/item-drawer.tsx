@@ -5,9 +5,12 @@ import { useRouter } from "next/navigation";
 import {
   Copy,
   Download,
+  FileIcon,
+  Info,
   Pencil,
   Pin,
   Star,
+  Tag,
   Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -68,6 +71,41 @@ type EditFormState = {
 const CONTENT_TYPE_NAMES = new Set(["snippet", "prompt", "command", "note"]);
 const LANGUAGE_TYPE_NAMES = new Set(["snippet", "command"]);
 const URL_TYPE_NAMES = new Set(["link"]);
+const DOWNLOADABLE_TYPE_NAMES = new Set(["file", "image"]);
+
+function isDownloadableItem(item: ItemDetailResponse) {
+  return (
+    Boolean(item.fileName) &&
+    DOWNLOADABLE_TYPE_NAMES.has(item.type.name.toLowerCase())
+  );
+}
+
+function ItemDownloadLink({
+  item,
+  className,
+}: {
+  item: ItemDetailResponse;
+  className?: string;
+}) {
+  if (!isDownloadableItem(item)) {
+    return null;
+  }
+
+  return (
+    <a
+      href={`/api/items/${item.id}/download?download=1`}
+      download={item.fileName ?? undefined}
+      className={buttonVariants({
+        variant: "outline",
+        size: "sm",
+        className: cn("shrink-0", className),
+      })}
+    >
+      <Download />
+      Download
+    </a>
+  );
+}
 
 function formatLongDate(date: string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -135,7 +173,7 @@ function ItemDrawerContent({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex items-center gap-2 border-b border-border pb-4">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border pb-4">
         <Button
           type="button"
           variant="outline"
@@ -167,6 +205,7 @@ function ItemDrawerContent({
           <Copy />
           Copy
         </Button>
+        <ItemDownloadLink item={item} />
         <div className="ml-auto flex shrink-0 items-center gap-2">
           <Button type="button" variant="outline" size="sm" onClick={onEdit}>
             <Pencil />
@@ -188,8 +227,8 @@ function ItemDrawerContent({
         <div className="space-y-6 py-6">
           {item.description ? (
             <section className="space-y-2">
-              <h3 className="text-sm font-medium">Description</h3>
-              <p className="text-sm text-muted-foreground">{item.description}</p>
+              <h3 className="text-sm text-muted-foreground">Description</h3>
+              <p className="text-sm">{item.description}</p>
             </section>
           ) : null}
 
@@ -228,7 +267,7 @@ function ItemDrawerContent({
 
           {item.fileName && item.type.name.toLowerCase() === "image" ? (
             <section className="space-y-2">
-              <h3 className="text-sm font-medium">Image</h3>
+              <h3 className="text-sm text-muted-foreground">Image</h3>
               <div className="overflow-hidden rounded-lg border border-border bg-muted/20">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -245,30 +284,31 @@ function ItemDrawerContent({
           ) : null}
 
           {item.fileName && item.type.name.toLowerCase() === "file" ? (
-            <section className="space-y-3">
-              <h3 className="text-sm font-medium">File</h3>
-              <div className="rounded-lg border border-border bg-muted/20 p-4">
-                <p className="text-sm font-medium">{item.fileName}</p>
-                {item.fileSize ? (
-                  <p className="mt-1 text-sm text-muted-foreground">
-                    {formatFileSize(item.fileSize)}
-                  </p>
-                ) : null}
+            <section className="space-y-2">
+              <h3 className="text-sm text-muted-foreground">File</h3>
+              <div className="flex items-center gap-3 rounded-lg border border-border bg-muted/20 p-3">
+                <div className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-muted">
+                  <FileIcon className="size-5 text-muted-foreground" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-medium">{item.fileName}</p>
+                  {item.fileSize ? (
+                    <p className="text-sm text-muted-foreground">
+                      {formatFileSize(item.fileSize)}
+                    </p>
+                  ) : null}
+                </div>
+                <ItemDownloadLink item={item} />
               </div>
-              <a
-                href={`/api/items/${item.id}/download?download=1`}
-                download={item.fileName}
-                className={buttonVariants({ variant: "outline", size: "sm" })}
-              >
-                <Download />
-                Download
-              </a>
             </section>
           ) : null}
 
           {item.tags.length > 0 ? (
             <section className="space-y-2">
-              <h3 className="text-sm font-medium">Tags</h3>
+              <h3 className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                <Tag className="size-3.5" />
+                Tags
+              </h3>
               <div className="flex flex-wrap gap-1.5">
                 {item.tags.map((tag) => (
                   <span
@@ -294,7 +334,10 @@ function ItemDrawerContent({
           ) : null}
 
           <section className="space-y-2">
-            <h3 className="text-sm font-medium">Details</h3>
+            <h3 className="flex items-center gap-1.5 text-sm text-muted-foreground">
+              <Info className="size-3.5" />
+              Details
+            </h3>
             <dl className="grid gap-2 text-sm">
               <div className="flex items-center justify-between gap-4">
                 <dt className="text-muted-foreground">Created</dt>
@@ -710,7 +753,7 @@ export function ItemDrawer() {
     >
       <SheetContent
         side="right"
-        className="flex w-full max-w-none flex-col gap-0 p-0 sm:max-w-2xl"
+        className="flex h-svh max-w-none flex-col gap-0 p-0 data-[side=right]:w-[min(54rem,92vw)] data-[side=right]:sm:max-w-none"
       >
         {selectedItemId ? (
           <ItemDrawerPanel key={selectedItemId} itemId={selectedItemId} />

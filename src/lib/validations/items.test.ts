@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 
-import { createItemSchema } from "./items";
+import {
+  createItemSchema,
+  parseCreatableItemTypeFromPathname,
+  resolveDefaultCreateType,
+} from "./items";
 
 describe("createItemSchema", () => {
   it("accepts a valid snippet payload", () => {
@@ -117,5 +121,34 @@ describe("createItemSchema", () => {
     if (result.success) {
       expect(result.data.tags).toEqual([]);
     }
+  });
+});
+
+describe("parseCreatableItemTypeFromPathname", () => {
+  it("returns the item type from an items page path", () => {
+    expect(parseCreatableItemTypeFromPathname("/items/prompt")).toBe("prompt");
+  });
+
+  it("returns undefined for non-item paths", () => {
+    expect(parseCreatableItemTypeFromPathname("/dashboard")).toBeUndefined();
+    expect(parseCreatableItemTypeFromPathname("/items")).toBeUndefined();
+    expect(parseCreatableItemTypeFromPathname("/items/prompt/extra")).toBeUndefined();
+  });
+});
+
+describe("resolveDefaultCreateType", () => {
+  it("falls back to snippet when no default is provided", () => {
+    expect(resolveDefaultCreateType(undefined, false)).toBe("snippet");
+  });
+
+  it("uses the page type when provided", () => {
+    expect(resolveDefaultCreateType("note", false)).toBe("note");
+  });
+
+  it("falls back to snippet for file and image types on free plans", () => {
+    expect(resolveDefaultCreateType("file", false)).toBe("snippet");
+    expect(resolveDefaultCreateType("image", false)).toBe("snippet");
+    expect(resolveDefaultCreateType("file", true)).toBe("file");
+    expect(resolveDefaultCreateType("image", true)).toBe("image");
   });
 });

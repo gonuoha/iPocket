@@ -71,3 +71,30 @@ export const createItemSchema = z
 export type UpdateItemInput = z.infer<typeof updateItemSchema>;
 export type CreateItemInput = z.infer<typeof createItemSchema>;
 export type CreatableItemType = z.infer<typeof creatableItemTypeSchema>;
+
+export function parseCreatableItemTypeFromPathname(
+  pathname: string,
+): CreatableItemType | undefined {
+  const match = pathname.match(/^\/items\/([^/]+)$/);
+  if (!match) {
+    return undefined;
+  }
+
+  const parsed = creatableItemTypeSchema.safeParse(match[1]);
+  return parsed.success ? parsed.data : undefined;
+}
+
+export function resolveDefaultCreateType(
+  defaultType: CreatableItemType | undefined,
+  isPro: boolean,
+): CreatableItemType {
+  if (!defaultType) {
+    return "snippet";
+  }
+
+  if ((defaultType === "file" || defaultType === "image") && !isPro) {
+    return "snippet";
+  }
+
+  return defaultType;
+}

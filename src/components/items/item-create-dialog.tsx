@@ -1,6 +1,6 @@
 "use client";
 
-import { createElement, useState, useTransition } from "react";
+import { createElement, useEffect, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -37,7 +37,10 @@ import {
 } from "@/components/markdown-editor/markdown-editor";
 import { Textarea } from "@/components/ui/textarea";
 import { getItemTypeIcon, getItemTypeLabel } from "@/lib/item-type-styles";
-import type { CreatableItemType } from "@/lib/validations/items";
+import {
+  resolveDefaultCreateType,
+  type CreatableItemType,
+} from "@/lib/validations/items";
 
 const CREATABLE_ITEM_TYPES: {
   type: CreatableItemType;
@@ -83,12 +86,14 @@ type ItemCreateDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isPro: boolean;
+  defaultType?: CreatableItemType;
 };
 
 export function ItemCreateDialog({
   open,
   onOpenChange,
   isPro,
+  defaultType,
 }: ItemCreateDialogProps) {
   const router = useRouter();
   const [formState, setFormState] = useState<CreateFormState>(initialFormState);
@@ -105,6 +110,17 @@ export function ItemCreateDialog({
     (!showUrl || formState.url.trim().length > 0) &&
     (!showFileUpload || formState.uploadedFile !== null) &&
     !isCreating;
+
+  useEffect(() => {
+    if (!open) {
+      return;
+    }
+
+    setFormState({
+      ...initialFormState,
+      type: resolveDefaultCreateType(defaultType, isPro),
+    });
+  }, [open, defaultType, isPro]);
 
   function handleOpenChange(nextOpen: boolean) {
     if (!nextOpen) {
@@ -189,7 +205,7 @@ export function ItemCreateDialog({
                   <SelectItem
                     key={type}
                     value={type}
-                    disabled={type === "file" && !isPro}
+                    disabled={FILE_TYPE_NAMES.has(type) && !isPro}
                   >
                     {createElement(getItemTypeIcon(icon), {
                       className: "size-4 shrink-0",
@@ -199,12 +215,6 @@ export function ItemCreateDialog({
                 ))}
               </SelectContent>
             </Select>
-            {!isPro ? (
-              <p className="text-xs text-muted-foreground">
-                File uploads require Pro. Image uploads are available on the free
-                plan.
-              </p>
-            ) : null}
           </div>
 
           <div className="space-y-2">
