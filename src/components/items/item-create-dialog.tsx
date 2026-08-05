@@ -20,6 +20,10 @@ import {
   CODE_EDITOR_TYPE_NAMES,
   CodeEditor,
 } from "@/components/code-editor/code-editor";
+import {
+  MARKDOWN_EDITOR_TYPE_NAMES,
+  MarkdownEditor,
+} from "@/components/markdown-editor/markdown-editor";
 import { Textarea } from "@/components/ui/textarea";
 import { getItemTypeIcon, getItemTypeLabel } from "@/lib/item-type-styles";
 import { cn } from "@/lib/utils";
@@ -74,6 +78,7 @@ export function ItemCreateDialog({ open, onOpenChange }: ItemCreateDialogProps) 
   const showLanguage = LANGUAGE_TYPE_NAMES.has(formState.type);
   const showUrl = URL_TYPE_NAMES.has(formState.type);
   const useCodeEditor = CODE_EDITOR_TYPE_NAMES.has(formState.type);
+  const useMarkdownEditor = MARKDOWN_EDITOR_TYPE_NAMES.has(formState.type);
   const canCreate =
     formState.title.trim().length > 0 &&
     (!showUrl || formState.url.trim().length > 0) &&
@@ -195,6 +200,12 @@ export function ItemCreateDialog({ open, onOpenChange }: ItemCreateDialogProps) 
                   id="item-create-content"
                   value={formState.content}
                   language={formState.language}
+                  onChange={(content) => handleFormChange({ content })}
+                />
+              ) : useMarkdownEditor ? (
+                <MarkdownEditor
+                  id="item-create-content"
+                  value={formState.content}
                   onChange={(content) => handleFormChange({ content })}
                 />
               ) : (

@@ -7,7 +7,7 @@ const LANGUAGE_ALIASES: Record<string, string> = {
   yml: "yaml",
 };
 
-export const CODE_EDITOR_MIN_HEIGHT = 120;
+export const CODE_EDITOR_MIN_HEIGHT = 200;
 export const CODE_EDITOR_MAX_HEIGHT = 400;
 const CODE_EDITOR_LINE_HEIGHT = 19;
 const CODE_EDITOR_PADDING = 16;

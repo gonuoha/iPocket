@@ -38,6 +38,10 @@ import {
   CODE_EDITOR_TYPE_NAMES,
   CodeEditor,
 } from "@/components/code-editor/code-editor";
+import {
+  MARKDOWN_EDITOR_TYPE_NAMES,
+  MarkdownEditor,
+} from "@/components/markdown-editor/markdown-editor";
 import { Textarea } from "@/components/ui/textarea";
 import type { ItemDetail } from "@/lib/db/items";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
@@ -196,6 +200,8 @@ function ItemDrawerContent({
                   language={item.language ?? undefined}
                   readOnly
                 />
+              ) : MARKDOWN_EDITOR_TYPE_NAMES.has(item.type.name.toLowerCase()) ? (
+                <MarkdownEditor value={item.content} readOnly />
               ) : (
                 <pre className="overflow-x-auto rounded-lg border border-border bg-muted/40 p-4 font-mono text-sm leading-relaxed whitespace-pre-wrap">
                   {item.content}
@@ -291,6 +297,7 @@ function ItemDrawerEditor({
   const showLanguage = LANGUAGE_TYPE_NAMES.has(typeName);
   const showUrl = URL_TYPE_NAMES.has(typeName);
   const useCodeEditor = CODE_EDITOR_TYPE_NAMES.has(typeName);
+  const useMarkdownEditor = MARKDOWN_EDITOR_TYPE_NAMES.has(typeName);
   const canSave = formState.title.trim().length > 0 && !isSaving;
 
   return (
@@ -342,6 +349,12 @@ function ItemDrawerEditor({
                   id="item-edit-content"
                   value={formState.content}
                   language={formState.language}
+                  onChange={(content) => onChange({ content })}
+                />
+              ) : useMarkdownEditor ? (
+                <MarkdownEditor
+                  id="item-edit-content"
+                  value={formState.content}
                   onChange={(content) => onChange({ content })}
                 />
               ) : (
