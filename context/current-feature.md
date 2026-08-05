@@ -1,27 +1,16 @@
-# Current Feature: Item Drawer
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Right-side slide-in drawer opens when clicking an ItemCard — this is the item detail view (no separate item page)
-- Use shadcn Sheet component, opening from the right
-- Works on both dashboard and items list pages
-- Client wrapper component manages drawer state (pages remain server components)
-- Snappy UX: fetch on click, no page navigation
-- Card data (title, description, tags, etc.) continues to be fetched by server components as before
-- Full item detail (content, collections, language, etc.) fetched on click via `/api/items/[id]`
-- Query function lives in `lib/db/items.ts`; API route calls it with auth check
-- Drawer shows skeleton/loading state while fetching
-- Action bar with Favorite (star, yellow when active), Pin, Copy, Edit (pencil), and Delete (trash, right-aligned)
-- Drawer details display only for now — code editor and item-specific renderers come later
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Visual reference: `context/screenshots/dashboard-ui-drawer.png`
-- Action bar layout follows the screenshot
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -53,3 +42,4 @@ In Progress
 - 2026-08-02: Completed **Rate Limiting for Auth** — Upstash Redis sliding-window limits on login, register, forgot/reset password, and resend-verification; custom login route, 429 with Retry-After, inline form errors, fail-open when Redis unavailable, GitHub OAuth emailVerified fix via events.signIn
 - 2026-08-05: Completed **Items List View** — dynamic `/items/[type]` route with type-filtered ItemCard grid, db helpers, auth protection, sidebar plural labels with per-type counts, shared `getItemTypeLabel` helper
 - 2026-08-05: Completed **Three-Column Item Listing** — responsive items grid with three columns on xl screens, matching collections grid breakpoints
+- 2026-08-05: Completed **Item Drawer** — right-side Sheet drawer opens on ItemCard/ItemRow click, full item detail via `/api/items/[id]` with auth check, skeleton loading state, action bar (Favorite, Pin, Copy, Edit, icon-only Delete)
