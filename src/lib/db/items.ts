@@ -188,6 +188,55 @@ export async function getItemById(
   return mapItemDetail(item);
 }
 
+export type UpdateItemData = {
+  title: string;
+  description: string | null;
+  content: string | null;
+  url: string | null;
+  language: string | null;
+  tags: string[];
+};
+
+export async function updateItem(
+  userId: string,
+  itemId: string,
+  data: UpdateItemData,
+): Promise<ItemDetail | null> {
+  const existing = await prisma.item.findFirst({
+    where: { id: itemId, userId },
+    select: { id: true },
+  });
+
+  if (!existing) {
+    return null;
+  }
+
+  const item = await prisma.item.update({
+    where: { id: itemId },
+    data: {
+      title: data.title,
+      description: data.description,
+      content: data.content,
+      url: data.url,
+      language: data.language,
+      tags: {
+        deleteMany: {},
+        create: data.tags.map((name) => ({
+          tag: {
+            connectOrCreate: {
+              where: { userId_name: { userId, name } },
+              create: { userId, name },
+            },
+          },
+        })),
+      },
+    },
+    select: itemDetailSelect,
+  });
+
+  return mapItemDetail(item);
+}
+
 export async function getPinnedItems(
   userId: string,
   limit = 20,

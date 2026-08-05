@@ -1,6 +1,7 @@
 "use client";
 
-import { createElement, useEffect, useState } from "react";
+import { createElement, useEffect, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import {
   Copy,
   Pencil,
@@ -10,8 +11,11 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
+import { updateItem } from "@/actions/items";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -20,6 +24,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from "@/components/ui/sheet";
+import { Textarea } from "@/components/ui/textarea";
 import type { ItemDetail } from "@/lib/db/items";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
 import { cn } from "@/lib/utils";
@@ -31,12 +36,36 @@ type ItemDetailResponse = Omit<ItemDetail, "createdAt" | "updatedAt"> & {
   updatedAt: string;
 };
 
+type EditFormState = {
+  title: string;
+  description: string;
+  content: string;
+  url: string;
+  language: string;
+  tags: string;
+};
+
+const CONTENT_TYPE_NAMES = new Set(["snippet", "prompt", "command", "note"]);
+const LANGUAGE_TYPE_NAMES = new Set(["snippet", "command"]);
+const URL_TYPE_NAMES = new Set(["link"]);
+
 function formatLongDate(date: string) {
   return new Intl.DateTimeFormat("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
   }).format(new Date(date));
+}
+
+function toFormState(item: ItemDetailResponse): EditFormState {
+  return {
+    title: item.title,
+    description: item.description ?? "",
+    content: item.content ?? "",
+    url: item.url ?? "",
+    language: item.language ?? "",
+    tags: item.tags.join(", "),
+  };
 }
 
 function ItemDrawerSkeleton() {
@@ -59,7 +88,13 @@ function ItemDrawerSkeleton() {
   );
 }
 
-function ItemDrawerContent({ item }: { item: ItemDetailResponse }) {
+function ItemDrawerContent({
+  item,
+  onEdit,
+}: {
+  item: ItemDetailResponse;
+  onEdit: () => void;
+}) {
   async function handleCopy() {
     const textToCopy =
       item.content ??
@@ -111,7 +146,7 @@ function ItemDrawerContent({ item }: { item: ItemDetailResponse }) {
           Copy
         </Button>
         <div className="ml-auto flex shrink-0 items-center gap-2">
-          <Button type="button" variant="outline" size="sm">
+          <Button type="button" variant="outline" size="sm" onClick={onEdit}>
             <Pencil />
             Edit
           </Button>
@@ -211,10 +246,159 @@ function ItemDrawerContent({ item }: { item: ItemDetailResponse }) {
   );
 }
 
+function ItemDrawerEditor({
+  item,
+  formState,
+  onChange,
+  onCancel,
+  onSave,
+  isSaving,
+}: {
+  item: ItemDetailResponse;
+  formState: EditFormState;
+  onChange: (patch: Partial<EditFormState>) => void;
+  onCancel: () => void;
+  onSave: () => void;
+  isSaving: boolean;
+}) {
+  const typeName = item.type.name.toLowerCase();
+  const showContent = CONTENT_TYPE_NAMES.has(typeName);
+  const showLanguage = LANGUAGE_TYPE_NAMES.has(typeName);
+  const showUrl = URL_TYPE_NAMES.has(typeName);
+  const canSave = formState.title.trim().length > 0 && !isSaving;
+
+  return (
+    <div className="flex min-h-0 flex-1 flex-col">
+      <div className="flex items-center justify-end gap-2 border-b border-border pb-4">
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={onCancel}
+          disabled={isSaving}
+        >
+          Cancel
+        </Button>
+        <Button type="button" size="sm" onClick={onSave} disabled={!canSave}>
+          {isSaving ? "Saving..." : "Save"}
+        </Button>
+      </div>
+
+      <ScrollArea className="min-h-0 flex-1 pr-4">
+        <div className="space-y-6 py-6">
+          <div className="space-y-2">
+            <Label htmlFor="item-edit-title">Title</Label>
+            <Input
+              id="item-edit-title"
+              value={formState.title}
+              onChange={(event) => onChange({ title: event.target.value })}
+              required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="item-edit-description">Description</Label>
+            <Textarea
+              id="item-edit-description"
+              value={formState.description}
+              onChange={(event) =>
+                onChange({ description: event.target.value })
+              }
+              rows={3}
+            />
+          </div>
+
+          {showContent ? (
+            <div className="space-y-2">
+              <Label htmlFor="item-edit-content">Content</Label>
+              <Textarea
+                id="item-edit-content"
+                value={formState.content}
+                onChange={(event) =>
+                  onChange({ content: event.target.value })
+                }
+                className="min-h-40 font-mono text-sm"
+              />
+            </div>
+          ) : null}
+
+          {showLanguage ? (
+            <div className="space-y-2">
+              <Label htmlFor="item-edit-language">Language</Label>
+              <Input
+                id="item-edit-language"
+                value={formState.language}
+                onChange={(event) =>
+                  onChange({ language: event.target.value })
+                }
+              />
+            </div>
+          ) : null}
+
+          {showUrl ? (
+            <div className="space-y-2">
+              <Label htmlFor="item-edit-url">URL</Label>
+              <Input
+                id="item-edit-url"
+                value={formState.url}
+                onChange={(event) => onChange({ url: event.target.value })}
+              />
+            </div>
+          ) : null}
+
+          <div className="space-y-2">
+            <Label htmlFor="item-edit-tags">Tags</Label>
+            <Input
+              id="item-edit-tags"
+              value={formState.tags}
+              onChange={(event) => onChange({ tags: event.target.value })}
+              placeholder="Comma-separated tags"
+            />
+          </div>
+
+          <section className="space-y-2">
+            <h3 className="text-sm font-medium">Type</h3>
+            <Badge variant="secondary">{item.type.name}</Badge>
+          </section>
+
+          {item.collection ? (
+            <section className="space-y-2">
+              <h3 className="text-sm font-medium">Collections</h3>
+              <div className="flex flex-wrap gap-1.5">
+                <span className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
+                  {item.collection.name}
+                </span>
+              </div>
+            </section>
+          ) : null}
+
+          <section className="space-y-2">
+            <h3 className="text-sm font-medium">Details</h3>
+            <dl className="grid gap-2 text-sm">
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-muted-foreground">Created</dt>
+                <dd>{formatLongDate(item.createdAt)}</dd>
+              </div>
+              <div className="flex items-center justify-between gap-4">
+                <dt className="text-muted-foreground">Updated</dt>
+                <dd>{formatLongDate(item.updatedAt)}</dd>
+              </div>
+            </dl>
+          </section>
+        </div>
+      </ScrollArea>
+    </div>
+  );
+}
+
 function ItemDrawerPanel({ itemId }: { itemId: string }) {
+  const router = useRouter();
   const [item, setItem] = useState<ItemDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [mode, setMode] = useState<"view" | "edit">("view");
+  const [formState, setFormState] = useState<EditFormState | null>(null);
+  const [isSaving, startSaving] = useTransition();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -254,6 +438,65 @@ function ItemDrawerPanel({ itemId }: { itemId: string }) {
       controller.abort();
     };
   }, [itemId]);
+
+  function handleEdit() {
+    if (!item) {
+      return;
+    }
+
+    setFormState(toFormState(item));
+    setMode("edit");
+  }
+
+  function handleCancel() {
+    setFormState(null);
+    setMode("view");
+  }
+
+  function handleFormChange(patch: Partial<EditFormState>) {
+    setFormState((previous) => (previous ? { ...previous, ...patch } : previous));
+  }
+
+  function handleSave() {
+    if (!item || !formState) {
+      return;
+    }
+
+    const title = formState.title.trim();
+
+    if (!title) {
+      return;
+    }
+
+    startSaving(async () => {
+      const result = await updateItem(item.id, {
+        title,
+        description: formState.description,
+        content: formState.content,
+        url: formState.url,
+        language: formState.language,
+        tags: formState.tags
+          .split(",")
+          .map((tag) => tag.trim())
+          .filter((tag) => tag.length > 0),
+      });
+
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      setItem({
+        ...result.data,
+        createdAt: result.data.createdAt.toISOString(),
+        updatedAt: result.data.updatedAt.toISOString(),
+      });
+      setFormState(null);
+      setMode("view");
+      toast.success("Item updated");
+      router.refresh();
+    });
+  }
 
   const typeStyles = item ? getItemTypeStyles(item.type.color) : null;
 
@@ -303,7 +546,19 @@ function ItemDrawerPanel({ itemId }: { itemId: string }) {
         {!isLoading && error ? (
           <p className="py-6 text-sm text-destructive">{error}</p>
         ) : null}
-        {!isLoading && item ? <ItemDrawerContent item={item} /> : null}
+        {!isLoading && item && mode === "view" ? (
+          <ItemDrawerContent item={item} onEdit={handleEdit} />
+        ) : null}
+        {!isLoading && item && mode === "edit" && formState ? (
+          <ItemDrawerEditor
+            item={item}
+            formState={formState}
+            onChange={handleFormChange}
+            onCancel={handleCancel}
+            onSave={handleSave}
+            isSaving={isSaving}
+          />
+        ) : null}
       </div>
     </>
   );
