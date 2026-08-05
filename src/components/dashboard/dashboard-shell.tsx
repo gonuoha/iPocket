@@ -1,6 +1,8 @@
 "use client";
 
 import { Sheet, SheetContent } from "@/components/ui/sheet";
+import { ItemDrawer } from "@/components/items/item-drawer";
+import { ItemDrawerProvider } from "@/components/items/item-drawer-context";
 import { cn } from "@/lib/utils";
 
 import { TopBar } from "./top-bar";
@@ -43,6 +45,8 @@ function DashboardShellInner({
           {children}
         </main>
       </div>
+
+      <ItemDrawer />
     </div>
   );
 }
@@ -56,7 +60,9 @@ export function DashboardShell({
 }) {
   return (
     <SidebarProvider>
-      <DashboardShellInner sidebar={sidebar}>{children}</DashboardShellInner>
+      <ItemDrawerProvider>
+        <DashboardShellInner sidebar={sidebar}>{children}</DashboardShellInner>
+      </ItemDrawerProvider>
     </SidebarProvider>
   );
 }

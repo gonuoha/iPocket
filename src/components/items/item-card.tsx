@@ -1,10 +1,13 @@
+"use client";
+
 import { createElement } from "react";
-import Link from "next/link";
 import { Pin, Star } from "lucide-react";
 
 import type { DashboardItem } from "@/lib/db/items";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
 import { cn } from "@/lib/utils";
+
+import { useItemDrawer } from "./item-drawer-context";
 
 function formatDate(date: Date | string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -18,13 +21,14 @@ type ItemCardProps = {
 };
 
 export function ItemCard({ item }: ItemCardProps) {
+  const { openItem } = useItemDrawer();
   const typeStyles = getItemTypeStyles(item.type.color);
-  const typeSlug = item.type.name.toLowerCase();
 
   return (
-    <Link
-      href={`/items/${typeSlug}/${item.id}`}
-      className="flex h-full flex-col rounded-xl border border-border border-l-4 bg-card p-4 transition-colors hover:bg-muted/40"
+    <button
+      type="button"
+      onClick={() => openItem(item.id)}
+      className="flex h-full w-full flex-col rounded-xl border border-border border-l-4 bg-card p-4 text-left transition-colors hover:bg-muted/40"
       style={
         item.type.color?.startsWith("#")
           ? { borderLeftColor: item.type.color }
@@ -82,7 +86,7 @@ export function ItemCard({ item }: ItemCardProps) {
           ))}
         </div>
       ) : null}
-    </Link>
+    </button>
   );
 }
 

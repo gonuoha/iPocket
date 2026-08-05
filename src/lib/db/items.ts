@@ -16,6 +16,26 @@ export type DashboardItem = {
   tags: string[];
 };
 
+export type ItemDetail = {
+  id: string;
+  title: string;
+  description: string | null;
+  contentType: string;
+  content: string | null;
+  url: string | null;
+  language: string | null;
+  fileUrl: string | null;
+  fileName: string | null;
+  fileSize: number | null;
+  isFavorite: boolean;
+  isPinned: boolean;
+  type: CollectionItemType;
+  tags: string[];
+  collection: { id: string; name: string } | null;
+  createdAt: Date;
+  updatedAt: Date;
+};
+
 export type UserItemStats = {
   itemCount: number;
   collectionCount: number;
@@ -23,6 +43,46 @@ export type UserItemStats = {
   favoriteCollectionCount: number;
   pinnedCount: number;
 };
+
+const itemDetailSelect = {
+  id: true,
+  title: true,
+  description: true,
+  contentType: true,
+  content: true,
+  url: true,
+  language: true,
+  fileUrl: true,
+  fileName: true,
+  fileSize: true,
+  isFavorite: true,
+  isPinned: true,
+  createdAt: true,
+  updatedAt: true,
+  type: {
+    select: {
+      id: true,
+      name: true,
+      icon: true,
+      color: true,
+    },
+  },
+  tags: {
+    select: {
+      tag: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  },
+  collection: {
+    select: {
+      id: true,
+      name: true,
+    },
+  },
+} as const;
 
 const itemSelect = {
   id: true,
@@ -50,6 +110,46 @@ const itemSelect = {
   },
 } as const;
 
+function mapItemDetail(item: {
+  id: string;
+  title: string;
+  description: string | null;
+  contentType: string;
+  content: string | null;
+  url: string | null;
+  language: string | null;
+  fileUrl: string | null;
+  fileName: string | null;
+  fileSize: number | null;
+  isFavorite: boolean;
+  isPinned: boolean;
+  createdAt: Date;
+  updatedAt: Date;
+  type: CollectionItemType;
+  tags: { tag: { name: string } }[];
+  collection: { id: string; name: string } | null;
+}): ItemDetail {
+  return {
+    id: item.id,
+    title: item.title,
+    description: item.description,
+    contentType: item.contentType,
+    content: item.content,
+    url: item.url,
+    language: item.language,
+    fileUrl: item.fileUrl,
+    fileName: item.fileName,
+    fileSize: item.fileSize,
+    isFavorite: item.isFavorite,
+    isPinned: item.isPinned,
+    type: item.type,
+    tags: item.tags.map((entry) => entry.tag.name),
+    collection: item.collection,
+    createdAt: item.createdAt,
+    updatedAt: item.updatedAt,
+  };
+}
+
 function mapItem(item: {
   id: string;
   title: string;
@@ -70,6 +170,22 @@ function mapItem(item: {
     type: item.type,
     tags: item.tags.map((entry) => entry.tag.name),
   };
+}
+
+export async function getItemById(
+  userId: string,
+  itemId: string,
+): Promise<ItemDetail | null> {
+  const item = await prisma.item.findFirst({
+    where: { id: itemId, userId },
+    select: itemDetailSelect,
+  });
+
+  if (!item) {
+    return null;
+  }
+
+  return mapItemDetail(item);
 }
 
 export async function getPinnedItems(
