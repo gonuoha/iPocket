@@ -1,27 +1,16 @@
-# Current Feature: Markdown Editor
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create `MarkdownEditor` component with tabbed Write/Preview interface
-- Replace Textarea with `MarkdownEditor` for notes and prompts only; keep `CodeEditor` for snippets and commands
-- Use `react-markdown` with `remark-gfm` for GitHub Flavored Markdown support
-- Match existing dark theme styling (`bg-[#1e1e1e]` container, `bg-[#2d2d2d]` header)
-- Add copy button in header (same style as `CodeEditor`)
-- Support both display (readonly) and edit modes — readonly shows Preview only; edit defaults to Write with Preview available
-- Style markdown preview: distinct headings, dark code blocks, inline code highlight, lists, blockquotes, blue links, bordered tables
-- Use custom `.markdown-preview` CSS class for reliable dark mode styling
-- Fluid height with max 400px, matching `CodeEditor` behavior
-- Integrate in `NewItemDialog`, `ItemDrawer` (edit mode), and `ItemDrawer` (view mode) for note and prompt content fields
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Spec: `context/features/markdown-editor-spec.md`
-- Styling: headings (h1–h6) with proper sizing/weight; code blocks with dark background and monospace font; blockquotes with left border accent; links with hover state; tables with borders and header background
-- Integration points: note and prompt content field only — no changes to snippet/command fields
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -58,3 +47,4 @@ In Progress
 - 2026-08-05: Completed **Item Delete** — AlertDialog confirmation on drawer delete button; `deleteItem` server action and db helper with ownership check; success/error toasts, drawer close, and path revalidation for `/items/[type]` and `/dashboard`
 - 2026-08-05: Completed **Item Create** — Dialog modal from top bar New Item button with type selector (snippet, prompt, command, note, link) and dynamic fields; Zod-validated `createItem` server action and db helper with tag connect-or-create; success toast, modal close, and `router.refresh()`; unit tests for schema and action
 - 2026-08-05: Completed **Code Editor** — Monaco `CodeEditor` component with dark theme, macOS window dots, copy button, and language header; replaces textarea for snippet and command content in item drawer (view/edit) and create dialog; fluid height capped at 400px with themed scrollbars
+- 2026-08-05: Completed **Markdown Editor** — `MarkdownEditor` with Write/Preview tabs, `react-markdown` + `remark-gfm`, dark-themed `.markdown-preview` styles, and copy button; replaces textarea for note and prompt content in create dialog and item drawer (view/edit); 200px default height
