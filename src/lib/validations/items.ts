@@ -9,6 +9,14 @@ const nullableTrimmedString = z.preprocess(
   z.string().trim().nullable(),
 );
 
+export const creatableItemTypeSchema = z.enum([
+  "snippet",
+  "prompt",
+  "command",
+  "note",
+  "link",
+]);
+
 export const updateItemSchema = z.object({
   title: z.string().trim().min(1, "Title is required"),
   description: nullableTrimmedString.optional(),
@@ -21,4 +29,29 @@ export const updateItemSchema = z.object({
   tags: z.array(z.string().trim().min(1)).default([]),
 });
 
+export const createItemSchema = z
+  .object({
+    type: creatableItemTypeSchema,
+    title: z.string().trim().min(1, "Title is required"),
+    description: nullableTrimmedString.optional(),
+    content: nullableTrimmedString.optional(),
+    language: nullableTrimmedString.optional(),
+    url: z.preprocess(
+      emptyToNull,
+      z.string().trim().url("Enter a valid URL").nullable(),
+    ).optional(),
+    tags: z.array(z.string().trim().min(1)).default([]),
+  })
+  .superRefine((data, ctx) => {
+    if (data.type === "link" && !data.url) {
+      ctx.addIssue({
+        code: "custom",
+        message: "URL is required",
+        path: ["url"],
+      });
+    }
+  });
+
 export type UpdateItemInput = z.infer<typeof updateItemSchema>;
+export type CreateItemInput = z.infer<typeof createItemSchema>;
+export type CreatableItemType = z.infer<typeof creatableItemTypeSchema>;

@@ -1,16 +1,28 @@
-# Current Feature
+# Current Feature: Item Create
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- What success looks like for the active feature -->
+- Add new items via a modal dialog opened from the "New Item" button in the top bar
+- Use shadcn Dialog component for the create flow
+- Provide a type selector for snippet, prompt, command, note, and link
+- Show fields dynamically based on selected type:
+  - All types: title (required), description, tags
+  - snippet/command: content, language
+  - prompt/note: content
+  - link: URL (required)
+- Implement `createItem` server action with Zod validation
+- Add `createItem` query function in `lib/db/items.ts`
+- Show toast on success, close modal, and refresh the view
 
 ## Notes
 
-<!-- Additional context, constraints, or details from spec -->
+- Modal is triggered from the existing "New Item" button in the top bar (currently display-only)
+- Follow patterns established by Item Drawer edit mode (`updateItem` action, Zod validation, tag handling)
+- File and image types are not in scope for this feature
 
 ## History
 

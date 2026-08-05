@@ -4,15 +4,58 @@ import { revalidatePath } from "next/cache";
 
 import { auth } from "@/auth";
 import {
+  createItem as createItemInDb,
   deleteItem as deleteItemInDb,
+  getItemTypeBySlug,
   updateItem as updateItemInDb,
 } from "@/lib/db/items";
 import type { DeleteItemResult, ItemDetail } from "@/lib/db/items";
-import { updateItemSchema } from "@/lib/validations/items";
+import { createItemSchema, updateItemSchema } from "@/lib/validations/items";
 
 type ActionResult<T> =
   | { success: true; data: T }
   | { success: false; error: string };
+
+export async function createItem(
+  data: unknown,
+): Promise<ActionResult<ItemDetail>> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const parsed = createItemSchema.safeParse(data);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const itemType = await getItemTypeBySlug(session.user.id, parsed.data.type);
+
+  if (!itemType) {
+    return { success: false, error: "Invalid item type" };
+  }
+
+  const created = await createItemInDb(session.user.id, {
+    typeId: itemType.id,
+    title: parsed.data.title,
+    description: parsed.data.description ?? null,
+    content: parsed.data.content ?? null,
+    url: parsed.data.url ?? null,
+    language: parsed.data.language ?? null,
+    tags: parsed.data.tags,
+    contentType: "text",
+  });
+
+  revalidatePath(`/items/${parsed.data.type}`);
+  revalidatePath("/dashboard");
+
+  return { success: true, data: created };
+}
 
 export async function updateItem(
   itemId: string,

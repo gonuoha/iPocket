@@ -1,8 +1,10 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Code2, PanelLeft, Search } from "lucide-react";
 
+import { ItemCreateDialog } from "@/components/items/item-create-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/lib/utils";
@@ -11,9 +13,11 @@ import { useSidebar } from "./sidebar-context";
 
 export function TopBar() {
   const { toggleSidebar } = useSidebar();
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
 
   return (
-    <header className="grid h-14 shrink-0 grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-border px-4 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)_minmax(0,1fr)] md:gap-4 md:px-6">
+    <>
+      <header className="grid h-14 shrink-0 grid-cols-[auto_1fr_auto] items-center gap-3 border-b border-border px-4 md:grid-cols-[minmax(0,1fr)_minmax(0,20rem)_minmax(0,1fr)] md:gap-4 md:px-6">
       <div className="flex min-w-0 items-center gap-2 justify-self-start">
         <Button
           variant="ghost"
@@ -57,10 +61,13 @@ export function TopBar() {
         <Button variant="outline" size="sm" disabled className="hidden sm:inline-flex">
           New Collection
         </Button>
-        <Button size="sm" disabled>
+        <Button size="sm" onClick={() => setIsCreateOpen(true)}>
           New Item
         </Button>
       </div>
     </header>
+
+      <ItemCreateDialog open={isCreateOpen} onOpenChange={setIsCreateOpen} />
+    </>
   );
 }

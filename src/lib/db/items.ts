@@ -197,6 +197,48 @@ export type UpdateItemData = {
   tags: string[];
 };
 
+export type CreateItemData = {
+  typeId: string;
+  title: string;
+  description: string | null;
+  content: string | null;
+  url: string | null;
+  language: string | null;
+  tags: string[];
+  contentType: "text" | "file";
+};
+
+export async function createItem(
+  userId: string,
+  data: CreateItemData,
+): Promise<ItemDetail> {
+  const item = await prisma.item.create({
+    data: {
+      userId,
+      typeId: data.typeId,
+      title: data.title,
+      description: data.description,
+      content: data.content,
+      url: data.url,
+      language: data.language,
+      contentType: data.contentType,
+      tags: {
+        create: data.tags.map((name) => ({
+          tag: {
+            connectOrCreate: {
+              where: { userId_name: { userId, name } },
+              create: { userId, name },
+            },
+          },
+        })),
+      },
+    },
+    select: itemDetailSelect,
+  });
+
+  return mapItemDetail(item);
+}
+
 export async function updateItem(
   userId: string,
   itemId: string,
