@@ -1,16 +1,26 @@
-# Current Feature
+# Current Feature: Item Delete
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- What success looks like for the active feature -->
+- Wire the item drawer Delete button to a shadcn confirmation dialog (AlertDialog) before deleting
+- Add `deleteItem(itemId)` server action in `src/actions/items.ts` with auth, ownership check, and `{ success, data, error }` return pattern
+- Add `deleteItem` query in `lib/db/items.ts` — delete by id scoped to user; ItemTag rows cascade via Prisma schema
+- On confirm: call server action, show Sonner success toast, close the drawer, and `router.refresh()` so dashboard/items lists update
+- Show error toast if delete fails (unauthorized, not found, etc.)
+- Revalidate the relevant items list path (`/items/[type]`) and dashboard after delete
 
 ## Notes
 
-<!-- Additional context, constraints, or details from spec -->
+- Delete button already exists in `ItemDrawerContent` (`item-drawer.tsx`) but has no handler
+- Follow the same patterns as `updateItem` (server action + db helper + `revalidatePath`)
+- Use shadcn AlertDialog for confirmation — simpler than account delete (no typed phrase); Cancel + destructive Confirm actions
+- Add AlertDialog component via shadcn if not already in `src/components/ui/`
+- After delete, the drawer should close (call `closeItem()` from item drawer context)
+- File/image items: delete the DB record only for now; R2 file cleanup can come later
 
 ## History
 

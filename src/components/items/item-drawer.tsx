@@ -11,7 +11,17 @@ import {
 } from "lucide-react";
 import { toast } from "sonner";
 
-import { updateItem } from "@/actions/items";
+import { deleteItem, updateItem } from "@/actions/items";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -91,9 +101,11 @@ function ItemDrawerSkeleton() {
 function ItemDrawerContent({
   item,
   onEdit,
+  onDelete,
 }: {
   item: ItemDetailResponse;
   onEdit: () => void;
+  onDelete: () => void;
 }) {
   async function handleCopy() {
     const textToCopy =
@@ -155,6 +167,7 @@ function ItemDrawerContent({
             variant="destructive"
             size="icon-sm"
             aria-label="Delete"
+            onClick={onDelete}
           >
             <Trash2 />
           </Button>
@@ -393,12 +406,15 @@ function ItemDrawerEditor({
 
 function ItemDrawerPanel({ itemId }: { itemId: string }) {
   const router = useRouter();
+  const { closeItem } = useItemDrawer();
   const [item, setItem] = useState<ItemDetailResponse | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"view" | "edit">("view");
   const [formState, setFormState] = useState<EditFormState | null>(null);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [isSaving, startSaving] = useTransition();
+  const [isDeleting, startDeleting] = useTransition();
 
   useEffect(() => {
     const controller = new AbortController();
@@ -455,6 +471,26 @@ function ItemDrawerPanel({ itemId }: { itemId: string }) {
 
   function handleFormChange(patch: Partial<EditFormState>) {
     setFormState((previous) => (previous ? { ...previous, ...patch } : previous));
+  }
+
+  function handleDeleteConfirm() {
+    if (!item) {
+      return;
+    }
+
+    startDeleting(async () => {
+      const result = await deleteItem(item.id);
+
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      setIsDeleteOpen(false);
+      toast.success("Item deleted");
+      closeItem();
+      router.refresh();
+    });
   }
 
   function handleSave() {
@@ -547,7 +583,11 @@ function ItemDrawerPanel({ itemId }: { itemId: string }) {
           <p className="py-6 text-sm text-destructive">{error}</p>
         ) : null}
         {!isLoading && item && mode === "view" ? (
-          <ItemDrawerContent item={item} onEdit={handleEdit} />
+          <ItemDrawerContent
+            item={item}
+            onEdit={handleEdit}
+            onDelete={() => setIsDeleteOpen(true)}
+          />
         ) : null}
         {!isLoading && item && mode === "edit" && formState ? (
           <ItemDrawerEditor
@@ -560,6 +600,28 @@ function ItemDrawerPanel({ itemId }: { itemId: string }) {
           />
         ) : null}
       </div>
+
+      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete item?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete &ldquo;{item?.title}&rdquo;. This action
+              cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleDeleteConfirm}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

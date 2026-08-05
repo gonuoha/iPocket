@@ -237,6 +237,37 @@ export async function updateItem(
   return mapItemDetail(item);
 }
 
+export type DeleteItemResult = {
+  typeName: string;
+};
+
+export async function deleteItem(
+  userId: string,
+  itemId: string,
+): Promise<DeleteItemResult | null> {
+  const existing = await prisma.item.findFirst({
+    where: { id: itemId, userId },
+    select: {
+      id: true,
+      type: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  if (!existing) {
+    return null;
+  }
+
+  await prisma.item.delete({
+    where: { id: itemId },
+  });
+
+  return { typeName: existing.type.name };
+}
+
 export async function getPinnedItems(
   userId: string,
   limit = 20,

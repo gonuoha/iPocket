@@ -3,8 +3,11 @@
 import { revalidatePath } from "next/cache";
 
 import { auth } from "@/auth";
-import { updateItem as updateItemInDb } from "@/lib/db/items";
-import type { ItemDetail } from "@/lib/db/items";
+import {
+  deleteItem as deleteItemInDb,
+  updateItem as updateItemInDb,
+} from "@/lib/db/items";
+import type { DeleteItemResult, ItemDetail } from "@/lib/db/items";
 import { updateItemSchema } from "@/lib/validations/items";
 
 type ActionResult<T> =
@@ -46,4 +49,25 @@ export async function updateItem(
   revalidatePath(`/items/${updated.type.name.toLowerCase()}`);
 
   return { success: true, data: updated };
+}
+
+export async function deleteItem(
+  itemId: string,
+): Promise<ActionResult<DeleteItemResult>> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const deleted = await deleteItemInDb(session.user.id, itemId);
+
+  if (!deleted) {
+    return { success: false, error: "Item not found" };
+  }
+
+  revalidatePath(`/items/${deleted.typeName.toLowerCase()}`);
+  revalidatePath("/dashboard");
+
+  return { success: true, data: deleted };
 }
