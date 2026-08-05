@@ -1,23 +1,16 @@
-# Current Feature: Code Editor
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create a `CodeEditor` component using Monaco Editor with dark theme
-- Replace `Textarea` with `CodeEditor` for snippets and commands only
-- Keep `Textarea` for notes, prompts, and other non-code types
-- Add macOS-style window dots (red/yellow/green) at the top of the editor
-- Add a quick copy button in the editor header
-- Show the language in the editor header next to the copy button
-- Support both display (readonly) and edit modes
-- Make editor height fluid with a max height of 400px and a theme-matching scrollbar
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-Add Monaco Editor for snippets and commands with copy button and macOS window styling. Use `CodeEditor` only where code editing/display is needed; non-code item types continue using the existing textarea.
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -53,3 +46,4 @@ Add Monaco Editor for snippets and commands with copy button and macOS window st
 - 2026-08-05: Completed **Item Drawer — Edit Mode** — Edit toggles inline edit mode with Save/Cancel actions; Title/Description/Tags for all types plus type-specific Content/Language/URL fields; Zod-validated `updateItem` server action (`src/actions/items.ts`) with ownership check and tag disconnect/connect-or-create via new `updateItem` query in `lib/db/items.ts`; toast feedback and `router.refresh()` on save
 - 2026-08-05: Completed **Item Delete** — AlertDialog confirmation on drawer delete button; `deleteItem` server action and db helper with ownership check; success/error toasts, drawer close, and path revalidation for `/items/[type]` and `/dashboard`
 - 2026-08-05: Completed **Item Create** — Dialog modal from top bar New Item button with type selector (snippet, prompt, command, note, link) and dynamic fields; Zod-validated `createItem` server action and db helper with tag connect-or-create; success toast, modal close, and `router.refresh()`; unit tests for schema and action
+- 2026-08-05: Completed **Code Editor** — Monaco `CodeEditor` component with dark theme, macOS window dots, copy button, and language header; replaces textarea for snippet and command content in item drawer (view/edit) and create dialog; fluid height capped at 400px with themed scrollbars
