@@ -1,20 +1,16 @@
-# Current Feature: Collections Pages
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create the `/collections` page and show all collections using existing collection cards
-- Create the `/collections/[id]` page to show items in that collection using existing item cards
-- Link "View all collections" in the sidebar to `/collections`
-- Link all collection cards to their specific collection page
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Reuse `CollectionsGrid` / `CollectionCard` and `ItemsGrid` / `ItemCard`
-- Follow the same layout pattern as `/items` (dashboard shell, sidebar, auth protection)
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -58,3 +54,4 @@ In Progress
 - 2026-08-06: Completed **Item Copy** — shared `getItemCopyText` utility with content → url → fileName → description → title priority; reusable `ItemCopyButton` on item cards and in the item drawer with clipboard write, toast feedback, and copied state
 - 2026-08-06: Completed **Collection Create** — `CollectionCreateDialog` from top bar New Collection button with name/description fields; Zod-validated `createCollection` server action and db helper with user scoping and duplicate-name handling; success/error toasts, path revalidation, and `router.refresh()`; unit tests for schema and action; dashboard Overview section restyled as a grouping-only container
 - 2026-08-06: Completed **Add Item to Collections** — `ItemCollection` junction table migration replacing single `collectionId` FK; searchable `CollectionMultiSelect` in `ItemCreateDialog` and `ItemDrawer`; collection ownership validation in Zod schemas and `createItem`/`updateItem` server actions; collections fetched in layouts and passed through dashboard shell; unit tests for schema and action collection assignment
+- 2026-08-06: Completed **Collections Pages** — `/collections` list and `/collections/[id]` detail routes with dashboard shell layout, db helpers for all collections and collection items, auth protection, and links from dashboard and sidebar using existing collection and item cards
