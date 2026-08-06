@@ -1,20 +1,16 @@
-# Current Feature: Image Gallery View
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create an image thumbnail card to replace the current item card for image items
-- Show an image grid/gallery with 3 columns
-- Display image thumbnails with 16:9 aspect ratio (`aspect-video`)
-- Use `object-cover` to fill the card (may crop edges)
-- Add a subtle hover zoom effect (5% scale with 300ms transition)
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-Replace the regular item card with a dedicated image gallery view. Image items should render in a grid layout with thumbnail cards optimized for visual preview rather than the standard text-focused item card.
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -53,3 +49,5 @@ Replace the regular item card with a dedicated image gallery view. Image items s
 - 2026-08-05: Completed **Code Editor** — Monaco `CodeEditor` component with dark theme, macOS window dots, copy button, and language header; replaces textarea for snippet and command content in item drawer (view/edit) and create dialog; fluid height capped at 400px with themed scrollbars
 - 2026-08-05: Completed **Markdown Editor** — `MarkdownEditor` with Write/Preview tabs, `react-markdown` + `remark-gfm`, dark-themed `.markdown-preview` styles, and copy button; replaces textarea for note and prompt content in create dialog and item drawer (view/edit); 200px default height
 - 2026-08-05: Completed **File Upload with Cloudflare R2** — `/api/items/upload` and `/api/items/[id]/download` routes, `FileUpload` drag-and-drop component with progress, `lib/file-upload.ts` validation utilities (extension/MIME/size checks, ownership check), R2 client/storage helpers, `createItem`/`deleteItem` wired for file/image types with Pro gating and R2 cleanup on delete, image preview and file info in ItemDrawer, item type selector converted to a `Select` dropdown, unit tests for validation and server actions
+- 2026-08-06: Completed **Image Gallery View** — `ImageThumbnailCard` and `ImageGalleryGrid` for `/items/images` with 16:9 thumbnails, `object-cover`, and hover zoom; type-specific rendering in items page
+- 2026-08-06: Completed **File List View** — `FileList` and `FileListRow` for `/items/files` with extension icons, file size, upload date, row hover highlight, ItemDrawer on click, and direct download; `FileListItem` type and `getFileItemsByType` db helper
