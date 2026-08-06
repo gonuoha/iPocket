@@ -83,12 +83,12 @@ export function FileListRow({ item }: FileListRowProps) {
           download={item.fileName ?? undefined}
           onClick={(event) => event.stopPropagation()}
           className={cn(
-            buttonVariants({ variant: "outline", size: "sm" }),
-            "shrink-0",
+            buttonVariants({ variant: "ghost", size: "icon-xs" }),
+            "shrink-0 text-muted-foreground hover:text-foreground",
           )}
         >
-          <Download className="size-4" />
-          <span className="sr-only sm:not-sr-only">Download</span>
+          <Download />
+          <span className="sr-only">Download</span>
         </a>
       </div>
     </div>

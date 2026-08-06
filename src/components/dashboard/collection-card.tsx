@@ -5,59 +5,66 @@ import type { DashboardCollection } from "@/lib/db/collections";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
 import { cn } from "@/lib/utils";
 
+import { CollectionCardMenu } from "./collection-card-menu";
+
 type CollectionCardProps = {
   collection: DashboardCollection;
 };
 
 export function CollectionCard({ collection }: CollectionCardProps) {
   return (
-    <Link
-      href={`/collections/${collection.id}`}
-      className="block rounded-xl border border-border border-l-4 bg-card p-4 transition-colors hover:bg-muted/40"
+    <div
+      className="relative rounded-xl border border-border border-l-4 bg-card transition-colors hover:bg-muted/40"
       style={
         collection.dominantTypeColor
           ? { borderLeftColor: collection.dominantTypeColor }
           : undefined
       }
     >
-      <div className="flex items-start justify-between gap-2">
-        <h3 className="font-medium">{collection.name}</h3>
-        {collection.isFavorite ? (
-          <Star className="size-4 shrink-0 fill-yellow-400 text-yellow-400" />
-        ) : null}
+      <div className="absolute top-2 right-2 z-10">
+        <CollectionCardMenu />
       </div>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {collection.itemCount} items
-      </p>
-      {collection.description ? (
-        <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
-          {collection.description}
-        </p>
-      ) : null}
-      {collection.types.length > 0 ? (
-        <div className="mt-3 flex flex-wrap gap-2">
-          {collection.types.map((type) => {
-            const Icon = getItemTypeIcon(type.icon);
-            const styles = getItemTypeStyles(type.color);
 
-            return (
-              <span
-                key={type.id}
-                className={cn(
-                  "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs",
-                  styles.textClassName,
-                  styles.bgClassName,
-                )}
-                style={{ ...styles.textStyle, ...styles.bgStyle }}
-              >
-                <Icon className="size-3" />
-                {type.name}
-              </span>
-            );
-          })}
-        </div>
-      ) : null}
-    </Link>
+      <Link href={`/collections/${collection.id}`} className="block p-4">
+        <h3 className="pr-8 font-medium">{collection.name}</h3>
+        <p className="mt-1 text-sm text-muted-foreground">
+          {collection.itemCount} items
+        </p>
+        {collection.description ? (
+          <p className="mt-2 line-clamp-2 text-sm text-muted-foreground">
+            {collection.description}
+          </p>
+        ) : null}
+        {collection.types.length > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-2">
+            {collection.types.map((type) => {
+              const Icon = getItemTypeIcon(type.icon);
+              const styles = getItemTypeStyles(type.color);
+
+              return (
+                <span
+                  key={type.id}
+                  className={cn(
+                    "inline-flex items-center gap-1 rounded-md px-1.5 py-0.5 text-xs",
+                    styles.textClassName,
+                    styles.bgClassName,
+                  )}
+                  style={{ ...styles.textStyle, ...styles.bgStyle }}
+                >
+                  <Icon className="size-3" />
+                  {type.name}
+                </span>
+              );
+            })}
+          </div>
+        ) : null}
+        {collection.isFavorite ? (
+          <div className="mt-3">
+            <Star className="size-4 fill-yellow-400 text-yellow-400" />
+          </div>
+        ) : null}
+      </Link>
+    </div>
   );
 }
 

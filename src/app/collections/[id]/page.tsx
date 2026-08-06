@@ -1,9 +1,9 @@
 import { notFound } from "next/navigation";
 
-import { ItemsGrid } from "@/components/items/item-card";
+import { CollectionItemSections } from "@/components/collections/collection-item-sections";
 import { PageContainer, PageHeader } from "@/components/layout/page-container";
 import { getCollectionById } from "@/lib/db/collections";
-import { getItemsByCollection } from "@/lib/db/items";
+import { getFileItemsByCollection, getItemsByCollection } from "@/lib/db/items";
 import { getCurrentUser } from "@/lib/db/user";
 
 type CollectionDetailPageProps = {
@@ -21,7 +21,10 @@ export default async function CollectionDetailPage({
     notFound();
   }
 
-  const items = await getItemsByCollection(user.id, collection.id);
+  const [items, fileItems] = await Promise.all([
+    getItemsByCollection(user.id, collection.id),
+    getFileItemsByCollection(user.id, collection.id),
+  ]);
 
   return (
     <PageContainer wide>
@@ -34,7 +37,7 @@ export default async function CollectionDetailPage({
       />
 
       {items.length > 0 ? (
-        <ItemsGrid items={items} />
+        <CollectionItemSections items={items} fileItems={fileItems} />
       ) : (
         <p className="text-sm text-muted-foreground">
           No items in this collection yet.

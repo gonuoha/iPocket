@@ -463,6 +463,31 @@ export async function getItemsByCollection(
   return items.map(mapItem);
 }
 
+const collectionItemsWhere = (userId: string, collectionId: string) => ({
+  userId,
+  collections: {
+    some: { collectionId },
+  },
+});
+
+export async function getFileItemsByCollection(
+  userId: string,
+  collectionId: string,
+): Promise<FileListItem[]> {
+  const items = await prisma.item.findMany({
+    where: {
+      ...collectionItemsWhere(userId, collectionId),
+      type: {
+        name: { equals: "file", mode: "insensitive" },
+      },
+    },
+    orderBy: { createdAt: "desc" },
+    select: fileItemSelect,
+  });
+
+  return items.map(mapFileItem);
+}
+
 export async function getFileItemsByType(
   userId: string,
   typeId: string,
