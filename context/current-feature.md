@@ -1,16 +1,21 @@
-# Current Feature
+# Current Feature: Collection Edit & Delete
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- What success looks like for the active feature -->
+- Add edit, delete, and favorite (icon only) buttons on `/collections/[id]`
+- Add an edit modal for collection metadata (name, description)
+- Add delete confirmation; deleting a collection removes item associations only, not the items themselves
+- On collection cards at `/collections` and dashboard, show a 3-dot dropdown with edit, delete, and favorite
+- Clicking anywhere else on a collection card navigates to the collection detail page
 
 ## Notes
 
-<!-- Additional context, constraints, or details from spec -->
+- Do not implement favorite functionality yet — button/menu item only
+- Reuse existing patterns from collection create dialog and item delete confirmation
 
 ## History
 
@@ -45,12 +50,12 @@ Not Started
 - 2026-08-05: Completed **Item Drawer** — right-side Sheet drawer opens on ItemCard/ItemRow click, full item detail via `/api/items/[id]` with auth check, skeleton loading state, action bar (Favorite, Pin, Copy, Edit, icon-only Delete)
 - 2026-08-05: Completed **Item Drawer — Edit Mode** — Edit toggles inline edit mode with Save/Cancel actions; Title/Description/Tags for all types plus type-specific Content/Language/URL fields; Zod-validated `updateItem` server action (`src/actions/items.ts`) with ownership check and tag disconnect/connect-or-create via new `updateItem` query in `lib/db/items.ts`; toast feedback and `router.refresh()` on save
 - 2026-08-05: Completed **Item Delete** — AlertDialog confirmation on drawer delete button; `deleteItem` server action and db helper with ownership check; success/error toasts, drawer close, and path revalidation for `/items/[type]` and `/dashboard`
-- 2026-08-05: Completed **Item Create** — Dialog modal from top bar New Item button with type selector (snippet, prompt, command, note, link) and dynamic fields; Zod-validated `createItem` server action and db helper with tag connect-or-create; success toast, modal close, and `router.refresh()`; unit tests for schema and action
+- 2026-08-05: Completed **Item Create** — Dialog modal from top bar New Item button with type selector (snippet, prompt, command, note, link) and dynamic fields; Zod-validated `createItem` server action and db helper with tag connect-or-create; success toast, modal close, and `router.refresh()`; unit tests for schema and action; dashboard Overview section restyled as a grouping-only container
 - 2026-08-05: Completed **Code Editor** — Monaco `CodeEditor` component with dark theme, macOS window dots, copy button, and language header; replaces textarea for snippet and command content in item drawer (view/edit) and create dialog; fluid height capped at 400px with themed scrollbars
 - 2026-08-05: Completed **Markdown Editor** — `MarkdownEditor` with Write/Preview tabs, `react-markdown` + `remark-gfm`, dark-themed `.markdown-preview` styles, and copy button; replaces textarea for note and prompt content in create dialog and item drawer (view/edit); 200px default height
 - 2026-08-05: Completed **File Upload with Cloudflare R2** — `/api/items/upload` and `/api/items/[id]/download` routes, `FileUpload` drag-and-drop component with progress, `lib/file-upload.ts` validation utilities (extension/MIME/size checks, ownership check), R2 client/storage helpers, `createItem`/`deleteItem` wired for file/image types with Pro gating and R2 cleanup on delete, image preview and file info in ItemDrawer, item type selector converted to a `Select` dropdown, unit tests for validation and server actions
 - 2026-08-06: Completed **Image Gallery View** — `ImageThumbnailCard` and `ImageGalleryGrid` for `/items/images` with 16:9 thumbnails, `object-cover`, and hover zoom; type-specific rendering in items page
-- 2026-08-06: Completed **File List View** — `FileList` and `FileListRow` for `/items/files` with extension icons, file size, upload date, row hover highlight, ItemDrawer on click, and direct download; `FileListItem` type and `getFileItemsByType` db helper
+- 2026-08-06: Completed **File List View** — `FileList` and `FileListRow` for `/items/files` with extension icons, file size, upload date, row hover highlight, ItemDrawer on click, and direct download; `FileListItem` type and `getFileItemsByCollection` db helper
 - 2026-08-06: Completed **Item Copy** — shared `getItemCopyText` utility with content → url → fileName → description → title priority; reusable `ItemCopyButton` on item cards and in the item drawer with clipboard write, toast feedback, and copied state
 - 2026-08-06: Completed **Collection Create** — `CollectionCreateDialog` from top bar New Collection button with name/description fields; Zod-validated `createCollection` server action and db helper with user scoping and duplicate-name handling; success/error toasts, path revalidation, and `router.refresh()`; unit tests for schema and action; dashboard Overview section restyled as a grouping-only container
 - 2026-08-06: Completed **Add Item to Collections** — `ItemCollection` junction table migration replacing single `collectionId` FK; searchable `CollectionMultiSelect` in `ItemCreateDialog` and `ItemDrawer`; collection ownership validation in Zod schemas and `createItem`/`updateItem` server actions; collections fetched in layouts and passed through dashboard shell; unit tests for schema and action collection assignment

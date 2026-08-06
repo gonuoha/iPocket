@@ -22,7 +22,7 @@ export function CollectionCard({ collection }: CollectionCardProps) {
       }
     >
       <div className="absolute top-2 right-2 z-10">
-        <CollectionCardMenu />
+        <CollectionCardMenu collection={collection} />
       </div>
 
       <Link href={`/collections/${collection.id}`} className="block p-4">

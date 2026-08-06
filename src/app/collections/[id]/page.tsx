@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 
+import { CollectionDetailActions } from "@/components/collections/collection-detail-actions";
 import { CollectionItemSections } from "@/components/collections/collection-item-sections";
 import { PageContainer, PageHeader } from "@/components/layout/page-container";
 import { getCollectionById } from "@/lib/db/collections";
@@ -28,13 +29,16 @@ export default async function CollectionDetailPage({
 
   return (
     <PageContainer wide>
-      <PageHeader
-        title={collection.name}
-        description={
-          collection.description ??
-          (items.length === 1 ? "1 item" : `${items.length} items`)
-        }
-      />
+      <div className="flex items-start justify-between gap-4">
+        <PageHeader
+          title={collection.name}
+          description={
+            collection.description ??
+            (items.length === 1 ? "1 item" : `${items.length} items`)
+          }
+        />
+        <CollectionDetailActions collection={collection} />
+      </div>
 
       {items.length > 0 ? (
         <CollectionItemSections items={items} fileItems={fileItems} />

@@ -313,6 +313,63 @@ export async function createCollection(
   });
 }
 
+export async function updateCollection(
+  userId: string,
+  collectionId: string,
+  data: {
+    name: string;
+    description: string | null;
+  },
+): Promise<CreatedCollection | null> {
+  const existing = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    select: { id: true },
+  });
+
+  if (!existing) {
+    return null;
+  }
+
+  return prisma.collection.update({
+    where: { id: collectionId },
+    data: {
+      name: data.name,
+      description: data.description,
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      isFavorite: true,
+    },
+  });
+}
+
+export type DeletedCollection = {
+  id: string;
+  name: string;
+};
+
+export async function deleteCollection(
+  userId: string,
+  collectionId: string,
+): Promise<DeletedCollection | null> {
+  const existing = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    select: { id: true, name: true },
+  });
+
+  if (!existing) {
+    return null;
+  }
+
+  await prisma.collection.delete({
+    where: { id: collectionId },
+  });
+
+  return existing;
+}
+
 export async function getSelectableCollections(
   userId: string,
 ): Promise<SelectableCollection[]> {

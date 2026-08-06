@@ -5,9 +5,15 @@ import { revalidatePath } from "next/cache";
 import { auth } from "@/auth";
 import {
   createCollection as createCollectionInDb,
+  deleteCollection as deleteCollectionInDb,
+  updateCollection as updateCollectionInDb,
   type CreatedCollection,
+  type DeletedCollection,
 } from "@/lib/db/collections";
-import { createCollectionSchema } from "@/lib/validations/collections";
+import {
+  createCollectionSchema,
+  updateCollectionSchema,
+} from "@/lib/validations/collections";
 
 type ActionResult<T> =
   | { success: true; data: T }
@@ -46,9 +52,7 @@ export async function createCollection(
       description: parsed.data.description ?? null,
     });
 
-    revalidatePath("/dashboard");
-    revalidatePath("/profile");
-    revalidatePath("/collections");
+    revalidateCollectionPaths();
 
     return { success: true, data: created };
   } catch (error) {
@@ -61,4 +65,78 @@ export async function createCollection(
 
     throw error;
   }
+}
+
+function revalidateCollectionPaths(collectionId?: string) {
+  revalidatePath("/dashboard");
+  revalidatePath("/profile");
+  revalidatePath("/collections");
+
+  if (collectionId) {
+    revalidatePath(`/collections/${collectionId}`);
+  }
+}
+
+export async function updateCollection(
+  collectionId: string,
+  data: unknown,
+): Promise<ActionResult<CreatedCollection>> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const parsed = updateCollectionSchema.safeParse(data);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  try {
+    const updated = await updateCollectionInDb(session.user.id, collectionId, {
+      name: parsed.data.name,
+      description: parsed.data.description ?? null,
+    });
+
+    if (!updated) {
+      return { success: false, error: "Collection not found" };
+    }
+
+    revalidateCollectionPaths(collectionId);
+
+    return { success: true, data: updated };
+  } catch (error) {
+    if (isUniqueConstraintError(error)) {
+      return {
+        success: false,
+        error: "A collection with this name already exists",
+      };
+    }
+
+    throw error;
+  }
+}
+
+export async function deleteCollection(
+  collectionId: string,
+): Promise<ActionResult<DeletedCollection>> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const deleted = await deleteCollectionInDb(session.user.id, collectionId);
+
+  if (!deleted) {
+    return { success: false, error: "Collection not found" };
+  }
+
+  revalidateCollectionPaths(collectionId);
+
+  return { success: true, data: deleted };
 }
