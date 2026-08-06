@@ -1,24 +1,16 @@
-# Current Feature: Collection Create
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Enable the top bar "New Collection" button to open a create modal (name + description)
-- Add Zod-validated create flow matching item create patterns (server action + `lib/db` helper, user-scoped)
-- Show success/error toasts and close the modal on success
-- Refresh dashboard/sidebar so the new collection appears immediately (`revalidatePath` + `router.refresh()`)
-- Add unit tests for the create schema and server action
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Mirror **Item Create**: `ItemCreateDialog` + `createItem` server action + `createItem` in `lib/db/items.ts` + Zod in `lib/validations`
-- Collection model already has `name`, `description`, `isFavorite`, unique `[userId, name]`
-- Server components continue to load collections via `lib/db/collections.ts`; use API routes only if client needs to fetch collection data (same split as items: mutations via server actions, detail fetches via `/api/...`)
-- Top bar currently has a disabled "New Collection" outline button — wire it like "New Item"
-- On save, revalidate `/dashboard` (and any other collection surfaces) so grid, stats, and sidebar update
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -60,3 +52,4 @@ In Progress
 - 2026-08-06: Completed **Image Gallery View** — `ImageThumbnailCard` and `ImageGalleryGrid` for `/items/images` with 16:9 thumbnails, `object-cover`, and hover zoom; type-specific rendering in items page
 - 2026-08-06: Completed **File List View** — `FileList` and `FileListRow` for `/items/files` with extension icons, file size, upload date, row hover highlight, ItemDrawer on click, and direct download; `FileListItem` type and `getFileItemsByType` db helper
 - 2026-08-06: Completed **Item Copy** — shared `getItemCopyText` utility with content → url → fileName → description → title priority; reusable `ItemCopyButton` on item cards and in the item drawer with clipboard write, toast feedback, and copied state
+- 2026-08-06: Completed **Collection Create** — `CollectionCreateDialog` from top bar New Collection button with name/description fields; Zod-validated `createCollection` server action and db helper with user scoping and duplicate-name handling; success/error toasts, path revalidation, and `router.refresh()`; unit tests for schema and action; dashboard Overview section restyled as a grouping-only container
