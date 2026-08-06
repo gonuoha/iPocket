@@ -13,12 +13,13 @@ export const proxy = auth((req) => {
   const isDashboard = pathname.startsWith("/dashboard");
   const isProfile = pathname === "/profile";
   const isItems = pathname.startsWith("/items");
+  const isCollections = pathname.startsWith("/collections");
 
   if (isAuthPage && isLoggedIn) {
     return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
   }
 
-  if ((isDashboard || isProfile || isItems) && !isLoggedIn) {
+  if ((isDashboard || isProfile || isItems || isCollections) && !isLoggedIn) {
     const signInUrl = new URL("/sign-in", req.nextUrl.origin);
     signInUrl.searchParams.set(
       "callbackUrl",
@@ -42,5 +43,7 @@ export const config = {
     "/profile",
     "/items",
     "/items/:path*",
+    "/collections",
+    "/collections/:path*",
   ],
 };

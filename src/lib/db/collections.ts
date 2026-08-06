@@ -38,6 +38,14 @@ export type CreatedCollection = {
   isFavorite: boolean;
 };
 
+export type CollectionDetail = {
+  id: string;
+  name: string;
+  description: string | null;
+  isFavorite: boolean;
+  itemCount: number;
+};
+
 export type SelectableCollection = {
   id: string;
   name: string;
@@ -174,6 +182,49 @@ const collectionCountInclude = {
     select: { items: true },
   },
 } as const;
+
+export async function getAllCollections(
+  userId: string,
+): Promise<DashboardCollection[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId },
+    orderBy: { name: "asc" },
+    include: collectionCountInclude,
+  });
+
+  const aggregations = await getCollectionTypeAggregations(
+    collections.map((collection) => collection.id),
+  );
+
+  return collections.map((collection) =>
+    mapToDashboardCollection(
+      collection,
+      aggregations.get(collection.id) ?? { types: [], dominantTypeColor: null },
+    ),
+  );
+}
+
+export async function getCollectionById(
+  userId: string,
+  collectionId: string,
+): Promise<CollectionDetail | null> {
+  const collection = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    include: collectionCountInclude,
+  });
+
+  if (!collection) {
+    return null;
+  }
+
+  return {
+    id: collection.id,
+    name: collection.name,
+    description: collection.description,
+    isFavorite: collection.isFavorite,
+    itemCount: collection._count.items,
+  };
+}
 
 export async function getRecentCollections(
   userId: string,

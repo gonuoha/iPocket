@@ -48,6 +48,7 @@ export async function createCollection(
 
     revalidatePath("/dashboard");
     revalidatePath("/profile");
+    revalidatePath("/collections");
 
     return { success: true, data: created };
   } catch (error) {

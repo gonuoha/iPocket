@@ -1,16 +1,20 @@
-# Current Feature
+# Current Feature: Collections Pages
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- What success looks like for the active feature -->
+- Create the `/collections` page and show all collections using existing collection cards
+- Create the `/collections/[id]` page to show items in that collection using existing item cards
+- Link "View all collections" in the sidebar to `/collections`
+- Link all collection cards to their specific collection page
 
 ## Notes
 
-<!-- Additional context, constraints, or details from spec -->
+- Reuse `CollectionsGrid` / `CollectionCard` and `ItemsGrid` / `ItemCard`
+- Follow the same layout pattern as `/items` (dashboard shell, sidebar, auth protection)
 
 ## History
 
