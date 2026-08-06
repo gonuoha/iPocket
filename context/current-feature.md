@@ -1,32 +1,16 @@
-# Current Feature: Global Search
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add a global command palette opened with Cmd+K (Mac) / Ctrl+K (Windows)
-- Fuzzy search across all items and collections with client-side matching (no server round-trips)
-- Group results into Items and Collections sections
-- Support keyboard navigation (arrow keys, Enter to select)
-- Show item type icon and collection item count in results
-- Navigate to item drawer or collection page on select
-- TopBar search input opens the palette on click
-- Show ⌘K hint in the search input placeholder
-- Use shadcn `cmdk` (Command) component
-- Pre-fetch searchable data on app load (items: id, title, type, content preview; collections: id, name, itemCount)
-- Reuse existing data fetching functions
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-Add a global command palette (Cmd+K / Ctrl+K) with fuzzy search across items and collections.
-
-**Technical constraints:**
-- Client-side fuzzy search only — no server round-trips during search
-- Pre-fetch searchable data on app load
-- Search data shape: items (id, title, type, content preview), collections (id, name, itemCount)
-- Reuse existing data fetching functions
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -72,3 +56,4 @@ Add a global command palette (Cmd+K / Ctrl+K) with fuzzy search across items and
 - 2026-08-06: Completed **Add Item to Collections** — `ItemCollection` junction table migration replacing single `collectionId` FK; searchable `CollectionMultiSelect` in `ItemCreateDialog` and `ItemDrawer`; collection ownership validation in Zod schemas and `createItem`/`updateItem` server actions; collections fetched in layouts and passed through dashboard shell; unit tests for schema and action collection assignment
 - 2026-08-06: Completed **Collections Pages** — `/collections` list and `/collections/[id]` detail routes with dashboard shell layout, db helpers for all collections and collection items, auth protection, and links from dashboard and sidebar using existing collection and item cards
 - 2026-08-06: Completed **Collection Edit & Delete** — `updateCollection`/`deleteCollection` server actions and db helpers with ownership checks; edit modal and delete confirmation on `/collections/[id]` and collection card dropdown menus; favorite button/menu item UI only; delete removes collection associations without deleting items; unit tests for update and delete actions
+- 2026-08-06: Completed **Global Search** — Cmd+K/Ctrl+K command palette with shadcn `cmdk`, pre-fetched searchable items and collections, word-based client-side filter, grouped results with type icons and item counts, navigation to item drawer or collection page, TopBar search trigger with platform shortcut hint, scroll affordance, and unit tests for search filter utility
