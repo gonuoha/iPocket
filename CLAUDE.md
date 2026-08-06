@@ -21,8 +21,8 @@ Read these for full project context:
 - NextAuth v5 (Email + GitHub)
 - Tailwind CSS v4 + shadcn/ui
 - Cloudflare R2 (file storage)
-- OpenAI gpt-5-nano
-- Stripe (payments)
+- OpenAI gpt-5-nano (planned)
+- Stripe (planned)
 
 ## Quick Commands
 

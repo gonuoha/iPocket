@@ -48,7 +48,7 @@ const forgotPasswordLimiter = createLimiter("forgot-password", 3, "1 h");
 const resetPasswordLimiter = createLimiter("reset-password", 5, "15 m");
 const resendVerificationLimiter = createLimiter("resend-verification", 3, "15 m");
 
-export function getClientIp(request: Request): string {
+function getClientIp(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");
 
   if (forwarded) {

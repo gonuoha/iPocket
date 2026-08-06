@@ -311,19 +311,19 @@ git switch -c lesson-01-setup
 
 ### **MVP**
 
-- Items CRUD
-- Collections
-- Search
-- Basic tags
-- Free tier limits
+- [x] Items CRUD (create, read, update, delete; type-specific views and editors)
+- [x] Collections (dashboard display and stats)
+- [ ] Search
+- [x] Basic tags
+- [ ] Free tier limits
 
 ### **Pro Phase**
 
-- AI features
-- Custom item types
-- File uploads
-- Export
-- Billing & upgrade flow
+- [ ] AI features
+- [ ] Custom item types
+- [x] File uploads (R2-backed; Pro-gated)
+- [ ] Export
+- [ ] Billing & upgrade flow (Stripe)
 
 ### **Future Enhancements**
 
@@ -337,8 +337,9 @@ git switch -c lesson-01-setup
 
 ## 📌 Status
 
-- In planning
-- Ready for environment setup & UI scaffolding
+- Active development — core dashboard, auth, profile, and item CRUD are implemented
+- Remaining MVP work: search and free-tier enforcement
+- Pro integrations planned: Stripe billing, OpenAI features
 
 ---
 

@@ -68,8 +68,6 @@ export const createItemSchema = z
     }
   });
 
-export type UpdateItemInput = z.infer<typeof updateItemSchema>;
-export type CreateItemInput = z.infer<typeof createItemSchema>;
 export type CreatableItemType = z.infer<typeof creatableItemTypeSchema>;
 
 export function parseCreatableItemTypeFromPathname(
