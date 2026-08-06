@@ -1,16 +1,24 @@
-# Current Feature
+# Current Feature: Collection Create
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- What success looks like for the active feature -->
+- Enable the top bar "New Collection" button to open a create modal (name + description)
+- Add Zod-validated create flow matching item create patterns (server action + `lib/db` helper, user-scoped)
+- Show success/error toasts and close the modal on success
+- Refresh dashboard/sidebar so the new collection appears immediately (`revalidatePath` + `router.refresh()`)
+- Add unit tests for the create schema and server action
 
 ## Notes
 
-<!-- Additional context, constraints, or details from spec -->
+- Mirror **Item Create**: `ItemCreateDialog` + `createItem` server action + `createItem` in `lib/db/items.ts` + Zod in `lib/validations`
+- Collection model already has `name`, `description`, `isFavorite`, unique `[userId, name]`
+- Server components continue to load collections via `lib/db/collections.ts`; use API routes only if client needs to fetch collection data (same split as items: mutations via server actions, detail fetches via `/api/...`)
+- Top bar currently has a disabled "New Collection" outline button — wire it like "New Item"
+- On save, revalidate `/dashboard` (and any other collection surfaces) so grid, stats, and sidebar update
 
 ## History
 

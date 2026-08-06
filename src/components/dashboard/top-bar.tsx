@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Code2, PanelLeft, Search } from "lucide-react";
 
+import { CollectionCreateDialog } from "@/components/collections/collection-create-dialog";
 import { ItemCreateDialog } from "@/components/items/item-create-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,6 +18,7 @@ export function TopBar({ isPro }: { isPro: boolean }) {
   const { toggleSidebar } = useSidebar();
   const pathname = usePathname();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isCollectionCreateOpen, setIsCollectionCreateOpen] = useState(false);
   const defaultType = parseCreatableItemTypeFromPathname(pathname);
 
   return (
@@ -62,7 +64,12 @@ export function TopBar({ isPro }: { isPro: boolean }) {
       </div>
 
       <div className="flex shrink-0 items-center gap-2 justify-self-end">
-        <Button variant="outline" size="sm" disabled className="hidden sm:inline-flex">
+        <Button
+          variant="outline"
+          size="sm"
+          className="hidden sm:inline-flex"
+          onClick={() => setIsCollectionCreateOpen(true)}
+        >
           New Collection
         </Button>
         <Button size="sm" onClick={() => setIsCreateOpen(true)}>
@@ -70,6 +77,11 @@ export function TopBar({ isPro }: { isPro: boolean }) {
         </Button>
       </div>
     </header>
+
+      <CollectionCreateDialog
+        open={isCollectionCreateOpen}
+        onOpenChange={setIsCollectionCreateOpen}
+      />
 
       <ItemCreateDialog
         open={isCreateOpen}

@@ -21,7 +21,10 @@ export default async function DashboardPage() {
       />
 
       <PageContent>
-        <PageSection title="Overview">
+        <PageSection
+          title="Overview"
+          className="rounded-none border-0 bg-background p-0"
+        >
           <StatsCards {...stats} />
         </PageSection>
 

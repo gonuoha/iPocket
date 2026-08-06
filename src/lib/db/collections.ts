@@ -31,6 +31,13 @@ export type SidebarCollection = {
   dominantTypeColor: string | null;
 };
 
+export type CreatedCollection = {
+  id: string;
+  name: string;
+  description: string | null;
+  isFavorite: boolean;
+};
+
 type CollectionTypeAggregation = {
   types: CollectionItemType[];
   dominantTypeColor: string | null;
@@ -202,6 +209,28 @@ export async function getSidebarRecentCollections(
       aggregations.get(collection.id) ?? { types: [], dominantTypeColor: null },
     ),
   );
+}
+
+export async function createCollection(
+  userId: string,
+  data: {
+    name: string;
+    description: string | null;
+  },
+): Promise<CreatedCollection> {
+  return prisma.collection.create({
+    data: {
+      userId,
+      name: data.name,
+      description: data.description,
+    },
+    select: {
+      id: true,
+      name: true,
+      description: true,
+      isFavorite: true,
+    },
+  });
 }
 
 export function toDashboardStats(stats: {
