@@ -1,6 +1,11 @@
 import { cache } from "react";
 
 import {
+  DASHBOARD_COLLECTIONS_LIMIT,
+  DASHBOARD_RECENT_ITEMS_LIMIT,
+} from "@/lib/pagination";
+
+import {
   getRecentCollections,
   getSearchableCollections,
   getSelectableCollections,
@@ -45,9 +50,9 @@ export const getDashboardPageData = cache(
     const user = await getCurrentUser();
     const [stats, collections, pinnedItems, recentItems] = await Promise.all([
       getUserItemStats(user.id),
-      getRecentCollections(user.id),
+      getRecentCollections(user.id, DASHBOARD_COLLECTIONS_LIMIT),
       getPinnedItems(user.id),
-      getRecentItems(user.id),
+      getRecentItems(user.id, DASHBOARD_RECENT_ITEMS_LIMIT),
     ]);
 
     return {

@@ -1,3 +1,9 @@
+import {
+  COLLECTIONS_PER_PAGE,
+  getTotalPages,
+  normalizePage,
+  type PaginatedResult,
+} from "@/lib/pagination";
 import { prisma } from "@/lib/prisma";
 
 export type CollectionItemType = {
@@ -208,6 +214,44 @@ export async function getAllCollections(
       aggregations.get(collection.id) ?? { types: [], dominantTypeColor: null },
     ),
   );
+}
+
+export async function getAllCollectionsPaginated(
+  userId: string,
+  page: number,
+  pageSize: number = COLLECTIONS_PER_PAGE,
+): Promise<PaginatedResult<DashboardCollection>> {
+  const where = { userId };
+  const totalCount = await prisma.collection.count({ where });
+  const totalPages = getTotalPages(totalCount, pageSize);
+  const normalizedPage = normalizePage(page, totalPages);
+  const collections = await prisma.collection.findMany({
+    where,
+    orderBy: { name: "asc" },
+    skip: (normalizedPage - 1) * pageSize,
+    take: pageSize,
+    include: collectionCountInclude,
+  });
+
+  const aggregations = await getCollectionTypeAggregations(
+    collections.map((collection) => collection.id),
+  );
+
+  return {
+    items: collections.map((collection) =>
+      mapToDashboardCollection(
+        collection,
+        aggregations.get(collection.id) ?? {
+          types: [],
+          dominantTypeColor: null,
+        },
+      ),
+    ),
+    totalCount,
+    page: normalizedPage,
+    pageSize,
+    totalPages,
+  };
 }
 
 export async function getCollectionById(

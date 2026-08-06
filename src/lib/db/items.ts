@@ -1,6 +1,13 @@
 import { cache } from "react";
 
 import { sortItemTypesBySystemOrder } from "@/lib/item-type-styles";
+import {
+  COLLECTIONS_PER_PAGE,
+  getTotalPages,
+  ITEMS_PER_PAGE,
+  normalizePage,
+  type PaginatedResult,
+} from "@/lib/pagination";
 import { prisma } from "@/lib/prisma";
 
 import type { CollectionItemType } from "./collections";
@@ -508,6 +515,8 @@ export async function getItemTypeBySlug(userId: string, slug: string) {
   });
 }
 
+export type { PaginatedResult } from "@/lib/pagination";
+
 export async function getItemsByType(
   userId: string,
   typeId: string,
@@ -519,6 +528,33 @@ export async function getItemsByType(
   });
 
   return items.map(mapItem);
+}
+
+export async function getItemsByTypePaginated(
+  userId: string,
+  typeId: string,
+  page: number,
+  pageSize: number = ITEMS_PER_PAGE,
+): Promise<PaginatedResult<DashboardItem>> {
+  const where = { userId, typeId };
+  const totalCount = await prisma.item.count({ where });
+  const totalPages = getTotalPages(totalCount, pageSize);
+  const normalizedPage = normalizePage(page, totalPages);
+  const items = await prisma.item.findMany({
+    where,
+    orderBy: { updatedAt: "desc" },
+    skip: (normalizedPage - 1) * pageSize,
+    take: pageSize,
+    select: itemSelect,
+  });
+
+  return {
+    items: items.map(mapItem),
+    totalCount,
+    page: normalizedPage,
+    pageSize,
+    totalPages,
+  };
 }
 
 export async function getItemsByCollection(
@@ -537,6 +573,38 @@ export async function getItemsByCollection(
   });
 
   return items.map(mapItem);
+}
+
+export async function getItemsByCollectionPaginated(
+  userId: string,
+  collectionId: string,
+  page: number,
+  pageSize: number = COLLECTIONS_PER_PAGE,
+): Promise<PaginatedResult<DashboardItem>> {
+  const where = {
+    userId,
+    collections: {
+      some: { collectionId },
+    },
+  };
+  const totalCount = await prisma.item.count({ where });
+  const totalPages = getTotalPages(totalCount, pageSize);
+  const normalizedPage = normalizePage(page, totalPages);
+  const items = await prisma.item.findMany({
+    where,
+    orderBy: { updatedAt: "desc" },
+    skip: (normalizedPage - 1) * pageSize,
+    take: pageSize,
+    select: itemSelect,
+  });
+
+  return {
+    items: items.map(mapItem),
+    totalCount,
+    page: normalizedPage,
+    pageSize,
+    totalPages,
+  };
 }
 
 const collectionItemsWhere = (userId: string, collectionId: string) => ({
@@ -570,6 +638,56 @@ export async function getFileItemsByType(
 ): Promise<FileListItem[]> {
   const items = await prisma.item.findMany({
     where: { userId, typeId },
+    orderBy: { createdAt: "desc" },
+    select: fileItemSelect,
+  });
+
+  return items.map(mapFileItem);
+}
+
+export async function getFileItemsByTypePaginated(
+  userId: string,
+  typeId: string,
+  page: number,
+  pageSize: number = ITEMS_PER_PAGE,
+): Promise<PaginatedResult<FileListItem>> {
+  const where = { userId, typeId };
+  const totalCount = await prisma.item.count({ where });
+  const totalPages = getTotalPages(totalCount, pageSize);
+  const normalizedPage = normalizePage(page, totalPages);
+  const items = await prisma.item.findMany({
+    where,
+    orderBy: { createdAt: "desc" },
+    skip: (normalizedPage - 1) * pageSize,
+    take: pageSize,
+    select: fileItemSelect,
+  });
+
+  return {
+    items: items.map(mapFileItem),
+    totalCount,
+    page: normalizedPage,
+    pageSize,
+    totalPages,
+  };
+}
+
+export async function getFileItemsByIds(
+  userId: string,
+  itemIds: string[],
+): Promise<FileListItem[]> {
+  if (itemIds.length === 0) {
+    return [];
+  }
+
+  const items = await prisma.item.findMany({
+    where: {
+      userId,
+      id: { in: itemIds },
+      type: {
+        name: { equals: "file", mode: "insensitive" },
+      },
+    },
     orderBy: { createdAt: "desc" },
     select: fileItemSelect,
   });
