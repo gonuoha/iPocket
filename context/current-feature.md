@@ -1,21 +1,16 @@
-# Current Feature: Collection Edit & Delete
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add edit, delete, and favorite (icon only) buttons on `/collections/[id]`
-- Add an edit modal for collection metadata (name, description)
-- Add delete confirmation; deleting a collection removes item associations only, not the items themselves
-- On collection cards at `/collections` and dashboard, show a 3-dot dropdown with edit, delete, and favorite
-- Clicking anywhere else on a collection card navigates to the collection detail page
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Do not implement favorite functionality yet — button/menu item only
-- Reuse existing patterns from collection create dialog and item delete confirmation
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -60,3 +55,4 @@ In Progress
 - 2026-08-06: Completed **Collection Create** — `CollectionCreateDialog` from top bar New Collection button with name/description fields; Zod-validated `createCollection` server action and db helper with user scoping and duplicate-name handling; success/error toasts, path revalidation, and `router.refresh()`; unit tests for schema and action; dashboard Overview section restyled as a grouping-only container
 - 2026-08-06: Completed **Add Item to Collections** — `ItemCollection` junction table migration replacing single `collectionId` FK; searchable `CollectionMultiSelect` in `ItemCreateDialog` and `ItemDrawer`; collection ownership validation in Zod schemas and `createItem`/`updateItem` server actions; collections fetched in layouts and passed through dashboard shell; unit tests for schema and action collection assignment
 - 2026-08-06: Completed **Collections Pages** — `/collections` list and `/collections/[id]` detail routes with dashboard shell layout, db helpers for all collections and collection items, auth protection, and links from dashboard and sidebar using existing collection and item cards
+- 2026-08-06: Completed **Collection Edit & Delete** — `updateCollection`/`deleteCollection` server actions and db helpers with ownership checks; edit modal and delete confirmation on `/collections/[id]` and collection card dropdown menus; favorite button/menu item UI only; delete removes collection associations without deleting items; unit tests for update and delete actions
