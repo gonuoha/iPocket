@@ -51,6 +51,12 @@ export type SelectableCollection = {
   name: string;
 };
 
+export type SearchableCollection = {
+  id: string;
+  name: string;
+  itemCount: number;
+};
+
 type CollectionTypeAggregation = {
   types: CollectionItemType[];
   dominantTypeColor: string | null;
@@ -381,6 +387,22 @@ export async function getSelectableCollections(
       name: true,
     },
   });
+}
+
+export async function getSearchableCollections(
+  userId: string,
+): Promise<SearchableCollection[]> {
+  const collections = await prisma.collection.findMany({
+    where: { userId },
+    orderBy: { name: "asc" },
+    include: collectionCountInclude,
+  });
+
+  return collections.map((collection) => ({
+    id: collection.id,
+    name: collection.name,
+    itemCount: collection._count.items,
+  }));
 }
 
 export async function validateUserCollectionIds(

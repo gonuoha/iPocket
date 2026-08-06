@@ -9,13 +9,14 @@ export default async function CollectionsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { sidebarData, user, collections } = await getDashboardLayoutData();
+  const { sidebarData, user, collections, searchData } = await getDashboardLayoutData();
 
   return (
     <DashboardShell
       sidebar={<SidebarContent sidebarData={sidebarData} />}
       isPro={user.isPro}
       collections={collections}
+      searchData={searchData}
     >
       {children}
     </DashboardShell>

@@ -3,6 +3,9 @@
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ItemDrawer } from "@/components/items/item-drawer";
 import { ItemDrawerProvider } from "@/components/items/item-drawer-context";
+import { CommandPalette } from "@/components/search/command-palette";
+import { CommandPaletteProvider } from "@/components/search/command-palette-context";
+import type { DashboardSearchData } from "@/lib/db/dashboard";
 import type { SelectableCollection } from "@/lib/db/collections";
 import { cn } from "@/lib/utils";
 
@@ -52,6 +55,7 @@ function DashboardShellInner({
       </div>
 
       <ItemDrawer collections={collections} />
+      <CommandPalette />
     </div>
   );
 }
@@ -61,18 +65,26 @@ export function DashboardShell({
   sidebar,
   isPro,
   collections,
+  searchData,
 }: {
   children: React.ReactNode;
   sidebar: React.ReactNode;
   isPro: boolean;
   collections: SelectableCollection[];
+  searchData: DashboardSearchData;
 }) {
   return (
     <SidebarProvider>
       <ItemDrawerProvider>
-        <DashboardShellInner sidebar={sidebar} isPro={isPro} collections={collections}>
-          {children}
-        </DashboardShellInner>
+        <CommandPaletteProvider searchData={searchData}>
+          <DashboardShellInner
+            sidebar={sidebar}
+            isPro={isPro}
+            collections={collections}
+          >
+            {children}
+          </DashboardShellInner>
+        </CommandPaletteProvider>
       </ItemDrawerProvider>
     </SidebarProvider>
   );

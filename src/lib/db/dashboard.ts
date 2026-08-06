@@ -2,17 +2,21 @@ import { cache } from "react";
 
 import {
   getRecentCollections,
+  getSearchableCollections,
   getSelectableCollections,
   toDashboardStats,
   type DashboardCollection,
   type DashboardStats,
+  type SearchableCollection,
   type SelectableCollection,
 } from "@/lib/db/collections";
 import {
   getPinnedItems,
   getRecentItems,
+  getSearchableItems,
   getUserItemStats,
   type DashboardItem,
+  type SearchableItem,
 } from "@/lib/db/items";
 import { getSidebarData, type SidebarData } from "@/lib/db/sidebar";
 import { getCurrentUser, type DashboardUser } from "@/lib/db/user";
@@ -24,10 +28,16 @@ export type DashboardPageData = {
   recentItems: DashboardItem[];
 };
 
+export type DashboardSearchData = {
+  items: SearchableItem[];
+  collections: SearchableCollection[];
+};
+
 export type DashboardLayoutData = {
   user: DashboardUser;
   sidebarData: SidebarData;
   collections: SelectableCollection[];
+  searchData: DashboardSearchData;
 };
 
 export const getDashboardPageData = cache(
@@ -52,11 +62,22 @@ export const getDashboardPageData = cache(
 export const getDashboardLayoutData = cache(
   async (): Promise<DashboardLayoutData> => {
     const user = await getCurrentUser();
-    const [sidebarData, collections] = await Promise.all([
-      getSidebarData(user),
-      getSelectableCollections(user.id),
-    ]);
+    const [sidebarData, collections, items, searchableCollections] =
+      await Promise.all([
+        getSidebarData(user),
+        getSelectableCollections(user.id),
+        getSearchableItems(user.id),
+        getSearchableCollections(user.id),
+      ]);
 
-    return { user, sidebarData, collections };
+    return {
+      user,
+      sidebarData,
+      collections,
+      searchData: {
+        items,
+        collections: searchableCollections,
+      },
+    };
   },
 );
