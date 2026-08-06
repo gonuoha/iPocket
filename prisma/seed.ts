@@ -405,7 +405,6 @@ async function main() {
           description: item.description ?? null,
           language: item.language ?? null,
           typeId: item.typeId,
-          collectionId,
           userId: user.id,
           isPinned: item.isPinned ?? false,
         },
@@ -418,9 +417,22 @@ async function main() {
           description: item.description ?? null,
           language: item.language ?? null,
           typeId: item.typeId,
-          collectionId,
           userId: user.id,
           isPinned: item.isPinned ?? false,
+        },
+      });
+
+      await prisma.itemCollection.upsert({
+        where: {
+          itemId_collectionId: {
+            itemId: item.id,
+            collectionId,
+          },
+        },
+        update: {},
+        create: {
+          itemId: item.id,
+          collectionId,
         },
       });
     }

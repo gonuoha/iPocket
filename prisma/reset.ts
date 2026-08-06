@@ -19,6 +19,7 @@ async function main() {
     // ItemType uses onDelete: Restrict on Item, so items must go first.
     const results = await prisma.$transaction([
       prisma.itemTag.deleteMany(),
+      prisma.itemCollection.deleteMany(),
       prisma.item.deleteMany(),
       prisma.collection.deleteMany(),
       prisma.tag.deleteMany(),

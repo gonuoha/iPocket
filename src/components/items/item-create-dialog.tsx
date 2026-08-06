@@ -5,6 +5,10 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { createItem } from "@/actions/items";
+import {
+  CollectionMultiSelect,
+  type SelectableCollection,
+} from "@/components/collections/collection-multi-select";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -68,6 +72,7 @@ type CreateFormState = {
   url: string;
   language: string;
   tags: string;
+  collectionIds: string[];
   uploadedFile: UploadedFile | null;
 };
 
@@ -79,6 +84,7 @@ const initialFormState: CreateFormState = {
   url: "",
   language: "",
   tags: "",
+  collectionIds: [],
   uploadedFile: null,
 };
 
@@ -87,6 +93,7 @@ type ItemCreateDialogProps = {
   onOpenChange: (open: boolean) => void;
   isPro: boolean;
   defaultType?: CreatableItemType;
+  collections: SelectableCollection[];
 };
 
 export function ItemCreateDialog({
@@ -94,6 +101,7 @@ export function ItemCreateDialog({
   onOpenChange,
   isPro,
   defaultType,
+  collections,
 }: ItemCreateDialogProps) {
   const router = useRouter();
   const [formState, setFormState] = useState<CreateFormState>(initialFormState);
@@ -164,6 +172,7 @@ export function ItemCreateDialog({
           .split(",")
           .map((tag) => tag.trim())
           .filter((tag) => tag.length > 0),
+        collectionIds: formState.collectionIds,
       });
 
       if (!result.success) {
@@ -315,6 +324,14 @@ export function ItemCreateDialog({
               placeholder="Comma-separated tags"
             />
           </div>
+
+          <CollectionMultiSelect
+            id="item-create-collections"
+            collections={collections}
+            value={formState.collectionIds}
+            onChange={(collectionIds) => handleFormChange({ collectionIds })}
+            disabled={isCreating}
+          />
         </div>
 
         <DialogFooter>

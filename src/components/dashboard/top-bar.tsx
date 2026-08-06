@@ -9,12 +9,19 @@ import { CollectionCreateDialog } from "@/components/collections/collection-crea
 import { ItemCreateDialog } from "@/components/items/item-create-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import type { SelectableCollection } from "@/lib/db/collections";
 import { parseCreatableItemTypeFromPathname } from "@/lib/validations/items";
 import { cn } from "@/lib/utils";
 
 import { useSidebar } from "./sidebar-context";
 
-export function TopBar({ isPro }: { isPro: boolean }) {
+export function TopBar({
+  isPro,
+  collections,
+}: {
+  isPro: boolean;
+  collections: SelectableCollection[];
+}) {
   const { toggleSidebar } = useSidebar();
   const pathname = usePathname();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
@@ -88,6 +95,7 @@ export function TopBar({ isPro }: { isPro: boolean }) {
         onOpenChange={setIsCreateOpen}
         isPro={isPro}
         defaultType={defaultType}
+        collections={collections}
       />
     </>
   );

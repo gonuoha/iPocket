@@ -6,6 +6,10 @@ vi.mock("@/auth", () => ({
   auth: vi.fn(),
 }));
 
+vi.mock("@/lib/db/collections", () => ({
+  validateUserCollectionIds: vi.fn(),
+}));
+
 vi.mock("@/lib/db/items", () => ({
   createItem: vi.fn(),
   getItemTypeBySlug: vi.fn(),
@@ -22,6 +26,7 @@ vi.mock("@/lib/r2/storage", () => ({
 }));
 
 import { auth } from "@/auth";
+import { validateUserCollectionIds } from "@/lib/db/collections";
 import {
   createItem as createItemInDb,
   deleteItem as deleteItemInDb,
@@ -33,6 +38,7 @@ import { deleteObject } from "@/lib/r2/storage";
 import { createItem, deleteItem } from "./items";
 
 const mockAuth = vi.mocked(auth);
+const mockValidateUserCollectionIds = vi.mocked(validateUserCollectionIds);
 const mockGetItemTypeBySlug = vi.mocked(getItemTypeBySlug);
 const mockCreateItemInDb = vi.mocked(createItemInDb);
 const mockDeleteItemInDb = vi.mocked(deleteItemInDb);
@@ -59,7 +65,7 @@ const createdItem: ItemDetail = {
     color: "#3b82f6",
   },
   tags: [],
-  collection: null,
+  collections: [],
   createdAt: new Date("2026-08-05T00:00:00.000Z"),
   updatedAt: new Date("2026-08-05T00:00:00.000Z"),
 };
@@ -67,6 +73,7 @@ const createdItem: ItemDetail = {
 describe("createItem", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockValidateUserCollectionIds.mockResolvedValue(true);
   });
 
   it("returns unauthorized when there is no session", async () => {
@@ -126,8 +133,61 @@ describe("createItem", () => {
       fileName: null,
       fileSize: null,
       tags: ["js"],
+      collectionIds: [],
       contentType: "text",
     });
+  });
+
+  it("rejects invalid collection selections", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGetItemTypeBySlug.mockResolvedValue({
+      id: "type-snippet",
+      name: "snippet",
+      icon: "Code",
+      color: "#3b82f6",
+    });
+    mockValidateUserCollectionIds.mockResolvedValue(false);
+
+    const result = await createItem({
+      type: "snippet",
+      title: "Test",
+      collectionIds: ["collection-1"],
+    });
+
+    expect(result).toEqual({
+      success: false,
+      error: "Invalid collection selection",
+    });
+    expect(mockCreateItemInDb).not.toHaveBeenCalled();
+  });
+
+  it("creates an item with collection assignments", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGetItemTypeBySlug.mockResolvedValue({
+      id: "type-snippet",
+      name: "snippet",
+      icon: "Code",
+      color: "#3b82f6",
+    });
+    mockCreateItemInDb.mockResolvedValue(createdItem);
+
+    const result = await createItem({
+      type: "snippet",
+      title: "Test",
+      collectionIds: ["collection-1", "collection-2"],
+    });
+
+    expect(result).toEqual({ success: true, data: createdItem });
+    expect(mockValidateUserCollectionIds).toHaveBeenCalledWith("user-1", [
+      "collection-1",
+      "collection-2",
+    ]);
+    expect(mockCreateItemInDb).toHaveBeenCalledWith(
+      "user-1",
+      expect.objectContaining({
+        collectionIds: ["collection-1", "collection-2"],
+      }),
+    );
   });
 
   it("rejects file references that do not belong to the user", async () => {

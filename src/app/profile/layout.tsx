@@ -9,10 +9,14 @@ export default async function ProfileLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { sidebarData, user } = await getDashboardLayoutData();
+  const { sidebarData, user, collections } = await getDashboardLayoutData();
 
   return (
-    <DashboardShell sidebar={<SidebarContent sidebarData={sidebarData} />} isPro={user.isPro}>
+    <DashboardShell
+      sidebar={<SidebarContent sidebarData={sidebarData} />}
+      isPro={user.isPro}
+      collections={collections}
+    >
       {children}
     </DashboardShell>
   );

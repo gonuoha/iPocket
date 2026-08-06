@@ -3,6 +3,7 @@
 import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ItemDrawer } from "@/components/items/item-drawer";
 import { ItemDrawerProvider } from "@/components/items/item-drawer-context";
+import type { SelectableCollection } from "@/lib/db/collections";
 import { cn } from "@/lib/utils";
 
 import { TopBar } from "./top-bar";
@@ -12,16 +13,18 @@ function DashboardShellInner({
   children,
   sidebar,
   isPro,
+  collections,
 }: {
   children: React.ReactNode;
   sidebar: React.ReactNode;
   isPro: boolean;
+  collections: SelectableCollection[];
 }) {
   const { collapsed, mobileOpen, setMobileOpen } = useSidebar();
 
   return (
     <div className="flex h-svh flex-col overflow-hidden">
-      <TopBar isPro={isPro} />
+      <TopBar isPro={isPro} collections={collections} />
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <aside
@@ -48,7 +51,7 @@ function DashboardShellInner({
         </main>
       </div>
 
-      <ItemDrawer />
+      <ItemDrawer collections={collections} />
     </div>
   );
 }
@@ -57,15 +60,17 @@ export function DashboardShell({
   children,
   sidebar,
   isPro,
+  collections,
 }: {
   children: React.ReactNode;
   sidebar: React.ReactNode;
   isPro: boolean;
+  collections: SelectableCollection[];
 }) {
   return (
     <SidebarProvider>
       <ItemDrawerProvider>
-        <DashboardShellInner sidebar={sidebar} isPro={isPro}>
+        <DashboardShellInner sidebar={sidebar} isPro={isPro} collections={collections}>
           {children}
         </DashboardShellInner>
       </ItemDrawerProvider>

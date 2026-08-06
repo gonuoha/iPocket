@@ -2,9 +2,11 @@ import { cache } from "react";
 
 import {
   getRecentCollections,
+  getSelectableCollections,
   toDashboardStats,
   type DashboardCollection,
   type DashboardStats,
+  type SelectableCollection,
 } from "@/lib/db/collections";
 import {
   getPinnedItems,
@@ -25,6 +27,7 @@ export type DashboardPageData = {
 export type DashboardLayoutData = {
   user: DashboardUser;
   sidebarData: SidebarData;
+  collections: SelectableCollection[];
 };
 
 export const getDashboardPageData = cache(
@@ -49,8 +52,11 @@ export const getDashboardPageData = cache(
 export const getDashboardLayoutData = cache(
   async (): Promise<DashboardLayoutData> => {
     const user = await getCurrentUser();
-    const sidebarData = await getSidebarData(user);
+    const [sidebarData, collections] = await Promise.all([
+      getSidebarData(user),
+      getSelectableCollections(user.id),
+    ]);
 
-    return { user, sidebarData };
+    return { user, sidebarData, collections };
   },
 );

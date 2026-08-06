@@ -122,6 +122,36 @@ describe("createItemSchema", () => {
       expect(result.data.tags).toEqual([]);
     }
   });
+
+  it("defaults collectionIds to an empty array", () => {
+    const result = createItemSchema.safeParse({
+      type: "prompt",
+      title: "Prompt",
+    });
+
+    expect(result.success).toBe(true);
+
+    if (result.success) {
+      expect(result.data.collectionIds).toEqual([]);
+    }
+  });
+
+  it("accepts collectionIds in create payloads", () => {
+    const result = createItemSchema.safeParse({
+      type: "snippet",
+      title: "Snippet",
+      collectionIds: ["collection-1", "collection-2"],
+    });
+
+    expect(result.success).toBe(true);
+
+    if (result.success) {
+      expect(result.data.collectionIds).toEqual([
+        "collection-1",
+        "collection-2",
+      ]);
+    }
+  });
 });
 
 describe("parseCreatableItemTypeFromPathname", () => {

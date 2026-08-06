@@ -38,6 +38,11 @@ export type CreatedCollection = {
   isFavorite: boolean;
 };
 
+export type SelectableCollection = {
+  id: string;
+  name: string;
+};
+
 type CollectionTypeAggregation = {
   types: CollectionItemType[];
   dominantTypeColor: string | null;
@@ -52,20 +57,42 @@ async function getCollectionTypeAggregations(
     return result;
   }
 
-  const typeCounts = await prisma.item.groupBy({
-    by: ["collectionId", "typeId"],
+  const typeCounts = await prisma.itemCollection.findMany({
     where: { collectionId: { in: collectionIds } },
-    _count: { typeId: true },
+    select: {
+      collectionId: true,
+      item: {
+        select: {
+          typeId: true,
+        },
+      },
+    },
   });
 
-  if (typeCounts.length === 0) {
+  const groupedCounts = new Map<string, Map<string, number>>();
+
+  for (const row of typeCounts) {
+    const countsByType =
+      groupedCounts.get(row.collectionId) ?? new Map<string, number>();
+    const currentCount = countsByType.get(row.item.typeId) ?? 0;
+    countsByType.set(row.item.typeId, currentCount + 1);
+    groupedCounts.set(row.collectionId, countsByType);
+  }
+
+  if (groupedCounts.size === 0) {
     for (const collectionId of collectionIds) {
       result.set(collectionId, { types: [], dominantTypeColor: null });
     }
     return result;
   }
 
-  const typeIds = [...new Set(typeCounts.map((row) => row.typeId))];
+  const typeIds = [
+    ...new Set(
+      [...groupedCounts.values()].flatMap((countsByType) => [
+        ...countsByType.keys(),
+      ]),
+    ),
+  ];
   const types = await prisma.itemType.findMany({
     where: { id: { in: typeIds } },
     select: {
@@ -78,22 +105,24 @@ async function getCollectionTypeAggregations(
   const typeById = new Map(types.map((type) => [type.id, type]));
 
   for (const collectionId of collectionIds) {
-    const rows = typeCounts.filter((row) => row.collectionId === collectionId);
+    const countsByType = groupedCounts.get(collectionId);
     const uniqueTypes: CollectionItemType[] = [];
     let dominantTypeColor: string | null = null;
     let maxCount = 0;
 
-    for (const row of rows) {
-      const type = typeById.get(row.typeId);
-      if (!type) {
-        continue;
-      }
+    if (countsByType) {
+      for (const [typeId, count] of countsByType) {
+        const type = typeById.get(typeId);
+        if (!type) {
+          continue;
+        }
 
-      uniqueTypes.push(type);
+        uniqueTypes.push(type);
 
-      if (row._count.typeId > maxCount) {
-        maxCount = row._count.typeId;
-        dominantTypeColor = type.color;
+        if (count > maxCount) {
+          maxCount = count;
+          dominantTypeColor = type.color;
+        }
       }
     }
 
@@ -231,6 +260,37 @@ export async function createCollection(
       isFavorite: true,
     },
   });
+}
+
+export async function getSelectableCollections(
+  userId: string,
+): Promise<SelectableCollection[]> {
+  return prisma.collection.findMany({
+    where: { userId },
+    orderBy: { name: "asc" },
+    select: {
+      id: true,
+      name: true,
+    },
+  });
+}
+
+export async function validateUserCollectionIds(
+  userId: string,
+  collectionIds: string[],
+): Promise<boolean> {
+  if (collectionIds.length === 0) {
+    return true;
+  }
+
+  const count = await prisma.collection.count({
+    where: {
+      userId,
+      id: { in: collectionIds },
+    },
+  });
+
+  return count === collectionIds.length;
 }
 
 export function toDashboardStats(stats: {

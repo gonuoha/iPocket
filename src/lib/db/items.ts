@@ -41,7 +41,7 @@ export type ItemDetail = {
   isPinned: boolean;
   type: CollectionItemType;
   tags: string[];
-  collection: { id: string; name: string } | null;
+  collections: { id: string; name: string }[];
   createdAt: Date;
   updatedAt: Date;
 };
@@ -86,10 +86,19 @@ const itemDetailSelect = {
       },
     },
   },
-  collection: {
+  collections: {
     select: {
-      id: true,
-      name: true,
+      collection: {
+        select: {
+          id: true,
+          name: true,
+        },
+      },
+    },
+    orderBy: {
+      collection: {
+        name: "asc",
+      },
     },
   },
 } as const;
@@ -167,7 +176,7 @@ function mapItemDetail(item: {
   updatedAt: Date;
   type: CollectionItemType;
   tags: { tag: { name: string } }[];
-  collection: { id: string; name: string } | null;
+  collections: { collection: { id: string; name: string } }[];
 }): ItemDetail {
   return {
     id: item.id,
@@ -184,7 +193,7 @@ function mapItemDetail(item: {
     isPinned: item.isPinned,
     type: item.type,
     tags: item.tags.map((entry) => entry.tag.name),
-    collection: item.collection,
+    collections: item.collections.map((entry) => entry.collection),
     createdAt: item.createdAt,
     updatedAt: item.updatedAt,
   };
@@ -235,6 +244,7 @@ export type UpdateItemData = {
   url: string | null;
   language: string | null;
   tags: string[];
+  collectionIds: string[];
 };
 
 export type CreateItemData = {
@@ -248,6 +258,7 @@ export type CreateItemData = {
   fileName: string | null;
   fileSize: number | null;
   tags: string[];
+  collectionIds: string[];
   contentType: "text" | "file";
 };
 
@@ -275,6 +286,13 @@ export async function createItem(
               where: { userId_name: { userId, name } },
               create: { userId, name },
             },
+          },
+        })),
+      },
+      collections: {
+        create: data.collectionIds.map((collectionId) => ({
+          collection: {
+            connect: { id: collectionId },
           },
         })),
       },
@@ -315,6 +333,14 @@ export async function updateItem(
               where: { userId_name: { userId, name } },
               create: { userId, name },
             },
+          },
+        })),
+      },
+      collections: {
+        deleteMany: {},
+        create: data.collectionIds.map((collectionId) => ({
+          collection: {
+            connect: { id: collectionId },
           },
         })),
       },

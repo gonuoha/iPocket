@@ -10,6 +10,7 @@ import {
   updateItem as updateItemInDb,
 } from "@/lib/db/items";
 import type { DeleteItemResult, ItemDetail } from "@/lib/db/items";
+import { validateUserCollectionIds } from "@/lib/db/collections";
 import { getUserIsPro } from "@/lib/db/user";
 import { isOwnedFileUrl } from "@/lib/file-upload";
 import { deleteObject } from "@/lib/r2/storage";
@@ -68,6 +69,15 @@ export async function createItem(
     return { success: false, error: "Invalid file reference" };
   }
 
+  const hasValidCollections = await validateUserCollectionIds(
+    session.user.id,
+    parsed.data.collectionIds,
+  );
+
+  if (!hasValidCollections) {
+    return { success: false, error: "Invalid collection selection" };
+  }
+
   const created = await createItemInDb(session.user.id, {
     typeId: itemType.id,
     title: parsed.data.title,
@@ -79,6 +89,7 @@ export async function createItem(
     fileName: usesFileContent ? (parsed.data.fileName ?? null) : null,
     fileSize: usesFileContent ? (parsed.data.fileSize ?? null) : null,
     tags: parsed.data.tags,
+    collectionIds: parsed.data.collectionIds,
     contentType: usesFileContent ? "file" : "text",
   });
 
@@ -107,6 +118,15 @@ export async function updateItem(
     };
   }
 
+  const hasValidCollections = await validateUserCollectionIds(
+    session.user.id,
+    parsed.data.collectionIds,
+  );
+
+  if (!hasValidCollections) {
+    return { success: false, error: "Invalid collection selection" };
+  }
+
   const updated = await updateItemInDb(session.user.id, itemId, {
     title: parsed.data.title,
     description: parsed.data.description ?? null,
@@ -114,6 +134,7 @@ export async function updateItem(
     url: parsed.data.url ?? null,
     language: parsed.data.language ?? null,
     tags: parsed.data.tags,
+    collectionIds: parsed.data.collectionIds,
   });
 
   if (!updated) {
@@ -121,6 +142,7 @@ export async function updateItem(
   }
 
   revalidatePath(`/items/${updated.type.name.toLowerCase()}`);
+  revalidatePath("/dashboard");
 
   return { success: true, data: updated };
 }

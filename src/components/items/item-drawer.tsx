@@ -17,6 +17,10 @@ import { toast } from "sonner";
 
 import { deleteItem, updateItem } from "@/actions/items";
 import {
+  CollectionMultiSelect,
+  type SelectableCollection,
+} from "@/components/collections/collection-multi-select";
+import {
   AlertDialog,
   AlertDialogAction,
   AlertDialogCancel,
@@ -67,6 +71,7 @@ type EditFormState = {
   url: string;
   language: string;
   tags: string;
+  collectionIds: string[];
 };
 
 const CONTENT_TYPE_NAMES = new Set(["snippet", "prompt", "command", "note"]);
@@ -124,6 +129,7 @@ function toFormState(item: ItemDetailResponse): EditFormState {
     url: item.url ?? "",
     language: item.language ?? "",
     tags: item.tags.join(", "),
+    collectionIds: item.collections.map((collection) => collection.id),
   };
 }
 
@@ -316,13 +322,18 @@ function ItemDrawerContent({
             </section>
           ) : null}
 
-          {item.collection ? (
+          {item.collections.length > 0 ? (
             <section className="space-y-2">
               <h3 className="text-sm font-medium">Collections</h3>
               <div className="flex flex-wrap gap-1.5">
-                <span className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                  {item.collection.name}
-                </span>
+                {item.collections.map((collection) => (
+                  <span
+                    key={collection.id}
+                    className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+                  >
+                    {collection.name}
+                  </span>
+                ))}
               </div>
             </section>
           ) : null}
@@ -352,6 +363,7 @@ function ItemDrawerContent({
 function ItemDrawerEditor({
   item,
   formState,
+  collections,
   onChange,
   onCancel,
   onSave,
@@ -359,6 +371,7 @@ function ItemDrawerEditor({
 }: {
   item: ItemDetailResponse;
   formState: EditFormState;
+  collections: SelectableCollection[];
   onChange: (patch: Partial<EditFormState>) => void;
   onCancel: () => void;
   onSave: () => void;
@@ -476,21 +489,18 @@ function ItemDrawerEditor({
             />
           </div>
 
+          <CollectionMultiSelect
+            id="item-edit-collections"
+            collections={collections}
+            value={formState.collectionIds}
+            onChange={(collectionIds) => onChange({ collectionIds })}
+            disabled={isSaving}
+          />
+
           <section className="space-y-2">
             <h3 className="text-sm font-medium">Type</h3>
             <Badge variant="secondary">{item.type.name}</Badge>
           </section>
-
-          {item.collection ? (
-            <section className="space-y-2">
-              <h3 className="text-sm font-medium">Collections</h3>
-              <div className="flex flex-wrap gap-1.5">
-                <span className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground">
-                  {item.collection.name}
-                </span>
-              </div>
-            </section>
-          ) : null}
 
           <section className="space-y-2">
             <h3 className="text-sm font-medium">Details</h3>
@@ -511,7 +521,13 @@ function ItemDrawerEditor({
   );
 }
 
-function ItemDrawerPanel({ itemId }: { itemId: string }) {
+function ItemDrawerPanel({
+  itemId,
+  collections,
+}: {
+  itemId: string;
+  collections: SelectableCollection[];
+}) {
   const router = useRouter();
   const { closeItem } = useItemDrawer();
   const [item, setItem] = useState<ItemDetailResponse | null>(null);
@@ -622,6 +638,7 @@ function ItemDrawerPanel({ itemId }: { itemId: string }) {
           .split(",")
           .map((tag) => tag.trim())
           .filter((tag) => tag.length > 0),
+        collectionIds: formState.collectionIds,
       });
 
       if (!result.success) {
@@ -700,6 +717,7 @@ function ItemDrawerPanel({ itemId }: { itemId: string }) {
           <ItemDrawerEditor
             item={item}
             formState={formState}
+            collections={collections}
             onChange={handleFormChange}
             onCancel={handleCancel}
             onSave={handleSave}
@@ -733,7 +751,11 @@ function ItemDrawerPanel({ itemId }: { itemId: string }) {
   );
 }
 
-export function ItemDrawer() {
+export function ItemDrawer({
+  collections,
+}: {
+  collections: SelectableCollection[];
+}) {
   const { selectedItemId, closeItem } = useItemDrawer();
 
   return (
@@ -750,7 +772,11 @@ export function ItemDrawer() {
         className="flex h-svh max-w-none flex-col gap-0 p-0 data-[side=right]:w-[min(54rem,92vw)] data-[side=right]:sm:max-w-none"
       >
         {selectedItemId ? (
-          <ItemDrawerPanel key={selectedItemId} itemId={selectedItemId} />
+          <ItemDrawerPanel
+            key={selectedItemId}
+            itemId={selectedItemId}
+            collections={collections}
+          />
         ) : null}
       </SheetContent>
     </Sheet>

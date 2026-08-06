@@ -29,6 +29,7 @@ export const updateItemSchema = z.object({
     z.string().trim().url("Enter a valid URL").nullable(),
   ).optional(),
   tags: z.array(z.string().trim().min(1)).default([]),
+  collectionIds: z.array(z.string().trim().min(1)).default([]),
 });
 
 export const createItemSchema = z
@@ -46,6 +47,7 @@ export const createItemSchema = z
     fileName: z.string().trim().min(1).optional(),
     fileSize: z.number().int().positive().optional(),
     tags: z.array(z.string().trim().min(1)).default([]),
+    collectionIds: z.array(z.string().trim().min(1)).default([]),
   })
   .superRefine((data, ctx) => {
     if (data.type === "link" && !data.url) {

@@ -1,16 +1,24 @@
-# Current Feature
+# Current Feature: Add Item to Collections
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- What success looks like for the active feature -->
+- Add a collection selector to the new-item form (`ItemCreateDialog`) so users can pick one or more collections when creating an item
+- Add the same collection selector to the item edit form in `ItemDrawer` so users can add or remove collection membership when editing
+- Fetch the user's available collections and present them as a multi-select input
+- Persist collection membership on create and update via `createItem` and `updateItem` server actions
+- Validate collection IDs (must belong to the authenticated user) in Zod schemas and server actions
+- Add unit tests for validation schemas and server actions covering collection assignment
 
 ## Notes
 
-<!-- Additional context, constraints, or details from spec -->
+- Out of scope: collection detail pages and any UI for browsing items within a collection
+- Current Prisma schema has `Item.collectionId` (single FK) — multiple collections per item requires a many-to-many junction table (e.g. `ItemCollection`) and a migration; remove or migrate the existing `collectionId` field
+- Follow existing patterns: tag multi-select/connect-or-create in item create/update, `CollectionCreateDialog` for form UX, and shadcn/ui components
+- Revalidate relevant paths (`/dashboard`, `/items/[type]`) after create/update
 
 ## History
 
