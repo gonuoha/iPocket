@@ -16,6 +16,16 @@ export type DashboardItem = {
   tags: string[];
 };
 
+export type FileListItem = {
+  id: string;
+  title: string;
+  fileName: string | null;
+  fileSize: number | null;
+  createdAt: Date;
+  isPinned: boolean;
+  isFavorite: boolean;
+};
+
 export type ItemDetail = {
   id: string;
   title: string;
@@ -109,6 +119,36 @@ const itemSelect = {
     },
   },
 } as const;
+
+const fileItemSelect = {
+  id: true,
+  title: true,
+  fileName: true,
+  fileSize: true,
+  createdAt: true,
+  isPinned: true,
+  isFavorite: true,
+} as const;
+
+function mapFileItem(item: {
+  id: string;
+  title: string;
+  fileName: string | null;
+  fileSize: number | null;
+  createdAt: Date;
+  isPinned: boolean;
+  isFavorite: boolean;
+}): FileListItem {
+  return {
+    id: item.id,
+    title: item.title,
+    fileName: item.fileName,
+    fileSize: item.fileSize,
+    createdAt: item.createdAt,
+    isPinned: item.isPinned,
+    isFavorite: item.isFavorite,
+  };
+}
 
 function mapItemDetail(item: {
   id: string;
@@ -377,6 +417,19 @@ export async function getItemsByType(
   });
 
   return items.map(mapItem);
+}
+
+export async function getFileItemsByType(
+  userId: string,
+  typeId: string,
+): Promise<FileListItem[]> {
+  const items = await prisma.item.findMany({
+    where: { userId, typeId },
+    orderBy: { createdAt: "desc" },
+    select: fileItemSelect,
+  });
+
+  return items.map(mapFileItem);
 }
 
 export type SystemItemType = {
