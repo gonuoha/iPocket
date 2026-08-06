@@ -7,6 +7,7 @@ import type { DashboardItem } from "@/lib/db/items";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
 import { cn } from "@/lib/utils";
 
+import { ItemCopyButton } from "./item-copy-button";
 import { useItemDrawer } from "./item-drawer-context";
 
 function formatDate(date: Date | string) {
@@ -25,68 +26,71 @@ export function ItemCard({ item }: ItemCardProps) {
   const typeStyles = getItemTypeStyles(item.type.color);
 
   return (
-    <button
-      type="button"
-      onClick={() => openItem(item.id)}
-      className="flex h-full w-full flex-col rounded-xl border border-border border-l-4 bg-card p-4 text-left transition-colors hover:bg-muted/40"
-      style={
-        item.type.color?.startsWith("#")
-          ? { borderLeftColor: item.type.color }
-          : undefined
-      }
-    >
-      <div className="flex items-start gap-3">
-        <div
-          className={cn(
-            "flex size-10 shrink-0 items-center justify-center rounded-lg",
-            typeStyles.textClassName,
-            typeStyles.bgClassName,
-            !item.type.color && "bg-muted text-muted-foreground",
-          )}
-          style={{ ...typeStyles.textStyle, ...typeStyles.bgStyle }}
-        >
-          {createElement(getItemTypeIcon(item.type.icon), { className: "size-4" })}
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between gap-2">
-            <div className="min-w-0">
-              <div className="flex items-center gap-2">
-                <h3 className="truncate font-medium">{item.title}</h3>
-                {item.isPinned ? (
-                  <Pin className="size-3.5 shrink-0 text-muted-foreground" />
-                ) : null}
-                {item.isFavorite ? (
-                  <Star className="size-3.5 shrink-0 fill-yellow-400 text-yellow-400" />
-                ) : null}
-              </div>
-            </div>
-            <time
-              dateTime={item.updatedAt.toISOString()}
-              className="shrink-0 text-xs text-muted-foreground"
-            >
-              {formatDate(item.updatedAt)}
-            </time>
+    <div className="relative h-full">
+      <button
+        type="button"
+        onClick={() => openItem(item.id)}
+        className="flex h-full w-full flex-col rounded-xl border border-border border-l-4 bg-card p-4 text-left transition-colors hover:bg-muted/40"
+        style={
+          item.type.color?.startsWith("#")
+            ? { borderLeftColor: item.type.color }
+            : undefined
+        }
+      >
+        <div className="flex items-start gap-3">
+          <div
+            className={cn(
+              "flex size-10 shrink-0 items-center justify-center rounded-lg",
+              typeStyles.textClassName,
+              typeStyles.bgClassName,
+              !item.type.color && "bg-muted text-muted-foreground",
+            )}
+            style={{ ...typeStyles.textStyle, ...typeStyles.bgStyle }}
+          >
+            {createElement(getItemTypeIcon(item.type.icon), { className: "size-4" })}
           </div>
-          {item.description ? (
-            <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
-              {item.description}
-            </p>
-          ) : null}
+          <div className="min-w-0 flex-1">
+            <div className="flex items-start justify-between gap-2">
+              <div className="min-w-0">
+                <div className="flex items-center gap-2">
+                  <h3 className="truncate font-medium">{item.title}</h3>
+                  {item.isPinned ? (
+                    <Pin className="size-3.5 shrink-0 text-muted-foreground" />
+                  ) : null}
+                  {item.isFavorite ? (
+                    <Star className="size-3.5 shrink-0 fill-yellow-400 text-yellow-400" />
+                  ) : null}
+                </div>
+              </div>
+              <time
+                dateTime={item.updatedAt.toISOString()}
+                className="shrink-0 text-xs text-muted-foreground"
+              >
+                {formatDate(item.updatedAt)}
+              </time>
+            </div>
+            {item.description ? (
+              <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
+                {item.description}
+              </p>
+            ) : null}
+          </div>
         </div>
-      </div>
-      {item.tags.length > 0 ? (
-        <div className="mt-3 flex flex-wrap gap-1.5">
-          {item.tags.map((tag) => (
-            <span
-              key={tag}
-              className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
-      ) : null}
-    </button>
+        {item.tags.length > 0 ? (
+          <div className="mt-3 flex flex-wrap gap-1.5">
+            {item.tags.map((tag) => (
+              <span
+                key={tag}
+                className="rounded-md bg-muted px-2 py-0.5 text-xs text-muted-foreground"
+              >
+                {tag}
+              </span>
+            ))}
+          </div>
+        ) : null}
+      </button>
+      <ItemCopyButton itemId={item.id} className="absolute right-3 bottom-3" />
+    </div>
   );
 }
 

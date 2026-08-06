@@ -48,6 +48,7 @@ import {
 } from "@/components/markdown-editor/markdown-editor";
 import { Textarea } from "@/components/ui/textarea";
 import type { ItemDetail } from "@/lib/db/items";
+import { getItemCopyText } from "@/lib/item-copy";
 import { formatFileSize } from "@/lib/file-upload";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
 import { cn } from "@/lib/utils";
@@ -156,15 +157,8 @@ function ItemDrawerContent({
   onDelete: () => void;
 }) {
   async function handleCopy() {
-    const textToCopy =
-      item.content ??
-      item.url ??
-      item.fileName ??
-      item.description ??
-      item.title;
-
     try {
-      await navigator.clipboard.writeText(textToCopy);
+      await navigator.clipboard.writeText(getItemCopyText(item));
       toast.success("Copied to clipboard");
     } catch {
       toast.error("Failed to copy");
