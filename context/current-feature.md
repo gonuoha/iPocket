@@ -1,24 +1,16 @@
-# Current Feature: Add Item to Collections
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add a collection selector to the new-item form (`ItemCreateDialog`) so users can pick one or more collections when creating an item
-- Add the same collection selector to the item edit form in `ItemDrawer` so users can add or remove collection membership when editing
-- Fetch the user's available collections and present them as a multi-select input
-- Persist collection membership on create and update via `createItem` and `updateItem` server actions
-- Validate collection IDs (must belong to the authenticated user) in Zod schemas and server actions
-- Add unit tests for validation schemas and server actions covering collection assignment
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Out of scope: collection detail pages and any UI for browsing items within a collection
-- Current Prisma schema has `Item.collectionId` (single FK) — multiple collections per item requires a many-to-many junction table (e.g. `ItemCollection`) and a migration; remove or migrate the existing `collectionId` field
-- Follow existing patterns: tag multi-select/connect-or-create in item create/update, `CollectionCreateDialog` for form UX, and shadcn/ui components
-- Revalidate relevant paths (`/dashboard`, `/items/[type]`) after create/update
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -61,3 +53,4 @@ In Progress
 - 2026-08-06: Completed **File List View** — `FileList` and `FileListRow` for `/items/files` with extension icons, file size, upload date, row hover highlight, ItemDrawer on click, and direct download; `FileListItem` type and `getFileItemsByType` db helper
 - 2026-08-06: Completed **Item Copy** — shared `getItemCopyText` utility with content → url → fileName → description → title priority; reusable `ItemCopyButton` on item cards and in the item drawer with clipboard write, toast feedback, and copied state
 - 2026-08-06: Completed **Collection Create** — `CollectionCreateDialog` from top bar New Collection button with name/description fields; Zod-validated `createCollection` server action and db helper with user scoping and duplicate-name handling; success/error toasts, path revalidation, and `router.refresh()`; unit tests for schema and action; dashboard Overview section restyled as a grouping-only container
+- 2026-08-06: Completed **Add Item to Collections** — `ItemCollection` junction table migration replacing single `collectionId` FK; searchable `CollectionMultiSelect` in `ItemCreateDialog` and `ItemDrawer`; collection ownership validation in Zod schemas and `createItem`/`updateItem` server actions; collections fetched in layouts and passed through dashboard shell; unit tests for schema and action collection assignment
