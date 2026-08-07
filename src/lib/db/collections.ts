@@ -415,6 +415,34 @@ export async function updateCollection(
   });
 }
 
+export type ToggleCollectionFavoriteResult = {
+  id: string;
+  isFavorite: boolean;
+};
+
+export async function toggleCollectionFavorite(
+  userId: string,
+  collectionId: string,
+): Promise<ToggleCollectionFavoriteResult | null> {
+  const existing = await prisma.collection.findFirst({
+    where: { id: collectionId, userId },
+    select: { id: true, isFavorite: true },
+  });
+
+  if (!existing) {
+    return null;
+  }
+
+  return prisma.collection.update({
+    where: { id: collectionId },
+    data: { isFavorite: !existing.isFavorite },
+    select: {
+      id: true,
+      isFavorite: true,
+    },
+  });
+}
+
 export type DeletedCollection = {
   id: string;
   name: string;

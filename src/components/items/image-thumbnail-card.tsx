@@ -1,11 +1,12 @@
 "use client";
 
-import { Download, Pin, Star } from "lucide-react";
+import { Download, Pin } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import type { DashboardItem } from "@/lib/db/items";
 import { cn } from "@/lib/utils";
 
+import { ItemFavoriteButton } from "./item-favorite-button";
 import { useItemDrawer } from "./item-drawer-context";
 
 type ImageThumbnailCardProps = {
@@ -29,18 +30,11 @@ export function ImageThumbnailCard({ item }: ImageThumbnailCardProps) {
             alt={item.title}
             className="size-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
-          {item.isPinned || item.isFavorite ? (
-            <div className="absolute top-2 right-2 flex items-center gap-1">
-              {item.isPinned ? (
-                <span className="rounded-md bg-background/80 p-1 backdrop-blur-sm">
-                  <Pin className="size-3.5 text-muted-foreground" />
-                </span>
-              ) : null}
-              {item.isFavorite ? (
-                <span className="rounded-md bg-background/80 p-1 backdrop-blur-sm">
-                  <Star className="size-3.5 fill-yellow-400 text-yellow-400" />
-                </span>
-              ) : null}
+          {item.isPinned ? (
+            <div className="absolute top-2 left-2 flex items-center gap-1">
+              <span className="rounded-md bg-background/80 p-1 backdrop-blur-sm">
+                <Pin className="size-3.5 text-muted-foreground" />
+              </span>
             </div>
           ) : null}
         </div>
@@ -48,6 +42,12 @@ export function ImageThumbnailCard({ item }: ImageThumbnailCardProps) {
           <h3 className="truncate text-sm font-medium">{item.title}</h3>
         </div>
       </button>
+      <ItemFavoriteButton
+        key={`${item.id}-${item.isFavorite}`}
+        itemId={item.id}
+        isFavorite={item.isFavorite}
+        className="absolute top-2 right-2 rounded-md bg-background/80 backdrop-blur-sm"
+      />
       <a
         href={`/api/items/${item.id}/download?download=1`}
         download

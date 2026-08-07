@@ -6,9 +6,11 @@ import { auth } from "@/auth";
 import {
   createCollection as createCollectionInDb,
   deleteCollection as deleteCollectionInDb,
+  toggleCollectionFavorite as toggleCollectionFavoriteInDb,
   updateCollection as updateCollectionInDb,
   type CreatedCollection,
   type DeletedCollection,
+  type ToggleCollectionFavoriteResult,
 } from "@/lib/db/collections";
 import {
   createCollectionSchema,
@@ -70,6 +72,7 @@ export async function createCollection(
 function revalidateCollectionPaths(collectionId?: string) {
   revalidatePath("/dashboard");
   revalidatePath("/profile");
+  revalidatePath("/favorites");
   revalidatePath("/collections");
 
   if (collectionId) {
@@ -139,4 +142,27 @@ export async function deleteCollection(
   revalidateCollectionPaths(collectionId);
 
   return { success: true, data: deleted };
+}
+
+export async function toggleCollectionFavorite(
+  collectionId: string,
+): Promise<ActionResult<ToggleCollectionFavoriteResult>> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const result = await toggleCollectionFavoriteInDb(
+    session.user.id,
+    collectionId,
+  );
+
+  if (!result) {
+    return { success: false, error: "Collection not found" };
+  }
+
+  revalidateCollectionPaths(collectionId);
+
+  return { success: true, data: result };
 }

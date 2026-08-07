@@ -1,8 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { Ellipsis, Pencil, Star, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 
+import { toggleCollectionFavorite } from "@/actions/collections";
 import { CollectionDeleteDialog } from "@/components/collections/collection-delete-dialog";
 import { CollectionEditDialog } from "@/components/collections/collection-edit-dialog";
 import {
@@ -23,8 +26,29 @@ type CollectionCardMenuProps = {
 };
 
 export function CollectionCardMenu({ collection }: CollectionCardMenuProps) {
+  const router = useRouter();
   const [isEditOpen, setIsEditOpen] = useState(false);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [isFavorite, setIsFavorite] = useState(collection.isFavorite);
+  const [isPending, startTransition] = useTransition();
+
+  function handleFavoriteToggle() {
+    const nextIsFavorite = !isFavorite;
+    setIsFavorite(nextIsFavorite);
+
+    startTransition(async () => {
+      const result = await toggleCollectionFavorite(collection.id);
+
+      if (!result.success) {
+        setIsFavorite(!nextIsFavorite);
+        toast.error(result.error);
+        return;
+      }
+
+      setIsFavorite(result.data.isFavorite);
+      router.refresh();
+    });
+  }
 
   return (
     <>
@@ -44,13 +68,16 @@ export function CollectionCardMenu({ collection }: CollectionCardMenuProps) {
             <Pencil />
             Edit
           </DropdownMenuItem>
-          <DropdownMenuItem>
+          <DropdownMenuItem
+            disabled={isPending}
+            onClick={handleFavoriteToggle}
+          >
             <Star
               className={cn(
-                collection.isFavorite && "fill-yellow-400 text-yellow-400",
+                isFavorite && "fill-yellow-400 text-yellow-400",
               )}
             />
-            Favorite
+            {isFavorite ? "Unfavorite" : "Favorite"}
           </DropdownMenuItem>
           <DropdownMenuItem
             variant="destructive"

@@ -1,16 +1,27 @@
-# Current Feature
+# Current Feature: Favorite Toggle
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- What success looks like for the active feature -->
+- Add `toggleItemFavorite` and `toggleCollectionFavorite` server actions with auth and ownership checks
+- Add db helpers to flip `isFavorite` on Item and Collection records
+- Wire ItemDrawer favorite button to toggle state with toast feedback and path revalidation
+- Wire CollectionDetailActions favorite button on `/collections/[id]`
+- Add clickable favorite toggle on item cards (ItemCard and related card views)
+- Wire collection card favorite action (CollectionCardMenu menu item)
+- Revalidate affected routes: `/dashboard`, `/favorites`, `/items/[type]`, `/collections`, `/collections/[id]`
+- Unit tests for toggle server actions
 
 ## Notes
 
-<!-- Additional context, constraints, or details from spec -->
+- `isFavorite` boolean already exists on Item and Collection (Prisma schema + seed data)
+- Favorite UI is display-only today — buttons exist in ItemDrawer, CollectionDetailActions, CollectionCardMenu, and star indicators on ItemCard/CollectionCard with no handlers
+- Favorites page (`/favorites`) is already complete; toggling should reflect there via revalidation
+- Follow existing server action patterns in `src/actions/items.ts` and `src/actions/collections.ts`
+- Active state styling: `fill-yellow-400 text-yellow-400` with yellow border/bg on buttons
 
 ## History
 

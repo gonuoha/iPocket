@@ -1,5 +1,4 @@
 import Link from "next/link";
-import { Star } from "lucide-react";
 
 import type { DashboardCollection } from "@/lib/db/collections";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
@@ -22,7 +21,10 @@ export function CollectionCard({ collection }: CollectionCardProps) {
       }
     >
       <div className="absolute top-2 right-2 z-10">
-        <CollectionCardMenu collection={collection} />
+        <CollectionCardMenu
+          key={`${collection.id}-${collection.isFavorite}`}
+          collection={collection}
+        />
       </div>
 
       <Link href={`/collections/${collection.id}`} className="block p-4">
@@ -56,11 +58,6 @@ export function CollectionCard({ collection }: CollectionCardProps) {
                 </span>
               );
             })}
-          </div>
-        ) : null}
-        {collection.isFavorite ? (
-          <div className="mt-3">
-            <Star className="size-4 fill-yellow-400 text-yellow-400" />
           </div>
         ) : null}
       </Link>

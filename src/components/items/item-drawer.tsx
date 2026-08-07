@@ -9,7 +9,6 @@ import {
   Info,
   Pencil,
   Pin,
-  Star,
   Tag,
   Trash2,
 } from "lucide-react";
@@ -20,6 +19,7 @@ import {
   CollectionMultiSelect,
   type SelectableCollection,
 } from "@/components/collections/collection-multi-select";
+import { ItemFavoriteButton } from "@/components/items/item-favorite-button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -157,10 +157,12 @@ function ItemDrawerContent({
   item,
   onEdit,
   onDelete,
+  onFavoriteToggle,
 }: {
   item: ItemDetailResponse;
   onEdit: () => void;
   onDelete: () => void;
+  onFavoriteToggle: (isFavorite: boolean) => void;
 }) {
   async function handleCopy() {
     try {
@@ -174,23 +176,12 @@ function ItemDrawerContent({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex flex-wrap items-center gap-2 border-b border-border pb-4">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className={cn(
-            "shrink-0",
-            item.isFavorite &&
-              "border-yellow-400/40 bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400/15 hover:text-yellow-400",
-          )}
-        >
-          <Star
-            className={cn(
-              item.isFavorite && "fill-yellow-400 text-yellow-400",
-            )}
-          />
-          Favorite
-        </Button>
+        <ItemFavoriteButton
+          itemId={item.id}
+          isFavorite={item.isFavorite}
+          variant="button"
+          onToggle={onFavoriteToggle}
+        />
         <Button type="button" variant="outline" size="sm" className="shrink-0">
           <Pin />
           Pin
@@ -658,6 +649,10 @@ function ItemDrawerPanel({
     });
   }
 
+  function handleFavoriteToggle(isFavorite: boolean) {
+    setItem((current) => (current ? { ...current, isFavorite } : current));
+  }
+
   const typeStyles = item ? getItemTypeStyles(item.type.color) : null;
 
   return (
@@ -711,6 +706,7 @@ function ItemDrawerPanel({
             item={item}
             onEdit={handleEdit}
             onDelete={() => setIsDeleteOpen(true)}
+            onFavoriteToggle={handleFavoriteToggle}
           />
         ) : null}
         {!isLoading && item && mode === "edit" && formState ? (

@@ -7,9 +7,14 @@ import {
   createItem as createItemInDb,
   deleteItem as deleteItemInDb,
   getItemTypeBySlug,
+  toggleItemFavorite as toggleItemFavoriteInDb,
   updateItem as updateItemInDb,
 } from "@/lib/db/items";
-import type { DeleteItemResult, ItemDetail } from "@/lib/db/items";
+import type {
+  DeleteItemResult,
+  ItemDetail,
+  ToggleItemFavoriteResult,
+} from "@/lib/db/items";
 import { validateUserCollectionIds } from "@/lib/db/collections";
 import { getUserIsPro } from "@/lib/db/user";
 import { isOwnedFileUrl } from "@/lib/file-upload";
@@ -174,4 +179,32 @@ export async function deleteItem(
   revalidatePath("/dashboard");
 
   return { success: true, data: deleted };
+}
+
+function revalidateItemFavoritePaths(typeName: string) {
+  revalidatePath(`/items/${typeName.toLowerCase()}`);
+  revalidatePath("/dashboard");
+  revalidatePath("/favorites");
+  revalidatePath("/profile");
+  revalidatePath("/collections", "layout");
+}
+
+export async function toggleItemFavorite(
+  itemId: string,
+): Promise<ActionResult<ToggleItemFavoriteResult>> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const result = await toggleItemFavoriteInDb(session.user.id, itemId);
+
+  if (!result) {
+    return { success: false, error: "Item not found" };
+  }
+
+  revalidateItemFavoritePaths(result.typeName);
+
+  return { success: true, data: result };
 }

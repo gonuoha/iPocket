@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import { Pencil, Star, Trash2 } from "lucide-react";
+import { Pencil, Trash2 } from "lucide-react";
 
 import { CollectionDeleteDialog } from "@/components/collections/collection-delete-dialog";
 import { CollectionEditDialog } from "@/components/collections/collection-edit-dialog";
+import { CollectionFavoriteButton } from "@/components/collections/collection-favorite-button";
 import { Button } from "@/components/ui/button";
-import { cn } from "@/lib/utils";
 
 type CollectionDetailActionsProps = {
   collection: {
@@ -26,23 +26,11 @@ export function CollectionDetailActions({
   return (
     <>
       <div className="flex shrink-0 items-center gap-2">
-        <Button
-          type="button"
-          variant="outline"
-          size="sm"
-          className={cn(
-            collection.isFavorite &&
-              "border-yellow-400/40 bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400/15 hover:text-yellow-400",
-          )}
-          aria-label="Favorite"
-        >
-          <Star
-            className={cn(
-              collection.isFavorite && "fill-yellow-400 text-yellow-400",
-            )}
-          />
-          Favorite
-        </Button>
+        <CollectionFavoriteButton
+          key={`${collection.id}-${collection.isFavorite}`}
+          collectionId={collection.id}
+          isFavorite={collection.isFavorite}
+        />
         <Button
           type="button"
           variant="outline"

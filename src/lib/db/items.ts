@@ -365,6 +365,54 @@ export async function updateItem(
   return mapItemDetail(item);
 }
 
+export type ToggleItemFavoriteResult = {
+  id: string;
+  isFavorite: boolean;
+  typeName: string;
+};
+
+export async function toggleItemFavorite(
+  userId: string,
+  itemId: string,
+): Promise<ToggleItemFavoriteResult | null> {
+  const existing = await prisma.item.findFirst({
+    where: { id: itemId, userId },
+    select: {
+      id: true,
+      isFavorite: true,
+      type: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  if (!existing) {
+    return null;
+  }
+
+  const updated = await prisma.item.update({
+    where: { id: itemId },
+    data: { isFavorite: !existing.isFavorite },
+    select: {
+      id: true,
+      isFavorite: true,
+      type: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  return {
+    id: updated.id,
+    isFavorite: updated.isFavorite,
+    typeName: updated.type.name,
+  };
+}
+
 export type DeleteItemResult = {
   typeName: string;
   fileUrl: string | null;

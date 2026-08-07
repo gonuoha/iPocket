@@ -1,13 +1,14 @@
 "use client";
 
 import { createElement } from "react";
-import { Pin, Star } from "lucide-react";
+import { Pin } from "lucide-react";
 
 import type { DashboardItem } from "@/lib/db/items";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
 import { cn } from "@/lib/utils";
 
 import { ItemCopyButton } from "./item-copy-button";
+import { ItemFavoriteButton } from "./item-favorite-button";
 import { useItemDrawer } from "./item-drawer-context";
 
 function formatDate(date: Date | string) {
@@ -30,7 +31,7 @@ export function ItemCard({ item }: ItemCardProps) {
       <button
         type="button"
         onClick={() => openItem(item.id)}
-        className="flex h-full w-full flex-col rounded-xl border border-border border-l-4 bg-card p-4 text-left transition-colors hover:bg-muted/40"
+        className="flex h-full w-full flex-col rounded-xl border border-border border-l-4 bg-card p-4 pr-12 text-left transition-colors hover:bg-muted/40"
         style={
           item.type.color?.startsWith("#")
             ? { borderLeftColor: item.type.color }
@@ -56,9 +57,6 @@ export function ItemCard({ item }: ItemCardProps) {
                   <h3 className="truncate font-medium">{item.title}</h3>
                   {item.isPinned ? (
                     <Pin className="size-3.5 shrink-0 text-muted-foreground" />
-                  ) : null}
-                  {item.isFavorite ? (
-                    <Star className="size-3.5 shrink-0 fill-yellow-400 text-yellow-400" />
                   ) : null}
                 </div>
               </div>
@@ -89,6 +87,12 @@ export function ItemCard({ item }: ItemCardProps) {
           </div>
         ) : null}
       </button>
+      <ItemFavoriteButton
+        key={`${item.id}-${item.isFavorite}`}
+        itemId={item.id}
+        isFavorite={item.isFavorite}
+        className="absolute top-3 right-3"
+      />
       <ItemCopyButton itemId={item.id} className="absolute right-3 bottom-3" />
     </div>
   );

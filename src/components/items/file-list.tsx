@@ -1,7 +1,7 @@
 "use client";
 
 import { createElement } from "react";
-import { Download, Pin, Star } from "lucide-react";
+import { Download, Pin } from "lucide-react";
 
 import { buttonVariants } from "@/components/ui/button";
 import type { FileListItem } from "@/lib/db/items";
@@ -9,6 +9,7 @@ import { formatFileSize } from "@/lib/file-upload";
 import { getFileIconByExtension } from "@/lib/file-icons";
 import { cn } from "@/lib/utils";
 
+import { ItemFavoriteButton } from "./item-favorite-button";
 import { useItemDrawer } from "./item-drawer-context";
 
 function formatUploadDate(date: Date | string) {
@@ -51,9 +52,6 @@ export function FileListRow({ item }: FileListRowProps) {
             {item.isPinned ? (
               <Pin className="size-3.5 shrink-0 text-muted-foreground" />
             ) : null}
-            {item.isFavorite ? (
-              <Star className="size-3.5 shrink-0 fill-yellow-400 text-yellow-400" />
-            ) : null}
           </div>
           <div className="mt-1 flex flex-col gap-1 text-sm text-muted-foreground sm:hidden">
             {item.fileSize ? <span>{formatFileSize(item.fileSize)}</span> : null}
@@ -78,6 +76,11 @@ export function FileListRow({ item }: FileListRowProps) {
             {formatUploadDate(item.createdAt)}
           </time>
         </div>
+        <ItemFavoriteButton
+          key={`${item.id}-${item.isFavorite}`}
+          itemId={item.id}
+          isFavorite={item.isFavorite}
+        />
         <a
           href={`/api/items/${item.id}/download?download=1`}
           download={item.fileName ?? undefined}
