@@ -1,27 +1,16 @@
-# Current Feature: Favorite Toggle
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add `toggleItemFavorite` and `toggleCollectionFavorite` server actions with auth and ownership checks
-- Add db helpers to flip `isFavorite` on Item and Collection records
-- Wire ItemDrawer favorite button to toggle state with toast feedback and path revalidation
-- Wire CollectionDetailActions favorite button on `/collections/[id]`
-- Add clickable favorite toggle on item cards (ItemCard and related card views)
-- Wire collection card favorite action (CollectionCardMenu menu item)
-- Revalidate affected routes: `/dashboard`, `/favorites`, `/items/[type]`, `/collections`, `/collections/[id]`
-- Unit tests for toggle server actions
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- `isFavorite` boolean already exists on Item and Collection (Prisma schema + seed data)
-- Favorite UI is display-only today — buttons exist in ItemDrawer, CollectionDetailActions, CollectionCardMenu, and star indicators on ItemCard/CollectionCard with no handlers
-- Favorites page (`/favorites`) is already complete; toggling should reflect there via revalidation
-- Follow existing server action patterns in `src/actions/items.ts` and `src/actions/collections.ts`
-- Active state styling: `fill-yellow-400 text-yellow-400` with yellow border/bg on buttons
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -72,3 +61,4 @@ In Progress
 - 2026-08-07: Completed **Settings Page** — protected `/settings` route with dashboard shell, Settings link in sidebar user menu, account actions (change password, forgot password, delete account) moved from profile
 - 2026-08-08: Completed **Editor Preferences Settings** — editor preferences card on `/settings` (font size, tab size, theme, word wrap, minimap); `editorPreferences` JSON column on User with migration; `updateEditorPreferences` server action; `EditorPreferencesContext` wired through dashboard shell; Monaco editor applies preferences with custom monokai/github-dark themes; auto-save with toast; unit tests for parse, validation, and action
 - 2026-08-08: Completed **Favorites Page** — protected `/favorites` route with compact terminal-style list of favorited items and collections; TopBar star navigation; `getFavoriteItems` and `getAllFavoriteCollections` db helpers sorted by `updatedAt`; ItemDrawer and collection page navigation; empty state; wide layout matching items/collections pages
+- 2026-08-08: Completed **Favorite Toggle** — `toggleItemFavorite` and `toggleCollectionFavorite` server actions and db helpers; `ItemFavoriteButton` and `CollectionFavoriteButton` wired in ItemDrawer, item cards/rows, image and file views, collection detail page, and collection card menu; path revalidation for dashboard, favorites, items, and collections; unit tests for toggle actions
