@@ -9,7 +9,7 @@ export default async function ProfileLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { sidebarData, user, collections, searchData } = await getDashboardLayoutData();
+  const { sidebarData, user, collections, searchData, editorPreferences } = await getDashboardLayoutData();
 
   return (
     <DashboardShell
@@ -17,6 +17,7 @@ export default async function ProfileLayout({
       isPro={user.isPro}
       collections={collections}
       searchData={searchData}
+      editorPreferences={editorPreferences}
     >
       {children}
     </DashboardShell>
