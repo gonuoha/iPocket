@@ -1,26 +1,16 @@
-# Current Feature: Favorites Page
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add star icon button to TopBar linking to `/favorites`
-- Create `/favorites` route with auth protection
-- Fetch all user favorited items and collections
-- Compact list view (VS Code/terminal style, not cards)
-- Each row shows: type icon, title, type badge, date added
-- Separate sections for items and collections with counts
-- Click item opens ItemDrawer; click collection navigates to `/collections/[id]`
-- Empty state when no favorites
-- Sort by most recently favorited (`updatedAt`)
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- UI style: monospace or semi-monospace font, minimal padding, high density
-- Subtle hover states; no cards or heavy borders — clean lines only
-- Spec: `context/features/favorites-spec.md`
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -70,3 +60,4 @@ In Progress
 - 2026-08-06: Completed **Pagination** — paginated `/items/[type]`, `/collections/[id]`, and `/collections` pages with numbered prev/next controls, page-scoped Prisma queries, shared pagination utilities and `PaginationControls` component, explicit dashboard collection/item limits, and unit tests for pagination helpers
 - 2026-08-07: Completed **Settings Page** — protected `/settings` route with dashboard shell, Settings link in sidebar user menu, account actions (change password, forgot password, delete account) moved from profile
 - 2026-08-08: Completed **Editor Preferences Settings** — editor preferences card on `/settings` (font size, tab size, theme, word wrap, minimap); `editorPreferences` JSON column on User with migration; `updateEditorPreferences` server action; `EditorPreferencesContext` wired through dashboard shell; Monaco editor applies preferences with custom monokai/github-dark themes; auto-save with toast; unit tests for parse, validation, and action
+- 2026-08-08: Completed **Favorites Page** — protected `/favorites` route with compact terminal-style list of favorited items and collections; TopBar star navigation; `getFavoriteItems` and `getAllFavoriteCollections` db helpers sorted by `updatedAt`; ItemDrawer and collection page navigation; empty state; wide layout matching items/collections pages
