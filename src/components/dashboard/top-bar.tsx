@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Code2, PanelLeft, Search } from "lucide-react";
+import { Code2, PanelLeft, Search, Star } from "lucide-react";
 
 import { CollectionCreateDialog } from "@/components/collections/collection-create-dialog";
 import { ItemCreateDialog } from "@/components/items/item-create-dialog";
@@ -83,6 +83,18 @@ export function TopBar({
       </div>
 
       <div className="flex shrink-0 items-center gap-2 justify-self-end">
+        <Button
+          variant="ghost"
+          size="icon"
+          className="shrink-0"
+          render={<Link href="/favorites" aria-label="Favorites" />}
+        >
+          <Star
+            className={cn(
+              pathname === "/favorites" && "fill-yellow-400 text-yellow-400",
+            )}
+          />
+        </Button>
         <Button
           variant="outline"
           size="sm"

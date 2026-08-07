@@ -470,6 +470,16 @@ export async function getSearchableItems(
   }));
 }
 
+export async function getFavoriteItems(userId: string): Promise<DashboardItem[]> {
+  const items = await prisma.item.findMany({
+    where: { userId, isFavorite: true },
+    orderBy: { updatedAt: "desc" },
+    select: itemSelect,
+  });
+
+  return items.map(mapItem);
+}
+
 export async function getPinnedItems(
   userId: string,
   limit = 20,

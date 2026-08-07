@@ -15,13 +15,19 @@ export const proxy = auth((req) => {
   const isSettings = pathname === "/settings";
   const isItems = pathname.startsWith("/items");
   const isCollections = pathname.startsWith("/collections");
+  const isFavorites = pathname.startsWith("/favorites");
 
   if (isAuthPage && isLoggedIn) {
     return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
   }
 
   if (
-    (isDashboard || isProfile || isSettings || isItems || isCollections) &&
+    (isDashboard ||
+      isProfile ||
+      isSettings ||
+      isItems ||
+      isCollections ||
+      isFavorites) &&
     !isLoggedIn
   ) {
     const signInUrl = new URL("/sign-in", req.nextUrl.origin);
@@ -50,5 +56,7 @@ export const config = {
     "/items/:path*",
     "/collections",
     "/collections/:path*",
+    "/favorites",
+    "/favorites/:path*",
   ],
 };

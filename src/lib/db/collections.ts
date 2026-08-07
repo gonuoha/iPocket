@@ -63,6 +63,12 @@ export type SearchableCollection = {
   itemCount: number;
 };
 
+export type FavoriteCollection = {
+  id: string;
+  name: string;
+  updatedAt: Date;
+};
+
 type CollectionTypeAggregation = {
   types: CollectionItemType[];
   dominantTypeColor: string | null;
@@ -297,6 +303,20 @@ export async function getRecentCollections(
       aggregations.get(collection.id) ?? { types: [], dominantTypeColor: null },
     ),
   );
+}
+
+export async function getAllFavoriteCollections(
+  userId: string,
+): Promise<FavoriteCollection[]> {
+  return prisma.collection.findMany({
+    where: { userId, isFavorite: true },
+    orderBy: { updatedAt: "desc" },
+    select: {
+      id: true,
+      name: true,
+      updatedAt: true,
+    },
+  });
 }
 
 export async function getFavoriteCollections(

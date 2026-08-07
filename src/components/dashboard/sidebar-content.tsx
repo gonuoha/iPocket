@@ -37,7 +37,7 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
   const navItems = [
     { href: "/dashboard", label: "All Items", icon: LayoutGrid, count: null },
     {
-      href: "/dashboard/favorites",
+      href: "/favorites",
       label: "Favorites",
       icon: Star,
       count: itemCounts.favoriteCount,
