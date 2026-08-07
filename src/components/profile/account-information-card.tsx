@@ -1,17 +1,7 @@
 "use client";
 
-import { CalendarDays, KeyRound, Mail } from "lucide-react";
-import { useState } from "react";
+import { CalendarDays, Mail } from "lucide-react";
 
-import { ChangePasswordForm } from "@/components/profile/change-password-form";
-import { DeleteAccountButton } from "@/components/profile/delete-account-button";
-import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
 import { UserAvatar } from "@/components/user-avatar";
 
 type AccountInformationCardProps = {
@@ -37,7 +27,6 @@ export function AccountInformationCard({
   createdAt,
   hasPassword,
 }: AccountInformationCardProps) {
-  const [changePasswordOpen, setChangePasswordOpen] = useState(false);
   const accountType = hasPassword ? "Email account" : "GitHub account";
 
   return (
@@ -61,33 +50,6 @@ export function AccountInformationCard({
           <CalendarDays className="size-4 shrink-0" />
           <span>Member since: {formatMemberSince(createdAt)}</span>
         </div>
-      </div>
-
-      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-        {hasPassword ? (
-          <>
-            <Button
-              type="button"
-              variant="outline"
-              className="flex-1"
-              onClick={() => setChangePasswordOpen(true)}
-            >
-              <KeyRound className="size-4" />
-              Change Password
-            </Button>
-            <Dialog open={changePasswordOpen} onOpenChange={setChangePasswordOpen}>
-              <DialogContent className="sm:max-w-md">
-                <DialogHeader>
-                  <DialogTitle>Change password</DialogTitle>
-                </DialogHeader>
-                <ChangePasswordForm
-                  onSuccess={() => setChangePasswordOpen(false)}
-                />
-              </DialogContent>
-            </Dialog>
-          </>
-        ) : null}
-        <DeleteAccountButton className={hasPassword ? "flex-1" : "sm:w-auto"} />
       </div>
     </div>
   );

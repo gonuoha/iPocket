@@ -14,7 +14,7 @@ export default async function ProfilePage() {
     <PageContainer>
       <PageHeader
         title="Profile"
-        description="Manage your account settings"
+        description="View your account information and usage"
       />
 
       <PageContent>

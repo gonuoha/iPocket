@@ -12,6 +12,7 @@ export const proxy = auth((req) => {
     pathname === "/reset-password";
   const isDashboard = pathname.startsWith("/dashboard");
   const isProfile = pathname === "/profile";
+  const isSettings = pathname === "/settings";
   const isItems = pathname.startsWith("/items");
   const isCollections = pathname.startsWith("/collections");
 
@@ -19,7 +20,10 @@ export const proxy = auth((req) => {
     return NextResponse.redirect(new URL("/dashboard", req.nextUrl));
   }
 
-  if ((isDashboard || isProfile || isItems || isCollections) && !isLoggedIn) {
+  if (
+    (isDashboard || isProfile || isSettings || isItems || isCollections) &&
+    !isLoggedIn
+  ) {
     const signInUrl = new URL("/sign-in", req.nextUrl.origin);
     signInUrl.searchParams.set(
       "callbackUrl",
@@ -41,6 +45,7 @@ export const config = {
     "/forgot-password",
     "/reset-password",
     "/profile",
+    "/settings",
     "/items",
     "/items/:path*",
     "/collections",
