@@ -12,6 +12,16 @@ import { prisma } from "@/lib/prisma";
 
 import type { CollectionItemType } from "./collections";
 
+const pinnedFirstByUpdatedAt = [
+  { isPinned: "desc" as const },
+  { updatedAt: "desc" as const },
+];
+
+const pinnedFirstByCreatedAt = [
+  { isPinned: "desc" as const },
+  { createdAt: "desc" as const },
+];
+
 export type DashboardItem = {
   id: string;
   title: string;
@@ -413,6 +423,54 @@ export async function toggleItemFavorite(
   };
 }
 
+export type ToggleItemPinResult = {
+  id: string;
+  isPinned: boolean;
+  typeName: string;
+};
+
+export async function toggleItemPin(
+  userId: string,
+  itemId: string,
+): Promise<ToggleItemPinResult | null> {
+  const existing = await prisma.item.findFirst({
+    where: { id: itemId, userId },
+    select: {
+      id: true,
+      isPinned: true,
+      type: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  if (!existing) {
+    return null;
+  }
+
+  const updated = await prisma.item.update({
+    where: { id: itemId },
+    data: { isPinned: !existing.isPinned },
+    select: {
+      id: true,
+      isPinned: true,
+      type: {
+        select: {
+          name: true,
+        },
+      },
+    },
+  });
+
+  return {
+    id: updated.id,
+    isPinned: updated.isPinned,
+    typeName: updated.type.name,
+  };
+}
+
 export type DeleteItemResult = {
   typeName: string;
   fileUrl: string | null;
@@ -581,7 +639,7 @@ export async function getItemsByType(
 ): Promise<DashboardItem[]> {
   const items = await prisma.item.findMany({
     where: { userId, typeId },
-    orderBy: { updatedAt: "desc" },
+    orderBy: pinnedFirstByUpdatedAt,
     select: itemSelect,
   });
 
@@ -600,7 +658,7 @@ export async function getItemsByTypePaginated(
   const normalizedPage = normalizePage(page, totalPages);
   const items = await prisma.item.findMany({
     where,
-    orderBy: { updatedAt: "desc" },
+    orderBy: pinnedFirstByUpdatedAt,
     skip: (normalizedPage - 1) * pageSize,
     take: pageSize,
     select: itemSelect,
@@ -626,7 +684,7 @@ export async function getItemsByCollection(
         some: { collectionId },
       },
     },
-    orderBy: { updatedAt: "desc" },
+    orderBy: pinnedFirstByUpdatedAt,
     select: itemSelect,
   });
 
@@ -650,7 +708,7 @@ export async function getItemsByCollectionPaginated(
   const normalizedPage = normalizePage(page, totalPages);
   const items = await prisma.item.findMany({
     where,
-    orderBy: { updatedAt: "desc" },
+    orderBy: pinnedFirstByUpdatedAt,
     skip: (normalizedPage - 1) * pageSize,
     take: pageSize,
     select: itemSelect,
@@ -683,7 +741,7 @@ export async function getFileItemsByCollection(
         name: { equals: "file", mode: "insensitive" },
       },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: pinnedFirstByCreatedAt,
     select: fileItemSelect,
   });
 
@@ -696,7 +754,7 @@ export async function getFileItemsByType(
 ): Promise<FileListItem[]> {
   const items = await prisma.item.findMany({
     where: { userId, typeId },
-    orderBy: { createdAt: "desc" },
+    orderBy: pinnedFirstByCreatedAt,
     select: fileItemSelect,
   });
 
@@ -715,7 +773,7 @@ export async function getFileItemsByTypePaginated(
   const normalizedPage = normalizePage(page, totalPages);
   const items = await prisma.item.findMany({
     where,
-    orderBy: { createdAt: "desc" },
+    orderBy: pinnedFirstByCreatedAt,
     skip: (normalizedPage - 1) * pageSize,
     take: pageSize,
     select: fileItemSelect,
@@ -746,7 +804,7 @@ export async function getFileItemsByIds(
         name: { equals: "file", mode: "insensitive" },
       },
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: pinnedFirstByCreatedAt,
     select: fileItemSelect,
   });
 

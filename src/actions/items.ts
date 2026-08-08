@@ -8,12 +8,14 @@ import {
   deleteItem as deleteItemInDb,
   getItemTypeBySlug,
   toggleItemFavorite as toggleItemFavoriteInDb,
+  toggleItemPin as toggleItemPinInDb,
   updateItem as updateItemInDb,
 } from "@/lib/db/items";
 import type {
   DeleteItemResult,
   ItemDetail,
   ToggleItemFavoriteResult,
+  ToggleItemPinResult,
 } from "@/lib/db/items";
 import { validateUserCollectionIds } from "@/lib/db/collections";
 import { getUserIsPro } from "@/lib/db/user";
@@ -205,6 +207,32 @@ export async function toggleItemFavorite(
   }
 
   revalidateItemFavoritePaths(result.typeName);
+
+  return { success: true, data: result };
+}
+
+function revalidateItemPinPaths(typeName: string) {
+  revalidatePath(`/items/${typeName.toLowerCase()}`);
+  revalidatePath("/dashboard");
+  revalidatePath("/collections", "layout");
+}
+
+export async function toggleItemPin(
+  itemId: string,
+): Promise<ActionResult<ToggleItemPinResult>> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const result = await toggleItemPinInDb(session.user.id, itemId);
+
+  if (!result) {
+    return { success: false, error: "Item not found" };
+  }
+
+  revalidateItemPinPaths(result.typeName);
 
   return { success: true, data: result };
 }

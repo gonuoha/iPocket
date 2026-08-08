@@ -8,7 +8,6 @@ import {
   FileIcon,
   Info,
   Pencil,
-  Pin,
   Tag,
   Trash2,
 } from "lucide-react";
@@ -20,6 +19,7 @@ import {
   type SelectableCollection,
 } from "@/components/collections/collection-multi-select";
 import { ItemFavoriteButton } from "@/components/items/item-favorite-button";
+import { ItemPinButton } from "@/components/items/item-pin-button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -158,11 +158,13 @@ function ItemDrawerContent({
   onEdit,
   onDelete,
   onFavoriteToggle,
+  onPinToggle,
 }: {
   item: ItemDetailResponse;
   onEdit: () => void;
   onDelete: () => void;
   onFavoriteToggle: (isFavorite: boolean) => void;
+  onPinToggle: (isPinned: boolean) => void;
 }) {
   async function handleCopy() {
     try {
@@ -182,10 +184,12 @@ function ItemDrawerContent({
           variant="button"
           onToggle={onFavoriteToggle}
         />
-        <Button type="button" variant="outline" size="sm" className="shrink-0">
-          <Pin />
-          Pin
-        </Button>
+        <ItemPinButton
+          itemId={item.id}
+          isPinned={item.isPinned}
+          variant="button"
+          onToggle={onPinToggle}
+        />
         <Button
           type="button"
           variant="outline"
@@ -653,6 +657,10 @@ function ItemDrawerPanel({
     setItem((current) => (current ? { ...current, isFavorite } : current));
   }
 
+  function handlePinToggle(isPinned: boolean) {
+    setItem((current) => (current ? { ...current, isPinned } : current));
+  }
+
   const typeStyles = item ? getItemTypeStyles(item.type.color) : null;
 
   return (
@@ -707,6 +715,7 @@ function ItemDrawerPanel({
             onEdit={handleEdit}
             onDelete={() => setIsDeleteOpen(true)}
             onFavoriteToggle={handleFavoriteToggle}
+            onPinToggle={handlePinToggle}
           />
         ) : null}
         {!isLoading && item && mode === "edit" && formState ? (

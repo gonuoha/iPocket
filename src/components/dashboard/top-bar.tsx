@@ -87,6 +87,7 @@ export function TopBar({
           variant="ghost"
           size="icon"
           className="shrink-0"
+          nativeButton={false}
           render={<Link href="/favorites" aria-label="Favorites" />}
         >
           <Star
