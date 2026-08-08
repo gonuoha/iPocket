@@ -1,48 +1,16 @@
-# Current Feature: Stripe Integration — Phase 1 (Core Infrastructure)
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Install and configure the Stripe SDK with env-var helpers
-- Create checkout and customer-portal API routes (authenticated)
-- Sync `isPro` from the database on every JWT validation
-- Add a reusable usage-limits module (50 items / 3 collections for free tier)
-- Unit-test the usage-limits module
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Spec: `context/features/stripe-phase-1-spec.md`
-- Pricing: iPocket Pro — $8/mo, $72/yr
-- No schema migration needed (`isPro`, `stripeCustomerId`, `stripeSubscriptionId` already on User)
-- Env vars in `.env.example`: `STRIPE_SECRET_KEY`, `STRIPE_PUBLISHABLE_KEY`, `STRIPE_WEBHOOK_SECRET`, `STRIPE_PRICE_ID_MONTHLY`, `STRIPE_PRICE_ID_YEARLY`
-- Stripe Dashboard: create iPocket Pro product with monthly/yearly prices before testing checkout
-
-### Files to create
-
-- `src/lib/stripe/client.ts` — Stripe singleton + env helpers
-- `src/lib/stripe/subscription.ts` — customer, checkout, portal helpers
-- `src/lib/subscription-limits.ts` — free-tier limit constants and helpers
-- `src/lib/subscription-limits.test.ts` — unit tests for usage-limits module
-- `src/app/api/stripe/checkout/route.ts` — checkout session API
-- `src/app/api/stripe/portal/route.ts` — customer portal API
-
-### Files to modify
-
-- `package.json` — add `stripe` dependency
-- `src/auth.ts` — JWT + session `isPro` sync (always from DB, not `trigger === "update"`)
-- `src/types/next-auth.d.ts` — extend Session and JWT types
-
-### Out of scope (Phase 2)
-
-- Webhooks, `isPro` updates from Stripe events
-- Free-tier enforcement in `createItem` / `createCollection`
-- Billing UI (`BillingCard`, `UpgradePrompt`)
-- Profile/settings usage display
-- Account deletion subscription cancellation
-- Stripe CLI setup
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -100,3 +68,4 @@ In Progress
 - 2026-08-08: Completed **Homepage** — real Next.js marketing page at `/` replacing prototype HTML injection; server/client components for navbar, hero chaos animation, scroll reveals, pricing toggle, and all mockup sections; Tailwind and shadcn/ui; auth-aware navbar; smooth anchor scroll and reduced-motion fallbacks; removed placeholder markup bridge and client script
 - 2026-08-08: Completed **Homepage UI Fixes** — mobile hamburger nav with Sheet, social proof section, anchor scroll offsets, pricing badge layout fix, progressive fade-in fallback, and 44px touch targets on marketing CTAs
 - 2026-08-08: Completed **Shared Navbar Across Marketing and Auth Pages** — homepage navbar on auth routes, open-folder brand icon on marketing and dashboard navbars, simplified sidebar nav (Favorites only), collapsed sidebar default below 1024px, hydration-safe viewport init, and auth anchor links routed to `/#features` and `/#pricing`
+- 2026-08-08: Completed **Stripe Integration — Phase 1 (Core Infrastructure)** — Stripe SDK with checkout and portal API routes, JWT `isPro` sync from database on every session validation, subscription-limits module (50 items / 3 collections) with unit tests, integration plan and phase specs
