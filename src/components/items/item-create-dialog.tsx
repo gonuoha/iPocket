@@ -1,6 +1,6 @@
 "use client";
 
-import { createElement, useEffect, useState, useTransition } from "react";
+import { createElement, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -119,19 +119,13 @@ export function ItemCreateDialog({
     (!showFileUpload || formState.uploadedFile !== null) &&
     !isCreating;
 
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    setFormState({
-      ...initialFormState,
-      type: resolveDefaultCreateType(defaultType, isPro),
-    });
-  }, [open, defaultType, isPro]);
-
   function handleOpenChange(nextOpen: boolean) {
-    if (!nextOpen) {
+    if (nextOpen) {
+      setFormState({
+        ...initialFormState,
+        type: resolveDefaultCreateType(defaultType, isPro),
+      });
+    } else {
       setFormState(initialFormState);
     }
 

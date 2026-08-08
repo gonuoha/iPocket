@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState } from "react";
+import { createContext, useContext, useState, useSyncExternalStore } from "react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -14,21 +14,40 @@ type SidebarContextValue = {
 
 const SidebarContext = createContext<SidebarContextValue | null>(null);
 
+const COLLAPSED_MEDIA_QUERY = "(max-width: 1023px)";
+
+function subscribeToSidebarCollapsed(callback: () => void) {
+  const mediaQuery = window.matchMedia(COLLAPSED_MEDIA_QUERY);
+  mediaQuery.addEventListener("change", callback);
+  return () => mediaQuery.removeEventListener("change", callback);
+}
+
+function getSidebarCollapsedSnapshot() {
+  return window.matchMedia(COLLAPSED_MEDIA_QUERY).matches;
+}
+
+function getSidebarCollapsedServerSnapshot() {
+  return true;
+}
+
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [collapsed, setCollapsed] = useState(true);
+  const viewportCollapsed = useSyncExternalStore(
+    subscribeToSidebarCollapsed,
+    getSidebarCollapsedSnapshot,
+    getSidebarCollapsedServerSnapshot,
+  );
+  const [collapsedOverride, setCollapsedOverride] = useState<boolean | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useIsMobile();
-
-  useEffect(() => {
-    setCollapsed(!window.matchMedia("(min-width: 1024px)").matches);
-  }, []);
+  const collapsed = collapsedOverride ?? viewportCollapsed;
 
   const toggleSidebar = () => {
     if (isMobile) {
       setMobileOpen((open) => !open);
       return;
     }
-    setCollapsed((value) => !value);
+
+    setCollapsedOverride(!(collapsedOverride ?? viewportCollapsed));
   };
 
   return (

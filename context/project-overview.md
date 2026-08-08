@@ -141,13 +141,21 @@ model Item {
   typeId      String
   type        ItemType @relation(fields: [typeId], references: [id])
 
-  collectionId String?
-  collection   Collection? @relation(fields: [collectionId], references: [id])
-
+  collections ItemCollection[]
   tags        ItemTag[]
 
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+}
+
+model ItemCollection {
+  itemId       String
+  collectionId String
+
+  item       Item       @relation(fields: [itemId], references: [id])
+  collection Collection @relation(fields: [collectionId], references: [id])
+
+  @@id([itemId, collectionId])
 }
 
 model ItemType {
@@ -172,7 +180,7 @@ model Collection {
   userId      String
   user        User @relation(fields: [userId], references: [id])
 
-  items       Item[]
+  items       ItemCollection[]
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 }
@@ -313,7 +321,7 @@ git switch -c lesson-01-setup
 
 - [x] Items CRUD (create, read, update, delete; type-specific views and editors)
 - [x] Collections (dashboard display and stats)
-- [ ] Search
+- [x] Search
 - [x] Basic tags
 - [ ] Free tier limits
 
@@ -338,7 +346,7 @@ git switch -c lesson-01-setup
 ## 📌 Status
 
 - Active development — core dashboard, auth, profile, and item CRUD are implemented
-- Remaining MVP work: search and free-tier enforcement
+- Remaining MVP work: free-tier enforcement
 - Pro integrations planned: Stripe billing, OpenAI features
 
 ---

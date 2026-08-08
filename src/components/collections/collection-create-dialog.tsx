@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -43,19 +43,8 @@ export function CollectionCreateDialog({
 
   const canCreate = formState.name.trim().length > 0 && !isCreating;
 
-  useEffect(() => {
-    if (!open) {
-      return;
-    }
-
-    setFormState(initialFormState);
-  }, [open]);
-
   function handleOpenChange(nextOpen: boolean) {
-    if (!nextOpen) {
-      setFormState(initialFormState);
-    }
-
+    setFormState(initialFormState);
     onOpenChange(nextOpen);
   }
 
