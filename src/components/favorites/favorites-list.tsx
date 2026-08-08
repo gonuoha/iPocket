@@ -1,19 +1,53 @@
 "use client";
 
-import { createElement } from "react";
+import { createElement, useMemo } from "react";
 import Link from "next/link";
-import { FolderOpen } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { ArrowDownUp, FolderOpen } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useItemDrawer } from "@/components/items/item-drawer-context";
 import type { FavoriteCollection } from "@/lib/db/collections";
 import type { DashboardItem } from "@/lib/db/items";
+import {
+  type FavoriteCollectionSortField,
+  FAVORITE_COLLECTION_SORT_OPTIONS,
+  type FavoriteItemSortField,
+  FAVORITE_ITEM_SORT_OPTIONS,
+  parseFavoriteCollectionSortParam,
+  parseFavoriteItemSortParam,
+  sortFavoriteCollections,
+  sortFavoriteItems,
+} from "@/lib/favorites-sort";
 import {
   getItemTypeIcon,
   getItemTypeLabel,
   getItemTypeStyles,
 } from "@/lib/item-type-styles";
 import { cn } from "@/lib/utils";
+
+const ITEM_SORT_LABELS: Record<FavoriteItemSortField, string> = {
+  newest: "Newest",
+  oldest: "Oldest",
+  "name-asc": "Name A-Z",
+  "name-desc": "Name Z-A",
+  type: "Type",
+};
+
+const COLLECTION_SORT_LABELS: Record<FavoriteCollectionSortField, string> = {
+  newest: "Newest",
+  oldest: "Oldest",
+  "name-asc": "Name A-Z",
+  "name-desc": "Name Z-A",
+};
 
 function formatFavoriteDate(date: Date | string) {
   return new Intl.DateTimeFormat("en-US", {
@@ -89,14 +123,88 @@ function FavoriteCollectionRow({ collection }: FavoriteCollectionRowProps) {
   );
 }
 
+type FavoritesSortControlProps<T extends string> = {
+  id: string;
+  sort: T;
+  options: readonly T[];
+  labels: Record<T, string>;
+  onSortChange: (sort: T) => void;
+};
+
+function FavoritesSortControl<T extends string>({
+  id,
+  sort,
+  options,
+  labels,
+  onSortChange,
+}: FavoritesSortControlProps<T>) {
+  return (
+    <div className="flex items-center gap-2">
+      <Label
+        htmlFor={id}
+        className="flex items-center gap-1.5 font-mono text-xs text-muted-foreground uppercase tracking-wide"
+      >
+        <ArrowDownUp className="size-3.5" />
+        Sort by
+      </Label>
+      <Select value={sort} onValueChange={(value) => onSortChange(value as T)}>
+        <SelectTrigger id={id} size="sm" className="min-w-32 font-mono">
+          <SelectValue>{labels[sort]}</SelectValue>
+        </SelectTrigger>
+        <SelectContent>
+          {options.map((option) => (
+            <SelectItem key={option} value={option}>
+              {labels[option]}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+    </div>
+  );
+}
+
 type FavoritesListProps = {
   items: DashboardItem[];
   collections: FavoriteCollection[];
 };
 
 export function FavoritesList({ items, collections }: FavoritesListProps) {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const legacySort = searchParams.get("sort");
+  const itemSort = parseFavoriteItemSortParam(
+    searchParams.get("itemSort") ?? legacySort,
+  );
+  const collectionSort = parseFavoriteCollectionSortParam(
+    searchParams.get("collectionSort") ?? legacySort,
+  );
+
+  const sortedItems = useMemo(
+    () => sortFavoriteItems(items, itemSort),
+    [items, itemSort],
+  );
+  const sortedCollections = useMemo(
+    () => sortFavoriteCollections(collections, collectionSort),
+    [collections, collectionSort],
+  );
+
   const hasItems = items.length > 0;
   const hasCollections = collections.length > 0;
+
+  function updateSortParam(key: string, value: string) {
+    const params = new URLSearchParams(searchParams.toString());
+
+    if (value === "newest") {
+      params.delete(key);
+    } else {
+      params.set(key, value);
+    }
+
+    params.delete("sort");
+
+    const query = params.toString();
+    router.replace(query ? `/favorites?${query}` : "/favorites", { scroll: false });
+  }
 
   if (!hasItems && !hasCollections) {
     return (
@@ -110,11 +218,20 @@ export function FavoritesList({ items, collections }: FavoritesListProps) {
     <div className="flex flex-col gap-6">
       {hasItems ? (
         <section>
-          <h2 className="mb-1 px-2 font-mono text-xs text-muted-foreground uppercase tracking-wide">
-            Items ({items.length})
-          </h2>
+          <div className="mb-1 flex items-center justify-between gap-3 px-2">
+            <h2 className="font-mono text-xs text-muted-foreground uppercase tracking-wide">
+              Items ({sortedItems.length})
+            </h2>
+            <FavoritesSortControl
+              id="favorites-item-sort"
+              sort={itemSort}
+              options={FAVORITE_ITEM_SORT_OPTIONS}
+              labels={ITEM_SORT_LABELS}
+              onSortChange={(nextSort) => updateSortParam("itemSort", nextSort)}
+            />
+          </div>
           <div className="border border-border">
-            {items.map((item) => (
+            {sortedItems.map((item) => (
               <FavoriteItemRow key={item.id} item={item} />
             ))}
           </div>
@@ -123,11 +240,22 @@ export function FavoritesList({ items, collections }: FavoritesListProps) {
 
       {hasCollections ? (
         <section>
-          <h2 className="mb-1 px-2 font-mono text-xs text-muted-foreground uppercase tracking-wide">
-            Collections ({collections.length})
-          </h2>
+          <div className="mb-1 flex items-center justify-between gap-3 px-2">
+            <h2 className="font-mono text-xs text-muted-foreground uppercase tracking-wide">
+              Collections ({sortedCollections.length})
+            </h2>
+            <FavoritesSortControl
+              id="favorites-collection-sort"
+              sort={collectionSort}
+              options={FAVORITE_COLLECTION_SORT_OPTIONS}
+              labels={COLLECTION_SORT_LABELS}
+              onSortChange={(nextSort) =>
+                updateSortParam("collectionSort", nextSort)
+              }
+            />
+          </div>
           <div className="border border-border">
-            {collections.map((collection) => (
+            {sortedCollections.map((collection) => (
               <FavoriteCollectionRow key={collection.id} collection={collection} />
             ))}
           </div>

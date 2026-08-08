@@ -1,3 +1,5 @@
+import { Suspense } from "react";
+
 import { FavoritesList } from "@/components/favorites/favorites-list";
 import { PageContainer, PageHeader } from "@/components/layout/page-container";
 import { getAllFavoriteCollections } from "@/lib/db/collections";
@@ -23,7 +25,9 @@ export default async function FavoritesPage() {
         }
       />
 
-      <FavoritesList items={items} collections={collections} />
+      <Suspense>
+        <FavoritesList items={items} collections={collections} />
+      </Suspense>
     </PageContainer>
   );
 }
