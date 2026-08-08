@@ -15,7 +15,7 @@ export function HomepagePricing() {
   const { free, pro } = PRICING_PLANS;
 
   return (
-    <section id="pricing" className="px-6 py-20">
+    <section id="pricing" className="scroll-mt-20 px-6 py-20">
       <div className="mx-auto max-w-6xl">
         <FadeInOnScroll className="mx-auto mb-12 max-w-xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
@@ -80,9 +80,9 @@ export function HomepagePricing() {
             </article>
           </FadeInOnScroll>
 
-          <FadeInOnScroll>
-            <article className="relative h-full rounded-2xl border border-primary bg-card p-8 shadow-lg ring-1 ring-primary">
-              <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
+          <FadeInOnScroll className="mt-4 sm:mt-0">
+            <article className="relative h-full rounded-2xl border border-primary bg-card p-8 pt-10 shadow-lg ring-1 ring-primary">
+              <span className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-primary px-3 py-1 text-xs font-semibold text-primary-foreground">
                 Most Popular
               </span>
               <h3 className="text-xl font-semibold">{pro.name}</h3>

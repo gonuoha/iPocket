@@ -69,6 +69,21 @@ export const HOMEPAGE_FEATURES: {
   },
 ];
 
+export const SOCIAL_PROOF = {
+  eyebrow: "Built for developers who ship",
+  logos: ["VS Code", "GitHub", "Notion", "Slack", "Terminal"],
+  testimonials: [
+    {
+      quote: "I finally stopped losing snippets across five different apps.",
+      author: "Alex M., Full-stack Engineer",
+    },
+    {
+      quote: "Cmd+K search alone replaced my messy bookmarks folder.",
+      author: "Jordan K., Backend Developer",
+    },
+  ],
+} as const;
+
 export const AI_CHECKLIST = [
   "Auto-generated tags from content",
   "Smart summaries for long notes",

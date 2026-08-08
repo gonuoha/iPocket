@@ -27,12 +27,18 @@ export function HomepageHero() {
             searchable hub.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">
-            <Link href="/register" className={cn(buttonVariants({ size: "lg" }))}>
+            <Link
+              href="/register"
+              className={cn(buttonVariants({ size: "lg" }), "min-h-11")}
+            >
               Get Started Free
             </Link>
             <Link
               href="#features"
-              className={cn(buttonVariants({ variant: "outline", size: "lg" }))}
+              className={cn(
+                buttonVariants({ variant: "outline", size: "lg" }),
+                "min-h-11",
+              )}
             >
               See Features
             </Link>

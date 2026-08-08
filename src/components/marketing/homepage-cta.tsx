@@ -17,7 +17,7 @@ export function HomepageCta() {
           </p>
           <Link
             href="/register"
-            className={cn(buttonVariants({ size: "lg" }), "mt-6")}
+            className={cn(buttonVariants({ size: "lg" }), "mt-6 min-h-11")}
           >
             Get Started Free
           </Link>

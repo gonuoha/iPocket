@@ -10,7 +10,12 @@ export async function HomepageNavbarActions() {
 
   if (isLoggedIn) {
     return (
-      <Button render={<Link href="/dashboard" />} nativeButton={false} size="sm">
+      <Button
+        render={<Link href="/dashboard" />}
+        nativeButton={false}
+        size="sm"
+        className="min-h-11 w-full sm:w-auto"
+      >
         Dashboard
       </Button>
     );
@@ -20,13 +25,16 @@ export async function HomepageNavbarActions() {
     <>
       <Link
         href="/sign-in"
-        className={cn(buttonVariants({ variant: "ghost", size: "sm" }))}
+        className={cn(
+          buttonVariants({ variant: "ghost", size: "sm" }),
+          "min-h-11 w-full sm:w-auto",
+        )}
       >
         Sign In
       </Link>
       <Link
         href="/register"
-        className={cn(buttonVariants({ size: "sm" }))}
+        className={cn(buttonVariants({ size: "sm" }), "min-h-11 w-full sm:w-auto")}
       >
         Get Started
       </Link>

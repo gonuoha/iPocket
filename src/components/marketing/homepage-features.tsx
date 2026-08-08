@@ -6,7 +6,7 @@ import {
 
 export function HomepageFeatures() {
   return (
-    <section id="features" className="bg-secondary/30 px-6 py-20">
+    <section id="features" className="scroll-mt-20 bg-secondary/30 px-6 py-20">
       <div className="mx-auto max-w-6xl">
         <FadeInOnScroll className="mx-auto mb-12 max-w-xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
