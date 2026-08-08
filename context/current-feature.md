@@ -1,29 +1,16 @@
-# Current Feature: iPocket Homepage Mockup
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create a static marketing homepage prototype in `prototypes/homepage/` (`index.html`, `styles.css`, `script.js`)
-- Implement dark theme with item-type accent colors (snippet blue, prompt amber, command cyan, note green, file slate, image pink, URL indigo)
-- Build hero "chaos to order" visual: floating chaos icons (Notion, GitHub, Slack, VS Code, browser, terminal, text file, bookmark) with drift/bounce/repel-from-cursor animation; pulsing transform arrow; dashboard preview mockup with sidebar and colored item cards
-- Add hero text: "Stop Losing Your Developer Knowledge" with gradient headline, subheadline, and CTA buttons
-- Add fixed top nav with logo, Features/Pricing links, Sign In/Get Started buttons (opacity increases on scroll)
-- Add Features section: 6 cards (Code Snippets, AI Prompts, Instant Search, Commands, Files & Docs, Collections) with type accent colors
-- Add AI section: two columns with Pro badge, capability checklist, and code-editor mockup showing AI Generated Tags demo
-- Add Pricing section: Free vs Pro cards, Pro highlighted with "Most Popular", yearly toggle ($72/year)
-- Add CTA section and footer with logo, link columns, and current-year copyright
-- Implement scroll fade-in animations and responsive layout (stacked hero on mobile, arrow rotates 90°)
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Product name in spec is iPocket (developer knowledge hub for snippets, prompts, commands, notes, files, images, links)
-- Chaos icons animate via `requestAnimationFrame`: random drift, wall bounce, subtle rotation/scale pulse, cursor repulsion
-- Arrow uses CSS pulse animation
-- Pricing tiers: Free ($0, 50 items, 3 collections); Pro ($8/mo or $72/year, unlimited, AI features)
-- Prototype only — not integrated into Next.js app
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -77,3 +64,4 @@ In Progress
 - 2026-08-08: Completed **Favorite Toggle** — `toggleItemFavorite` and `toggleCollectionFavorite` server actions and db helpers; `ItemFavoriteButton` and `CollectionFavoriteButton` wired in ItemDrawer, item cards/rows, image and file views, collection detail page, and collection card menu; path revalidation for dashboard, favorites, items, and collections; unit tests for toggle actions
 - 2026-08-08: Completed **Favorites Page Sorting** — per-section client-side sort controls on `/favorites` for items (Newest, Oldest, Name A-Z, Name Z-A, Item type) and collections (Newest, Oldest, Name A-Z, Name Z-A); inline sort UI on section headers; URL-persisted `itemSort` and `collectionSort` params; `favorites-sort` utility with unit tests
 - 2026-08-08: Completed **Pinned Items** — `toggleItemPin` server action and `ItemPinButton` in ItemDrawer with optimistic UI and toast feedback; pinned-first sorting on item, collection, and file listings; TopBar favorites link `nativeButton` fix; unit tests for toggle action
+- 2026-08-08: Completed **iPocket Homepage Mockup** — static marketing homepage in `prototypes/homepage/` with chaos-to-order hero animation, features, AI, pricing, CTA, and footer; served at `/` via marketing route group loading prototype markup and client script; auth CTAs link to sign-in and register; root layout scroll fix for long marketing page
