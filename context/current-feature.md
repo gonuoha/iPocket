@@ -1,16 +1,26 @@
-# Current Feature
+# Current Feature: Homepage
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- What success looks like for the active feature -->
+- Replace prototype HTML injection at `/` with real Next.js marketing components
+- Build all 7 page sections matching `prototypes/homepage/` mockup
+- Split server/client components for interactivity (chaos animation, scroll effects, pricing toggle)
+- Use Tailwind CSS and shadcn/ui consistent with the rest of the app
+- Wire buttons and links to correct routes (`/sign-in`, `/register`, in-page anchors)
+- Remove placeholder implementation (`get-homepage-markup.ts`, prototype CSS, `public/homepage/script.js`)
+- Use system item type colors from seed data for feature cards and dashboard mockup
 
 ## Notes
 
-<!-- Additional context, constraints, or details from spec -->
+- Spec: `context/features/homepage-spec.md`
+- Visual reference: `prototypes/homepage/`
+- Route: `/` in `(marketing)` route group (public)
+- Pricing toggle is UI-only; all upgrade CTAs go to `/register`
+- Respect `prefers-reduced-motion` for animations
 
 ## History
 

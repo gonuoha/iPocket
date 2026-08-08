@@ -1,12 +1,24 @@
-import Script from "next/script";
-
-import { getHomepageMarkup } from "@/lib/marketing/get-homepage-markup";
+import { HomepageAiSection } from "@/components/marketing/homepage-ai-section";
+import { HomepageCta } from "@/components/marketing/homepage-cta";
+import { HomepageFeatures } from "@/components/marketing/homepage-features";
+import { HomepageFooter } from "@/components/marketing/homepage-footer";
+import { HomepageHero } from "@/components/marketing/homepage-hero";
+import { HomepageNavbar } from "@/components/marketing/homepage-navbar";
+import { HomepageNavbarActions } from "@/components/marketing/homepage-navbar-actions";
+import { HomepagePricing } from "@/components/marketing/homepage-pricing";
 
 export default function HomePage() {
   return (
     <>
-      <div dangerouslySetInnerHTML={{ __html: getHomepageMarkup() }} />
-      <Script src="/homepage/script.js" strategy="afterInteractive" />
+      <HomepageNavbar actions={<HomepageNavbarActions />} />
+      <main>
+        <HomepageHero />
+        <HomepageFeatures />
+        <HomepageAiSection />
+        <HomepagePricing />
+        <HomepageCta />
+      </main>
+      <HomepageFooter />
     </>
   );
 }
