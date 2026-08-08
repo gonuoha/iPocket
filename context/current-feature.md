@@ -1,26 +1,16 @@
-# Current Feature: Homepage
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Replace prototype HTML injection at `/` with real Next.js marketing components
-- Build all 7 page sections matching `prototypes/homepage/` mockup
-- Split server/client components for interactivity (chaos animation, scroll effects, pricing toggle)
-- Use Tailwind CSS and shadcn/ui consistent with the rest of the app
-- Wire buttons and links to correct routes (`/sign-in`, `/register`, in-page anchors)
-- Remove placeholder implementation (`get-homepage-markup.ts`, prototype CSS, `public/homepage/script.js`)
-- Use system item type colors from seed data for feature cards and dashboard mockup
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Spec: `context/features/homepage-spec.md`
-- Visual reference: `prototypes/homepage/`
-- Route: `/` in `(marketing)` route group (public)
-- Pricing toggle is UI-only; all upgrade CTAs go to `/register`
-- Respect `prefers-reduced-motion` for animations
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -75,3 +65,4 @@ In Progress
 - 2026-08-08: Completed **Favorites Page Sorting** — per-section client-side sort controls on `/favorites` for items (Newest, Oldest, Name A-Z, Name Z-A, Item type) and collections (Newest, Oldest, Name A-Z, Name Z-A); inline sort UI on section headers; URL-persisted `itemSort` and `collectionSort` params; `favorites-sort` utility with unit tests
 - 2026-08-08: Completed **Pinned Items** — `toggleItemPin` server action and `ItemPinButton` in ItemDrawer with optimistic UI and toast feedback; pinned-first sorting on item, collection, and file listings; TopBar favorites link `nativeButton` fix; unit tests for toggle action
 - 2026-08-08: Completed **iPocket Homepage Mockup** — static marketing homepage in `prototypes/homepage/` with chaos-to-order hero animation, features, AI, pricing, CTA, and footer; served at `/` via marketing route group loading prototype markup and client script; auth CTAs link to sign-in and register; root layout scroll fix for long marketing page
+- 2026-08-08: Completed **Homepage** — real Next.js marketing page at `/` replacing prototype HTML injection; server/client components for navbar, hero chaos animation, scroll reveals, pricing toggle, and all mockup sections; Tailwind and shadcn/ui; auth-aware navbar; smooth anchor scroll and reduced-motion fallbacks; removed placeholder markup bridge and client script
