@@ -1,25 +1,16 @@
-# Current Feature: Favorites Page Sorting
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add client-side sort controls to the `/favorites` page
-- Support sorting by name (alphabetical), date (most recently updated), and item type (system order)
-- Apply sorting within each section (items and collections) independently
-- Preserve the existing compact list UI and section layout with counts
-- Default sort remains date (most recently updated), matching current server-side order
-- Sort preference persists for the session (e.g. local state or URL search param)
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Existing page: `src/app/favorites/page.tsx` fetches via `getFavoriteItems` and `getAllFavoriteCollections` (both ordered by `updatedAt desc` server-side)
-- Client component: `src/components/favorites/favorites-list.tsx` renders items and collections in separate sections
-- Item type sort should use `sortItemTypesBySystemOrder` from `src/lib/item-type-styles.ts` for consistent type ordering
-- Collections have no item type — when sorting by type, collections section can sort by name as a fallback or stay in a sensible secondary order
-- Sorting is client-side only; no db or server action changes required unless tests are added for a shared sort utility
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -71,3 +62,4 @@ In Progress
 - 2026-08-08: Completed **Editor Preferences Settings** — editor preferences card on `/settings` (font size, tab size, theme, word wrap, minimap); `editorPreferences` JSON column on User with migration; `updateEditorPreferences` server action; `EditorPreferencesContext` wired through dashboard shell; Monaco editor applies preferences with custom monokai/github-dark themes; auto-save with toast; unit tests for parse, validation, and action
 - 2026-08-08: Completed **Favorites Page** — protected `/favorites` route with compact terminal-style list of favorited items and collections; TopBar star navigation; `getFavoriteItems` and `getAllFavoriteCollections` db helpers sorted by `updatedAt`; ItemDrawer and collection page navigation; empty state; wide layout matching items/collections pages
 - 2026-08-08: Completed **Favorite Toggle** — `toggleItemFavorite` and `toggleCollectionFavorite` server actions and db helpers; `ItemFavoriteButton` and `CollectionFavoriteButton` wired in ItemDrawer, item cards/rows, image and file views, collection detail page, and collection card menu; path revalidation for dashboard, favorites, items, and collections; unit tests for toggle actions
+- 2026-08-08: Completed **Favorites Page Sorting** — per-section client-side sort controls on `/favorites` for items (Newest, Oldest, Name A-Z, Name Z-A, Item type) and collections (Newest, Oldest, Name A-Z, Name Z-A); inline sort UI on section headers; URL-persisted `itemSort` and `collectionSort` params; `favorites-sort` utility with unit tests
