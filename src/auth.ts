@@ -83,6 +83,14 @@ export const { handlers, auth, signIn } = NextAuth({
         token.picture = user.image;
       }
 
+      if (token.sub) {
+        const dbUser = await prisma.user.findUnique({
+          where: { id: token.sub },
+          select: { isPro: true },
+        });
+        token.isPro = dbUser?.isPro ?? false;
+      }
+
       return token;
     },
     async session({ session, token }) {
@@ -91,6 +99,7 @@ export const { handlers, auth, signIn } = NextAuth({
         session.user.name = (token.name as string | null | undefined) ?? session.user.name;
         session.user.email = (token.email as string | null | undefined) ?? session.user.email;
         session.user.image = (token.picture as string | null | undefined) ?? session.user.image;
+        session.user.isPro = (token.isPro as boolean | undefined) ?? false;
       }
 
       return session;
