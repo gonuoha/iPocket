@@ -1,35 +1,16 @@
-# Current Feature: Homepage UI Fixes
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Mobile users can open a hamburger nav menu and reach Features (`#features`) and Pricing (`#pricing`)
-- Anchor jumps land with section headings visible below the fixed navbar
-- Social proof section (logos, testimonials, or metrics) renders between existing homepage sections
-- Pro pricing "Most Popular" badge no longer overlaps the card border
-- Below-fold content is readable before scroll on slow JS / reduced motion
-- Hero and navbar CTAs meet 44px touch-target height on mobile
-- All seven original homepage spec sections remain present
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-Spec: `context/fixes/homepage-ui-fixes-spec.md`
-
-UI review findings for the marketing homepage at `/`. Touch-target sizing for shared button patterns is documented separately in `context/fixes/touch-targets-spec.md` — apply marketing-scoped overrides here where noted.
-
-**Key changes:**
-
-1. **Mobile nav (Major)** — Add hamburger + shadcn `Sheet` in `homepage-navbar.tsx` for Features, Pricing, Sign In, Get Started; close on anchor click; 44px trigger.
-2. **CTA sizes (Minor)** — `min-h-11` on hero/navbar/CTA buttons in `homepage-hero.tsx`, `homepage-navbar-actions.tsx`, `homepage-cta.tsx`.
-3. **Social proof (Minor)** — New `homepage-social-proof.tsx` between Features and AI; copy in `homepage-content.ts`.
-4. **Pricing badge (Minor)** — Fix overlap in `homepage-pricing.tsx` (badge at `absolute -top-3`).
-5. **Fade-in fallback (Minor)** — Improve `fade-in-on-scroll.tsx` for no-JS / slow observer without removing animation.
-6. **Anchor scroll offset (Minor)** — `scroll-padding-top` or `scroll-mt-20` in marketing layout / section targets.
-
-**References:** `.ui-review/report.json`, `.ui-review/screenshots/`, `context/features/homepage-spec.md`
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -85,3 +66,4 @@ UI review findings for the marketing homepage at `/`. Touch-target sizing for sh
 - 2026-08-08: Completed **Pinned Items** — `toggleItemPin` server action and `ItemPinButton` in ItemDrawer with optimistic UI and toast feedback; pinned-first sorting on item, collection, and file listings; TopBar favorites link `nativeButton` fix; unit tests for toggle action
 - 2026-08-08: Completed **iPocket Homepage Mockup** — static marketing homepage in `prototypes/homepage/` with chaos-to-order hero animation, features, AI, pricing, CTA, and footer; served at `/` via marketing route group loading prototype markup and client script; auth CTAs link to sign-in and register; root layout scroll fix for long marketing page
 - 2026-08-08: Completed **Homepage** — real Next.js marketing page at `/` replacing prototype HTML injection; server/client components for navbar, hero chaos animation, scroll reveals, pricing toggle, and all mockup sections; Tailwind and shadcn/ui; auth-aware navbar; smooth anchor scroll and reduced-motion fallbacks; removed placeholder markup bridge and client script
+- 2026-08-08: Completed **Homepage UI Fixes** — mobile hamburger nav with Sheet, social proof section, anchor scroll offsets, pricing badge layout fix, progressive fade-in fallback, and 44px touch targets on marketing CTAs
