@@ -1,20 +1,16 @@
-# Current Feature: Shared Navbar Across Marketing and Auth Pages
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Add the homepage navbar to the sign-in page.
-- Add the homepage navbar to the sign-up page.
-- Replace the homepage navbar brand icon with a folder icon.
-- Use the same folder icon consistently in the dashboard and other navigation bars.
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Preserve the existing homepage navbar styling and behavior when reusing it on authentication pages.
-- Keep the shared navigation icon visually and semantically consistent across the application.
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -71,3 +67,4 @@ In Progress
 - 2026-08-08: Completed **iPocket Homepage Mockup** — static marketing homepage in `prototypes/homepage/` with chaos-to-order hero animation, features, AI, pricing, CTA, and footer; served at `/` via marketing route group loading prototype markup and client script; auth CTAs link to sign-in and register; root layout scroll fix for long marketing page
 - 2026-08-08: Completed **Homepage** — real Next.js marketing page at `/` replacing prototype HTML injection; server/client components for navbar, hero chaos animation, scroll reveals, pricing toggle, and all mockup sections; Tailwind and shadcn/ui; auth-aware navbar; smooth anchor scroll and reduced-motion fallbacks; removed placeholder markup bridge and client script
 - 2026-08-08: Completed **Homepage UI Fixes** — mobile hamburger nav with Sheet, social proof section, anchor scroll offsets, pricing badge layout fix, progressive fade-in fallback, and 44px touch targets on marketing CTAs
+- 2026-08-08: Completed **Shared Navbar Across Marketing and Auth Pages** — homepage navbar on auth routes, open-folder brand icon on marketing and dashboard navbars, simplified sidebar nav (Favorites only), collapsed sidebar default below 1024px, hydration-safe viewport init, and auth anchor links routed to `/#features` and `/#pricing`
