@@ -1,9 +1,4 @@
-import {
-  Clock,
-  LayoutGrid,
-  Pin,
-  Star,
-} from "lucide-react";
+import { Star } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -35,20 +30,12 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
     sidebarData;
 
   const navItems = [
-    { href: "/dashboard", label: "All Items", icon: LayoutGrid, count: null },
     {
       href: "/favorites",
       label: "Favorites",
       icon: Star,
       count: itemCounts.favoriteCount,
     },
-    {
-      href: "/dashboard/pinned",
-      label: "Pinned",
-      icon: Pin,
-      count: itemCounts.pinnedCount,
-    },
-    { href: "/dashboard/recents", label: "Recents", icon: Clock, count: null },
   ];
 
   return (
@@ -69,7 +56,6 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
                 <SidebarNavLink
                   key={item.href}
                   href={item.href}
-                  active={item.href === "/dashboard"}
                   title={item.label}
                   className="group-data-[collapsed]:justify-center group-data-[collapsed]:px-0"
                 >

@@ -1,16 +1,20 @@
-# Current Feature
+# Current Feature: Shared Navbar Across Marketing and Auth Pages
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- What success looks like for the active feature -->
+- Add the homepage navbar to the sign-in page.
+- Add the homepage navbar to the sign-up page.
+- Replace the homepage navbar brand icon with a folder icon.
+- Use the same folder icon consistently in the dashboard and other navigation bars.
 
 ## Notes
 
-<!-- Additional context, constraints, or details from spec -->
+- Preserve the existing homepage navbar styling and behavior when reusing it on authentication pages.
+- Keep the shared navigation icon visually and semantically consistent across the application.
 
 ## History
 

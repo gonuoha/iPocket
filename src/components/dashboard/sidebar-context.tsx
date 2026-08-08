@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useContext, useState } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -15,9 +15,13 @@ type SidebarContextValue = {
 const SidebarContext = createContext<SidebarContextValue | null>(null);
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const [collapsed, setCollapsed] = useState(false);
+  const [collapsed, setCollapsed] = useState(true);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useIsMobile();
+
+  useEffect(() => {
+    setCollapsed(!window.matchMedia("(min-width: 1024px)").matches);
+  }, []);
 
   const toggleSidebar = () => {
     if (isMobile) {

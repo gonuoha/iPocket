@@ -18,8 +18,8 @@ type HomepageNavbarProps = {
 };
 
 const NAV_LINKS = [
-  { href: "#features", label: "Features" },
-  { href: "#pricing", label: "Pricing" },
+  { href: "/#features", label: "Features" },
+  { href: "/#pricing", label: "Pricing" },
 ] as const;
 
 export function HomepageNavbar({ actions }: HomepageNavbarProps) {

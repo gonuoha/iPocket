@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Code2 } from "lucide-react";
+import { FolderOpen } from "lucide-react";
 
 type AuthCardProps = {
   title: string;
@@ -10,12 +10,12 @@ type AuthCardProps = {
 
 export function AuthCard({ title, description, children, footer }: AuthCardProps) {
   return (
-    <div className="flex min-h-svh flex-col items-center justify-center p-6">
+    <div className="flex min-h-[calc(100svh-4rem)] flex-col items-center justify-center p-6">
       <div className="w-full max-w-sm space-y-6">
         <div className="space-y-2 text-center">
           <Link href="/" className="inline-flex items-center gap-2 font-semibold">
             <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-              <Code2 className="size-4" />
+              <FolderOpen className="size-4" />
             </div>
             <span>iPocket</span>
           </Link>

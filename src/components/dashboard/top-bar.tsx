@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Code2, PanelLeft, Search, Star } from "lucide-react";
+import { FolderOpen, PanelLeft, Search, Star } from "lucide-react";
 
 import { CollectionCreateDialog } from "@/components/collections/collection-create-dialog";
 import { ItemCreateDialog } from "@/components/items/item-create-dialog";
@@ -49,9 +49,7 @@ export function TopBar({
           href="/dashboard"
           className="flex min-w-0 items-center gap-2 font-semibold"
         >
-          <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-primary text-primary-foreground">
-            <Code2 className="size-4" />
-          </div>
+          <FolderOpen className="size-6 shrink-0 text-primary" aria-hidden="true" />
           <span className="truncate">iPocket</span>
         </Link>
       </div>
