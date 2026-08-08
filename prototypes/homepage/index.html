@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>iPocket — Stop Losing Your Developer Knowledge</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+  <nav class="navbar" id="navbar">
+    <div class="container navbar-inner">
+      <a href="/" class="logo">
+        <span class="logo-icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 7h16M4 12h16M4 17h10" />
+            <rect x="2" y="3" width="20" height="18" rx="2" />
+          </svg>
+        </span>
+        iPocket
+      </a>
+      <div class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+      </div>
+      <div class="nav-actions">
+        <a href="/sign-in" class="btn btn-ghost">Sign In</a>
+        <a href="/register" class="btn btn-primary">Get Started</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div class="hero-text fade-in">
+          <h1>
+            Stop Losing Your
+            <span class="gradient-text">Developer Knowledge</span>
+          </h1>
+          <p class="hero-subtitle">
+            Snippets in VS Code, prompts in Notion, commands in Slack, links in bookmarks —
+            scattered everywhere. iPocket brings it all into one searchable hub.
+          </p>
+          <div class="hero-cta">
+            <a href="/register" class="btn btn-primary btn-lg">Get Started Free</a>
+            <a href="#features" class="btn btn-outline btn-lg">See Features</a>
+          </div>
+        </div>
+
+        <div class="hero-visual fade-in">
+          <div class="chaos-box">
+            <p class="box-label">Your knowledge today...</p>
+            <div class="chaos-container" id="chaos-container" aria-hidden="true">
+              <div class="chaos-icon" data-icon="notion">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M4.459 4.208c.746.606 1.026.56 2.428.466l13.215-.793c.28 0 .047-.28-.046-.326L17.86 2.066c-.42-.326-.98-.7-2.055-.607L3.01 2.59c-.466.046-.56.28-.374.466l1.823 1.332zm.793 3.08v13.904c0 .747.374 1.026 1.215.98l14.523-.84c.841-.046.935-.56.935-1.167V6.354c0-.606-.233-.933-.748-.887l-15.177.887c-.56.047-.748.327-.748.933zm14.337.606c.093.42 0 .84-.42.888l-.7.14v10.264c-.608.327-1.168.514-1.635.514-.748 0-.935-.234-1.495-.933l-4.577-7.186v6.952l1.449.327s0 .84-1.168.84l-3.222.186c-.093-.186 0-.653.327-.746l.84-.233V9.298L7.822 9.17c-.093-.42.14-1.026.793-1.073l3.456-.233 4.764 7.279v-6.44l-1.215-.14c-.093-.514.28-.887.747-.933z"/></svg>
+              </div>
+              <div class="chaos-icon" data-icon="github">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.5 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/></svg>
+              </div>
+              <div class="chaos-icon" data-icon="slack">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M5.042 15.165a2.528 2.528 0 0 1-2.52 2.523A2.528 2.528 0 0 1 0 15.165a2.527 2.527 0 0 1 2.522-2.52h2.52v2.52zM6.313 15.165a2.527 2.527 0 0 1 2.521-2.52 2.527 2.527 0 0 1 2.521 2.52v6.313A2.528 2.528 0 0 1 8.808 24a2.528 2.528 0 0 1-2.521-2.522v-6.313zM8.808 5.042a2.528 2.528 0 0 1-2.521-2.52A2.528 2.528 0 0 1 8.808 0a2.528 2.528 0 0 1 2.521 2.522v2.52H8.808zM8.808 6.313a2.528 2.528 0 0 1 2.521 2.521 2.528 2.528 0 0 1-2.521 2.521H2.522A2.528 2.528 0 0 1 0 8.808a2.528 2.528 0 0 1 2.522-2.521h6.314zM18.956 8.808a2.528 2.528 0 0 1 2.522-2.521A2.528 2.528 0 0 1 24 8.808a2.528 2.528 0 0 1-2.522 2.521h-2.522V8.808zM17.688 8.808a2.528 2.528 0 0 1-2.523 2.521 2.527 2.527 0 0 1-2.52-2.521V2.522A2.527 2.527 0 0 1 15.165 0a2.528 2.528 0 0 1 2.523 2.522v6.314zM15.165 18.956a2.528 2.528 0 0 1 2.523 2.522A2.528 2.528 0 0 1 15.165 24a2.528 2.528 0 0 1-2.52-2.522v-2.522h2.52zM15.165 17.688a2.528 2.528 0 0 1-2.52-2.523 2.528 2.528 0 0 1 2.52-2.52h6.315A2.528 2.528 0 0 1 24 15.165a2.528 2.528 0 0 1-2.522 2.523h-6.313z"/></svg>
+              </div>
+              <div class="chaos-icon" data-icon="vscode">
+                <svg viewBox="0 0 24 24" fill="currentColor"><path d="M23.15 2.587L18.21.21a1.494 1.494 0 0 0-1.885.29l-9.471 8.966-4.12-3.128a.999.999 0 0 0-1.276.057L.327 7.261A1 1 0 0 0 .326 8.74L3.899 12 .326 15.26a1 1 0 0 0 .001 1.479L1.65 17.94a.999.999 0 0 0 1.276.057l4.12-3.128 9.472 8.966a1.49 1.49 0 0 0 1.884.29l4.942-2.377A1.5 1.5 0 0 0 24 20.06V3.939a1.5 1.5 0 0 0-.85-1.352zm-3.415 11.59l-3.124-1.893 3.124-1.892 1.893 3.124-1.893 1.881z"/></svg>
+              </div>
+              <div class="chaos-icon" data-icon="browser">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="18" rx="2"/><path d="M2 8h20M8 3v5"/></svg>
+              </div>
+              <div class="chaos-icon" data-icon="terminal">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+              </div>
+              <div class="chaos-icon" data-icon="file">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+              </div>
+              <div class="chaos-icon" data-icon="bookmark">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="transform-arrow" aria-hidden="true">
+            <svg viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.5">
+              <path d="M8 24h28M28 14l10 10-10 10" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+
+          <div class="dashboard-box">
+            <p class="box-label">...with iPocket</p>
+            <div class="dashboard-mockup">
+              <aside class="mock-sidebar">
+                <div class="mock-sidebar-logo">iPocket</div>
+                <nav class="mock-nav">
+                  <span class="mock-nav-item active">Dashboard</span>
+                  <span class="mock-nav-item">Snippets</span>
+                  <span class="mock-nav-item">Prompts</span>
+                  <span class="mock-nav-item">Commands</span>
+                  <span class="mock-nav-item">Collections</span>
+                </nav>
+              </aside>
+              <div class="mock-main">
+                <div class="mock-grid">
+                  <div class="mock-card" data-type="snippet">
+                    <span class="mock-card-title">React useEffect hook</span>
+                    <span class="mock-card-tag">react</span>
+                  </div>
+                  <div class="mock-card" data-type="prompt">
+                    <span class="mock-card-title">Code review prompt</span>
+                    <span class="mock-card-tag">ai</span>
+                  </div>
+                  <div class="mock-card" data-type="command">
+                    <span class="mock-card-title">Docker cleanup</span>
+                    <span class="mock-card-tag">devops</span>
+                  </div>
+                  <div class="mock-card" data-type="note">
+                    <span class="mock-card-title">API design notes</span>
+                    <span class="mock-card-tag">backend</span>
+                  </div>
+                  <div class="mock-card" data-type="url">
+                    <span class="mock-card-title">Prisma docs</span>
+                    <span class="mock-card-tag">docs</span>
+                  </div>
+                  <div class="mock-card" data-type="image">
+                    <span class="mock-card-title">Architecture diagram</span>
+                    <span class="mock-card-tag">design</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="features section" id="features">
+      <div class="container">
+        <div class="section-header fade-in-scroll">
+          <h2>Everything you save, one place to find it</h2>
+          <p>Built for how developers actually work — fast capture, instant recall.</p>
+        </div>
+        <div class="features-grid">
+          <article class="feature-card fade-in-scroll" data-type="snippet">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+            </div>
+            <h3>Code Snippets</h3>
+            <p>Store syntax-highlighted snippets with language tags. Copy in one click.</p>
+          </article>
+          <article class="feature-card fade-in-scroll" data-type="prompt">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+            </div>
+            <h3>AI Prompts</h3>
+            <p>Keep your best prompts organized with markdown preview and versioning.</p>
+          </article>
+          <article class="feature-card fade-in-scroll" data-type="url">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+            <h3>Instant Search</h3>
+            <p>Cmd+K to find anything — snippets, prompts, files, or collections instantly.</p>
+          </article>
+          <article class="feature-card fade-in-scroll" data-type="command">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            </div>
+            <h3>Commands</h3>
+            <p>Shell commands, git aliases, and docker one-liners — always at hand.</p>
+          </article>
+          <article class="feature-card fade-in-scroll" data-type="file">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+            <h3>Files &amp; Docs</h3>
+            <p>Upload PDFs, configs, and reference docs. Download anytime.</p>
+          </article>
+          <article class="feature-card fade-in-scroll" data-type="note">
+            <div class="feature-icon">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+            </div>
+            <h3>Collections</h3>
+            <p>Group related items into collections. Favorite the ones you use daily.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="ai-section section" id="ai">
+      <div class="container ai-grid">
+        <div class="ai-content fade-in-scroll">
+          <span class="badge badge-pro">Pro Feature</span>
+          <h2>AI that understands your knowledge</h2>
+          <p>Let AI tag, summarize, and organize your items so you spend less time filing and more time building.</p>
+          <ul class="ai-checklist">
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Auto-generated tags from content
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Smart summaries for long notes
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Suggested collections for new items
+            </li>
+            <li>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+              Natural language search
+            </li>
+          </ul>
+        </div>
+        <div class="ai-demo fade-in-scroll">
+          <div class="editor-mockup">
+            <div class="editor-header">
+              <span class="editor-dot red"></span>
+              <span class="editor-dot yellow"></span>
+              <span class="editor-dot green"></span>
+              <span class="editor-lang">typescript</span>
+            </div>
+            <pre class="editor-code"><code><span class="code-keyword">async function</span> <span class="code-fn">fetchUser</span>(<span class="code-param">id</span>: <span class="code-type">string</span>) {
+  <span class="code-keyword">const</span> res = <span class="code-keyword">await</span> fetch(`/api/users/${id}`);
+  <span class="code-keyword">return</span> res.json();
+}</code></pre>
+            <div class="ai-tags-demo">
+              <span class="ai-tags-label">AI Generated Tags</span>
+              <div class="ai-tags">
+                <span class="ai-tag">typescript</span>
+                <span class="ai-tag">api</span>
+                <span class="ai-tag">fetch</span>
+                <span class="ai-tag">async</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="pricing section" id="pricing">
+      <div class="container">
+        <div class="section-header fade-in-scroll">
+          <h2>Simple, transparent pricing</h2>
+          <p>Start free. Upgrade when you need more power.</p>
+        </div>
+
+        <div class="pricing-toggle fade-in-scroll">
+          <button type="button" class="toggle-btn active" data-period="monthly">Monthly</button>
+          <button type="button" class="toggle-btn" data-period="yearly">Yearly <span class="toggle-save">Save 25%</span></button>
+        </div>
+
+        <div class="pricing-grid">
+          <article class="pricing-card fade-in-scroll">
+            <h3>Free</h3>
+            <div class="pricing-amount">
+              <span class="price">$0</span>
+              <span class="period">/forever</span>
+            </div>
+            <ul class="pricing-features">
+              <li>50 items</li>
+              <li>3 collections</li>
+              <li>All item types</li>
+              <li>Global search</li>
+              <li>Dark mode</li>
+            </ul>
+            <a href="/register" class="btn btn-outline btn-block">Get Started</a>
+          </article>
+
+          <article class="pricing-card pricing-card-popular fade-in-scroll">
+            <span class="popular-badge">Most Popular</span>
+            <h3>Pro</h3>
+            <div class="pricing-amount">
+              <span class="price" id="pro-price">$8</span>
+              <span class="period" id="pro-period">/month</span>
+            </div>
+            <ul class="pricing-features">
+              <li>Unlimited items</li>
+              <li>Unlimited collections</li>
+              <li>File &amp; image uploads</li>
+              <li>AI tagging &amp; summaries</li>
+              <li>Natural language search</li>
+              <li>Priority support</li>
+            </ul>
+            <a href="/register" class="btn btn-primary btn-block">Upgrade to Pro</a>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-section section">
+      <div class="container cta-inner fade-in-scroll">
+        <h2>Ready to Organize Your Knowledge?</h2>
+        <p>Join developers who stopped losing snippets, prompts, and commands.</p>
+        <a href="/register" class="btn btn-primary btn-lg">Get Started Free</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-grid">
+      <div class="footer-brand">
+        <a href="/" class="logo">
+          <span class="logo-icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M4 7h16M4 12h16M4 17h10" />
+              <rect x="2" y="3" width="20" height="18" rx="2" />
+            </svg>
+          </span>
+          iPocket
+        </a>
+        <p>One hub for all your developer knowledge.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Product</h4>
+        <a href="#features">Features</a>
+        <a href="#pricing">Pricing</a>
+        <a href="#">Changelog</a>
+      </div>
+      <div class="footer-links">
+        <h4>Company</h4>
+        <a href="#">About</a>
+        <a href="#">Blog</a>
+        <a href="#">Contact</a>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <a href="#">Privacy</a>
+        <a href="#">Terms</a>
+      </div>
+    </div>
+    <div class="container footer-bottom">
+      <p>&copy; <span id="copyright-year"></span> iPocket. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <script src="script.js"></script>
+  </body>
+</html>
