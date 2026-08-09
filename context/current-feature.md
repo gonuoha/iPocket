@@ -1,41 +1,16 @@
-# Current Feature: Stripe Integration — Phase 2 (Integration & UI)
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Process Stripe webhook events and update `isPro` in the database
-- Enforce free-tier limits (50 items, 3 collections) in server actions
-- Add billing settings, upgrade prompts, and usage display across the app
-- Cancel Stripe subscription on account deletion
-- Verify full checkout → webhook → Pro unlock flow using Stripe CLI
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Spec: `context/features/stripe-phase-2-spec.md`
-- Depends on Phase 1 (`context/features/stripe-phase-1-spec.md`) — already merged
-- Stripe CLI required for integration testing: `stripe listen --forward-to localhost:3000/api/stripe/webhook`
-- Webhooks are source of truth for `isPro` — do not set it in checkout success redirect
-- No schema migration required
-
-### Files to create
-
-- `src/lib/stripe/webhook-handlers.ts`
-- `src/lib/stripe/webhook-handlers.test.ts`
-- `src/app/api/stripe/webhook/route.ts`
-- `src/components/settings/billing-card.tsx`
-- `src/components/shared/upgrade-prompt.tsx`
-
-### Files to modify
-
-- `src/actions/items.ts`, `src/actions/collections.ts` + tests
-- `src/lib/db/settings.ts`, `src/app/settings/page.tsx`
-- `src/components/profile/usage-statistics-card.tsx`, `src/app/profile/page.tsx`
-- `src/components/items/item-create-dialog.tsx`, `src/components/collections/collection-create-dialog.tsx`
-- `src/components/dashboard/sidebar-user-menu.tsx`, `src/components/marketing/homepage-pricing.tsx`
-- `src/components/dashboard/top-bar.tsx`, `src/app/api/auth/account/route.ts`
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -94,3 +69,4 @@ In Progress
 - 2026-08-08: Completed **Homepage UI Fixes** — mobile hamburger nav with Sheet, social proof section, anchor scroll offsets, pricing badge layout fix, progressive fade-in fallback, and 44px touch targets on marketing CTAs
 - 2026-08-08: Completed **Shared Navbar Across Marketing and Auth Pages** — homepage navbar on auth routes, open-folder brand icon on marketing and dashboard navbars, simplified sidebar nav (Favorites only), collapsed sidebar default below 1024px, hydration-safe viewport init, and auth anchor links routed to `/#features` and `/#pricing`
 - 2026-08-08: Completed **Stripe Integration — Phase 1 (Core Infrastructure)** — Stripe SDK with checkout and portal API routes, JWT `isPro` sync from database on every session validation, subscription-limits module (50 items / 3 collections) with unit tests, integration plan and phase specs
+- 2026-08-09: Completed **Stripe Integration — Phase 2 (Integration & UI)** — webhook handlers and `POST /api/stripe/webhook` route syncing `isPro` from checkout and subscription events; free-tier enforcement in create item/collection actions; `BillingCard` on settings and `UpgradePrompt` in create dialogs, top bar, and homepage pricing; usage limits on profile; Stripe subscription cancellation on account deletion; webhook handler and action unit tests
