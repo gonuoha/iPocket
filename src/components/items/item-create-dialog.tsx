@@ -31,6 +31,7 @@ import {
   CODE_EDITOR_TYPE_NAMES,
   CodeEditor,
 } from "@/components/code-editor/code-editor";
+import { LanguageSelect } from "@/components/code-editor/language-select";
 import {
   FileUpload,
   type UploadedFile,
@@ -211,7 +212,7 @@ export function ItemCreateDialog({
                 handleTypeChange(value as CreatableItemType)
               }
             >
-              <SelectTrigger id="item-create-type" className="w-full">
+              <SelectTrigger id="item-create-type" className="w-fit min-w-40">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -265,6 +266,15 @@ export function ItemCreateDialog({
             </div>
           ) : null}
 
+          {showLanguage ? (
+            <LanguageSelect
+              id="item-create-language"
+              value={formState.language}
+              onChange={(language) => handleFormChange({ language })}
+              disabled={isCreating}
+            />
+          ) : null}
+
           {showContent ? (
             <div className="space-y-2">
               <Label htmlFor="item-create-content">Content</Label>
@@ -291,19 +301,6 @@ export function ItemCreateDialog({
                   className="min-h-32 font-mono text-sm"
                 />
               )}
-            </div>
-          ) : null}
-
-          {showLanguage ? (
-            <div className="space-y-2">
-              <Label htmlFor="item-create-language">Language</Label>
-              <Input
-                id="item-create-language"
-                value={formState.language}
-                onChange={(event) =>
-                  handleFormChange({ language: event.target.value })
-                }
-              />
             </div>
           ) : null}
 

@@ -46,6 +46,7 @@ import {
   CODE_EDITOR_TYPE_NAMES,
   CodeEditor,
 } from "@/components/code-editor/code-editor";
+import { LanguageSelect } from "@/components/code-editor/language-select";
 import {
   MARKDOWN_EDITOR_TYPE_NAMES,
   MarkdownEditor,
@@ -421,6 +422,15 @@ function ItemDrawerEditor({
             />
           </div>
 
+          {showLanguage ? (
+            <LanguageSelect
+              id="item-edit-language"
+              value={formState.language}
+              onChange={(language) => onChange({ language })}
+              disabled={isSaving}
+            />
+          ) : null}
+
           {showContent ? (
             <div className="space-y-2">
               <Label htmlFor="item-edit-content">Content</Label>
@@ -449,20 +459,6 @@ function ItemDrawerEditor({
               )}
             </div>
           ) : null}
-
-          {showLanguage ? (
-            <div className="space-y-2">
-              <Label htmlFor="item-edit-language">Language</Label>
-              <Input
-                id="item-edit-language"
-                value={formState.language}
-                onChange={(event) =>
-                  onChange({ language: event.target.value })
-                }
-              />
-            </div>
-          ) : null}
-
           {showUrl ? (
             <div className="space-y-2">
               <Label htmlFor="item-edit-url">URL</Label>

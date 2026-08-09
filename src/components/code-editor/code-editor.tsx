@@ -67,7 +67,7 @@ export function CodeEditor({
           <span className="size-3 rounded-full bg-[#28c804]" />
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs font-medium capitalize text-zinc-400">
+          <span className="text-xs font-medium text-zinc-400">
             {formatCodeLanguageLabel(language)}
           </span>
           <Button
