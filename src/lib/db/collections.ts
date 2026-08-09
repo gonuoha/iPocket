@@ -201,27 +201,6 @@ const collectionCountInclude = {
   },
 } as const;
 
-export async function getAllCollections(
-  userId: string,
-): Promise<DashboardCollection[]> {
-  const collections = await prisma.collection.findMany({
-    where: { userId },
-    orderBy: { name: "asc" },
-    include: collectionCountInclude,
-  });
-
-  const aggregations = await getCollectionTypeAggregations(
-    collections.map((collection) => collection.id),
-  );
-
-  return collections.map((collection) =>
-    mapToDashboardCollection(
-      collection,
-      aggregations.get(collection.id) ?? { types: [], dominantTypeColor: null },
-    ),
-  );
-}
-
 export async function getAllCollectionsPaginated(
   userId: string,
   page: number,

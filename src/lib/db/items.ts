@@ -633,19 +633,6 @@ export async function getItemTypeBySlug(userId: string, slug: string) {
 
 export type { PaginatedResult } from "@/lib/pagination";
 
-export async function getItemsByType(
-  userId: string,
-  typeId: string,
-): Promise<DashboardItem[]> {
-  const items = await prisma.item.findMany({
-    where: { userId, typeId },
-    orderBy: pinnedFirstByUpdatedAt,
-    select: itemSelect,
-  });
-
-  return items.map(mapItem);
-}
-
 export async function getItemsByTypePaginated(
   userId: string,
   typeId: string,
@@ -671,24 +658,6 @@ export async function getItemsByTypePaginated(
     pageSize,
     totalPages,
   };
-}
-
-export async function getItemsByCollection(
-  userId: string,
-  collectionId: string,
-): Promise<DashboardItem[]> {
-  const items = await prisma.item.findMany({
-    where: {
-      userId,
-      collections: {
-        some: { collectionId },
-      },
-    },
-    orderBy: pinnedFirstByUpdatedAt,
-    select: itemSelect,
-  });
-
-  return items.map(mapItem);
 }
 
 export async function getItemsByCollectionPaginated(
@@ -721,44 +690,6 @@ export async function getItemsByCollectionPaginated(
     pageSize,
     totalPages,
   };
-}
-
-const collectionItemsWhere = (userId: string, collectionId: string) => ({
-  userId,
-  collections: {
-    some: { collectionId },
-  },
-});
-
-export async function getFileItemsByCollection(
-  userId: string,
-  collectionId: string,
-): Promise<FileListItem[]> {
-  const items = await prisma.item.findMany({
-    where: {
-      ...collectionItemsWhere(userId, collectionId),
-      type: {
-        name: { equals: "file", mode: "insensitive" },
-      },
-    },
-    orderBy: pinnedFirstByCreatedAt,
-    select: fileItemSelect,
-  });
-
-  return items.map(mapFileItem);
-}
-
-export async function getFileItemsByType(
-  userId: string,
-  typeId: string,
-): Promise<FileListItem[]> {
-  const items = await prisma.item.findMany({
-    where: { userId, typeId },
-    orderBy: pinnedFirstByCreatedAt,
-    select: fileItemSelect,
-  });
-
-  return items.map(mapFileItem);
 }
 
 export async function getFileItemsByTypePaginated(

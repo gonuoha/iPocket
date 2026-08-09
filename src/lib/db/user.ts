@@ -4,13 +4,6 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-export class DemoUserNotFoundError extends Error {
-  constructor() {
-    super("Demo user not found. Run npm run db:seed.");
-    this.name = "DemoUserNotFoundError";
-  }
-}
-
 export type DashboardUser = {
   id: string;
   name: string;

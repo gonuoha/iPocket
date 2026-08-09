@@ -228,8 +228,8 @@ model ItemTag {
 
 | Plan | Price           | Limits                  | Features                                        |
 | ---- | --------------- | ----------------------- | ----------------------------------------------- |
-| Free | $0              | 50 items, 3 collections | Basic search, image uploads, no AI              |
-| Pro  | $8/mo or $72/yr | Unlimited               | File uploads, custom types, AI features, export |
+| Free | $0              | 50 items, 3 collections | Basic search, no AI                             |
+| Pro  | $8/mo or $72/yr | Unlimited               | File & image uploads, custom types, AI, export  |
 
 > Stripe for subscriptions + webhooks for syncing
 
@@ -323,7 +323,7 @@ git switch -c lesson-01-setup
 - [x] Collections (dashboard display and stats)
 - [x] Search
 - [x] Basic tags
-- [ ] Free tier limits
+- [x] Free tier limits
 
 ### **Pro Phase**
 
@@ -331,7 +331,7 @@ git switch -c lesson-01-setup
 - [ ] Custom item types
 - [x] File uploads (R2-backed; Pro-gated)
 - [ ] Export
-- [ ] Billing & upgrade flow (Stripe)
+- [x] Billing & upgrade flow (Stripe)
 
 ### **Future Enhancements**
 
@@ -345,9 +345,8 @@ git switch -c lesson-01-setup
 
 ## 📌 Status
 
-- Active development — core dashboard, auth, profile, and item CRUD are implemented
-- Remaining MVP work: free-tier enforcement
-- Pro integrations planned: Stripe billing, OpenAI features
+- Active development — core dashboard, auth, profile, item CRUD, free-tier limits, and Stripe billing are implemented
+- Remaining Pro work: AI features, custom item types, export
 
 ---
 
