@@ -22,7 +22,6 @@ export function SuggestedTags({
 
   return (
     <div className="space-y-2">
-      <p className="text-sm text-muted-foreground">Suggested:</p>
       <div className="flex flex-wrap items-center gap-2">
         {tags.map((tag) => (
           <Badge

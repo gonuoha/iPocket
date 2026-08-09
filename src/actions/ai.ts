@@ -3,15 +3,19 @@
 import { ThinkingLevel } from "@google/genai";
 
 import { auth } from "@/auth";
-import { AI_MODEL, getGeminiClient } from "@/lib/ai/gemini";
-import { buildAutoTagPrompt } from "@/lib/ai/prompts";
+import { getGeminiClient, AI_MODEL } from "@/lib/ai/gemini";
+import { buildAutoTagPrompt, buildSummaryPrompt } from "@/lib/ai/prompts";
 import { truncateForAi } from "@/lib/ai/truncate-content";
 import { getUserIsPro } from "@/lib/db/user";
 import { checkAiRateLimit } from "@/lib/rate-limit";
 import {
   AUTO_TAGS_JSON_SCHEMA,
   generateAutoTagsSchema,
+  generateSummarySchema,
   modelAutoTagsResponseSchema,
+  modelSummaryResponseSchema,
+  SUMMARY_JSON_SCHEMA,
+  summaryResponseSchema,
 } from "@/lib/validations/ai";
 
 type ActionResult<T> =
@@ -40,6 +44,101 @@ function filterExistingTags(tags: string[], existingTags: string[]): string[] {
   const existing = new Set(existingTags.map((tag) => tag.trim().toLowerCase()));
 
   return tags.filter((tag) => !existing.has(tag));
+}
+
+function normalizeSummary(summary: string): string {
+  const trimmed = summary.trim();
+
+  if (trimmed.length <= 300) {
+    return trimmed;
+  }
+
+  return `${trimmed.slice(0, 297).trimEnd()}…`;
+}
+
+export async function generateSummary(
+  data: unknown,
+): Promise<ActionResult<{ summary: string }>> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const parsed = generateSummarySchema.safeParse(data);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const isPro = await getUserIsPro(session.user.id);
+
+  if (!isPro) {
+    return {
+      success: false,
+      error: "AI features require a Pro subscription",
+    };
+  }
+
+  const rateLimit = await checkAiRateLimit(session.user.id);
+
+  if (!rateLimit.success) {
+    return {
+      success: false,
+      error: "You've reached your AI limit. Try again later.",
+    };
+  }
+
+  const truncatedContent = truncateForAi(parsed.data.content);
+  const { systemInstruction, userContent } = buildSummaryPrompt({
+    title: parsed.data.title,
+    type: parsed.data.type,
+    content: truncatedContent,
+  });
+
+  try {
+    const client = getGeminiClient();
+    const response = await client.models.generateContent({
+      model: AI_MODEL,
+      contents: userContent,
+      config: {
+        systemInstruction,
+        responseMimeType: "application/json",
+        responseJsonSchema: SUMMARY_JSON_SCHEMA,
+        thinkingConfig: { thinkingLevel: ThinkingLevel.MINIMAL },
+        maxOutputTokens: 150,
+      },
+    });
+
+    const rawText = response.text;
+
+    if (!rawText) {
+      throw new Error("Empty response from Gemini");
+    }
+
+    const modelParsed = modelSummaryResponseSchema.safeParse(
+      JSON.parse(rawText),
+    );
+
+    if (!modelParsed.success) {
+      throw new Error("Invalid JSON from Gemini");
+    }
+
+    const normalized = normalizeSummary(modelParsed.data.summary);
+    const validated = summaryResponseSchema.safeParse({ summary: normalized });
+
+    if (!validated.success) {
+      throw new Error("Invalid summary from Gemini");
+    }
+
+    return { success: true, data: { summary: validated.data.summary } };
+  } catch (error) {
+    console.error("generateSummary failed:", error);
+    return { success: false, error: "AI is temporarily unavailable" };
+  }
 }
 
 export async function generateAutoTags(

@@ -22,7 +22,7 @@ import { getGeminiClient } from "@/lib/ai/gemini";
 import { getUserIsPro } from "@/lib/db/user";
 import { checkAiRateLimit } from "@/lib/rate-limit";
 
-import { generateAutoTags } from "./ai";
+import { generateAutoTags, generateSummary } from "./ai";
 
 const mockAuth = vi.mocked(auth);
 const mockGetUserIsPro = vi.mocked(getUserIsPro);
@@ -213,6 +213,121 @@ describe("generateAutoTags", () => {
     expect(result).toEqual({
       success: true,
       data: { tags: ["react", "hooks", "frontend", "backend", "testing"] },
+    });
+  });
+});
+
+const summaryInput = {
+  title: "React hooks",
+  content: "useEffect cleanup example",
+  type: "snippet" as const,
+};
+
+describe("generateSummary", () => {
+  it("returns unauthorized when there is no session", async () => {
+    mockAuth.mockResolvedValue(null);
+
+    const result = await generateSummary(summaryInput);
+
+    expect(result).toEqual({ success: false, error: "Unauthorized" });
+    expect(mockGenerateContent).not.toHaveBeenCalled();
+  });
+
+  it("returns a validation error for invalid payload", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+
+    const result = await generateSummary({ ...summaryInput, title: "" });
+
+    expect(result).toEqual({ success: false, error: "Title is required" });
+    expect(mockGenerateContent).not.toHaveBeenCalled();
+  });
+
+  it("returns pro subscription error for free users", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGetUserIsPro.mockResolvedValue(false);
+
+    const result = await generateSummary(summaryInput);
+
+    expect(result).toEqual({
+      success: false,
+      error: "AI features require a Pro subscription",
+    });
+    expect(mockCheckAiRateLimit).not.toHaveBeenCalled();
+  });
+
+  it("returns rate limit error when limited", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockCheckAiRateLimit.mockResolvedValue({
+      success: false,
+      remaining: 0,
+      reset: Date.now() + 3600000,
+    });
+
+    const result = await generateSummary(summaryInput);
+
+    expect(result).toEqual({
+      success: false,
+      error: "You've reached your AI limit. Try again later.",
+    });
+  });
+
+  it("returns summary for pro users with valid input", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGenerateContent.mockResolvedValue({
+      text: JSON.stringify({
+        summary: "A concise summary of the React hooks example.",
+      }),
+    });
+
+    const result = await generateSummary(summaryInput);
+
+    expect(result).toEqual({
+      success: true,
+      data: { summary: "A concise summary of the React hooks example." },
+    });
+    expect(mockGenerateContent).toHaveBeenCalledOnce();
+  });
+
+  it("normalizes summaries longer than 300 characters", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGenerateContent.mockResolvedValue({
+      text: JSON.stringify({
+        summary: "A".repeat(350),
+      }),
+    });
+
+    const result = await generateSummary(summaryInput);
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.summary.length).toBeLessThanOrEqual(300);
+      expect(result.data.summary.endsWith("…")).toBe(true);
+    }
+  });
+
+  it("returns service unavailable when Gemini throws", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGenerateContent.mockRejectedValue(new Error("API error"));
+
+    const result = await generateSummary(summaryInput);
+
+    expect(result).toEqual({
+      success: false,
+      error: "AI is temporarily unavailable",
+    });
+  });
+
+  it("returns service unavailable for invalid model JSON", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGenerateContent.mockResolvedValue({
+      text: JSON.stringify({ summary: "" }),
+    });
+
+    const result = await generateSummary(summaryInput);
+
+    expect(result).toEqual({
+      success: false,
+      error: "AI is temporarily unavailable",
     });
   });
 });

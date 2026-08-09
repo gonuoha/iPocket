@@ -14,7 +14,7 @@ import {
 import { toast } from "sonner";
 
 import { deleteItem, updateItem } from "@/actions/items";
-import { generateAutoTags } from "@/actions/ai";
+import { generateAutoTags, generateSummary } from "@/actions/ai";
 import {
   CollectionMultiSelect,
   type SelectableCollection,
@@ -23,6 +23,12 @@ import { ItemFavoriteButton } from "@/components/items/item-favorite-button";
 import { ItemPinButton } from "@/components/items/item-pin-button";
 import { SuggestTagsButton } from "@/components/ai/suggest-tags-button";
 import { SuggestedTags } from "@/components/ai/suggested-tags";
+import { GenerateSummaryButton } from "@/components/ai/generate-summary-button";
+import { SuggestedSummary } from "@/components/ai/suggested-summary";
+import {
+  buildSummaryContent,
+  canGenerateSummary,
+} from "@/lib/ai/build-summary-content";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -373,6 +379,9 @@ function ItemDrawerEditor({
   suggestedTags,
   isSuggesting,
   canSuggestTags,
+  suggestedSummary,
+  isSummarizing,
+  canGenerateSummaryEnabled,
   onChange,
   onCancel,
   onSave,
@@ -380,6 +389,9 @@ function ItemDrawerEditor({
   onAcceptSuggestedTag,
   onRejectSuggestedTag,
   onDismissSuggestedTags,
+  onGenerateSummary,
+  onAcceptSuggestedSummary,
+  onRejectSuggestedSummary,
   isSaving,
 }: {
   item: ItemDetailResponse;
@@ -389,6 +401,9 @@ function ItemDrawerEditor({
   suggestedTags: string[];
   isSuggesting: boolean;
   canSuggestTags: boolean;
+  suggestedSummary: string | null;
+  isSummarizing: boolean;
+  canGenerateSummaryEnabled: boolean;
   onChange: (patch: Partial<EditFormState>) => void;
   onCancel: () => void;
   onSave: () => void;
@@ -396,6 +411,9 @@ function ItemDrawerEditor({
   onAcceptSuggestedTag: (tag: string) => void;
   onRejectSuggestedTag: (tag: string) => void;
   onDismissSuggestedTags: () => void;
+  onGenerateSummary: () => void;
+  onAcceptSuggestedSummary: () => void;
+  onRejectSuggestedSummary: () => void;
   isSaving: boolean;
 }) {
   const typeName = item.type.name.toLowerCase();
@@ -436,7 +454,15 @@ function ItemDrawerEditor({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="item-edit-description">Description</Label>
+            <div className="flex items-center justify-between gap-2">
+              <Label htmlFor="item-edit-description">Description</Label>
+              <GenerateSummaryButton
+                isPro={isPro}
+                disabled={!canGenerateSummaryEnabled}
+                onGenerate={onGenerateSummary}
+                isLoading={isSummarizing}
+              />
+            </div>
             <Textarea
               id="item-edit-description"
               value={formState.description}
@@ -444,6 +470,11 @@ function ItemDrawerEditor({
                 onChange({ description: event.target.value })
               }
               rows={3}
+            />
+            <SuggestedSummary
+              summary={suggestedSummary}
+              onAccept={onAcceptSuggestedSummary}
+              onReject={onRejectSuggestedSummary}
             />
           </div>
 
@@ -570,8 +601,10 @@ function ItemDrawerPanel({
   const [formState, setFormState] = useState<EditFormState | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
+  const [suggestedSummary, setSuggestedSummary] = useState<string | null>(null);
   const [isSaving, startSaving] = useTransition();
   const [isSuggesting, startSuggesting] = useTransition();
+  const [isSummarizing, startSummarizing] = useTransition();
   const [isDeleting, startDeleting] = useTransition();
 
   useEffect(() => {
@@ -619,12 +652,14 @@ function ItemDrawerPanel({
     }
 
     setSuggestedTags([]);
+    setSuggestedSummary(null);
     setFormState(toFormState(item));
     setMode("edit");
   }
 
   function handleCancel() {
     setSuggestedTags([]);
+    setSuggestedSummary(null);
     setFormState(null);
     setMode("view");
   }
@@ -639,6 +674,61 @@ function ItemDrawerPanel({
     }
 
     return state.content.trim();
+  }
+
+  function getSummaryContentInput(
+    state: EditFormState,
+    typeName: string,
+    fileName?: string | null,
+  ) {
+    return {
+      type: typeName,
+      content: state.content,
+      url: state.url,
+      fileName,
+      language: state.language,
+    };
+  }
+
+  function handleGenerateSummary() {
+    if (!item || !formState) {
+      return;
+    }
+
+    const typeName = item.type.name.toLowerCase();
+    const summaryContentInput = getSummaryContentInput(
+      formState,
+      typeName,
+      item.fileName,
+    );
+
+    startSummarizing(async () => {
+      const result = await generateSummary({
+        title: formState.title.trim(),
+        content: buildSummaryContent(summaryContentInput),
+        type: typeName as AutoTagItemType,
+      });
+
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      setSuggestedSummary(result.data.summary);
+    });
+  }
+
+  function handleAcceptSuggestedSummary() {
+    if (!formState || !suggestedSummary) {
+      return;
+    }
+
+    handleFormChange({ description: suggestedSummary });
+    setSuggestedSummary(null);
+  }
+
+  function handleRejectSuggestedSummary() {
+    setSuggestedSummary(null);
   }
 
   function handleSuggestTags() {
@@ -761,6 +851,13 @@ function ItemDrawerPanel({
     formState !== null &&
     formState.title.trim().length > 0 &&
     suggestContent.length > 0;
+  const summaryContentInput =
+    formState && item
+      ? getSummaryContentInput(formState, editTypeName, item.fileName)
+      : { type: editTypeName };
+  const canGenerateSummaryEnabled =
+    formState !== null &&
+    canGenerateSummary(formState.title, summaryContentInput);
 
   return (
     <>
@@ -826,6 +923,9 @@ function ItemDrawerPanel({
             suggestedTags={suggestedTags}
             isSuggesting={isSuggesting}
             canSuggestTags={canSuggestTags}
+            suggestedSummary={suggestedSummary}
+            isSummarizing={isSummarizing}
+            canGenerateSummaryEnabled={canGenerateSummaryEnabled}
             onChange={handleFormChange}
             onCancel={handleCancel}
             onSave={handleSave}
@@ -833,6 +933,9 @@ function ItemDrawerPanel({
             onAcceptSuggestedTag={handleAcceptSuggestedTag}
             onRejectSuggestedTag={handleRejectSuggestedTag}
             onDismissSuggestedTags={() => setSuggestedTags([])}
+            onGenerateSummary={handleGenerateSummary}
+            onAcceptSuggestedSummary={handleAcceptSuggestedSummary}
+            onRejectSuggestedSummary={handleRejectSuggestedSummary}
             isSaving={isSaving}
           />
         ) : null}

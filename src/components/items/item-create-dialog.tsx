@@ -4,7 +4,7 @@ import { createElement, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { generateAutoTags } from "@/actions/ai";
+import { generateAutoTags, generateSummary } from "@/actions/ai";
 import { createItem } from "@/actions/items";
 import {
   CollectionMultiSelect,
@@ -51,6 +51,12 @@ import {
 import { UpgradePrompt } from "@/components/shared/upgrade-prompt";
 import { SuggestTagsButton } from "@/components/ai/suggest-tags-button";
 import { SuggestedTags } from "@/components/ai/suggested-tags";
+import { GenerateSummaryButton } from "@/components/ai/generate-summary-button";
+import { SuggestedSummary } from "@/components/ai/suggested-summary";
+import {
+  buildSummaryContent,
+  canGenerateSummary,
+} from "@/lib/ai/build-summary-content";
 import { appendTagToTagsString, parseTagsString } from "@/lib/parse-tags";
 
 const CREATABLE_ITEM_TYPES: {
@@ -115,8 +121,10 @@ export function ItemCreateDialog({
   const router = useRouter();
   const [formState, setFormState] = useState<CreateFormState>(initialFormState);
   const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
+  const [suggestedSummary, setSuggestedSummary] = useState<string | null>(null);
   const [isCreating, startCreating] = useTransition();
   const [isSuggesting, startSuggesting] = useTransition();
+  const [isSummarizing, startSummarizing] = useTransition();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const showContent = CONTENT_TYPE_NAMES.has(formState.type);
@@ -137,6 +145,17 @@ export function ItemCreateDialog({
       : formState.content.trim();
   const canSuggestTags =
     formState.title.trim().length > 0 && suggestContent.length > 0;
+  const summaryContentInput = {
+    type: formState.type,
+    content: formState.content,
+    url: formState.url,
+    fileName: formState.uploadedFile?.fileName,
+    language: formState.language,
+  };
+  const canGenerateSummaryEnabled = canGenerateSummary(
+    formState.title,
+    summaryContentInput,
+  );
 
   function handleOpenChange(nextOpen: boolean) {
     if (nextOpen) {
@@ -145,9 +164,11 @@ export function ItemCreateDialog({
         type: resolveDefaultCreateType(defaultType, isPro),
       });
       setSuggestedTags([]);
+      setSuggestedSummary(null);
     } else {
       setFormState(initialFormState);
       setSuggestedTags([]);
+      setSuggestedSummary(null);
     }
 
     onOpenChange(nextOpen);
@@ -164,6 +185,37 @@ export function ItemCreateDialog({
       uploadedFile: null,
     }));
     setSuggestedTags([]);
+    setSuggestedSummary(null);
+  }
+
+  function handleGenerateSummary() {
+    startSummarizing(async () => {
+      const result = await generateSummary({
+        title: formState.title.trim(),
+        content: buildSummaryContent(summaryContentInput),
+        type: formState.type,
+      });
+
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      setSuggestedSummary(result.data.summary);
+    });
+  }
+
+  function handleAcceptSuggestedSummary() {
+    if (!suggestedSummary) {
+      return;
+    }
+
+    handleFormChange({ description: suggestedSummary });
+    setSuggestedSummary(null);
+  }
+
+  function handleRejectSuggestedSummary() {
+    setSuggestedSummary(null);
   }
 
   function handleSuggestTags() {
@@ -286,7 +338,15 @@ export function ItemCreateDialog({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="item-create-description">Description</Label>
+            <div className="flex items-center justify-between gap-2">
+              <Label htmlFor="item-create-description">Description</Label>
+              <GenerateSummaryButton
+                isPro={isPro}
+                disabled={!canGenerateSummaryEnabled}
+                onGenerate={handleGenerateSummary}
+                isLoading={isSummarizing}
+              />
+            </div>
             <Textarea
               id="item-create-description"
               value={formState.description}
@@ -294,6 +354,11 @@ export function ItemCreateDialog({
                 handleFormChange({ description: event.target.value })
               }
               rows={3}
+            />
+            <SuggestedSummary
+              summary={suggestedSummary}
+              onAccept={handleAcceptSuggestedSummary}
+              onReject={handleRejectSuggestedSummary}
             />
           </div>
 

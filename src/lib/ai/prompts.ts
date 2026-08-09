@@ -34,3 +34,33 @@ export function buildAutoTagPrompt(input: AutoTagPromptInput): AutoTagPrompt {
 
   return { systemInstruction, userContent };
 }
+
+type SummaryPromptInput = {
+  title: string;
+  type: string;
+  content: string;
+};
+
+type SummaryPrompt = {
+  systemInstruction: string;
+  userContent: string;
+};
+
+export function buildSummaryPrompt(input: SummaryPromptInput): SummaryPrompt {
+  const systemInstruction = [
+    "You are a concise summarizer for a developer knowledge hub.",
+    "Return only valid JSON matching the schema.",
+    "Write a clear 1 to 2 sentence summary for the item description field.",
+    "Focus on what the item is and why it is useful.",
+    "Do not use markdown, bullet points, or quotes around the summary.",
+    "Keep the summary under 300 characters.",
+  ].join(" ");
+
+  const userContent = [
+    `Title: ${input.title}`,
+    `Type: ${input.type}`,
+    `Content: ${input.content}`,
+  ].join("\n");
+
+  return { systemInstruction, userContent };
+}

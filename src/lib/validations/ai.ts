@@ -38,3 +38,35 @@ export const AUTO_TAGS_JSON_SCHEMA = {
   },
   required: ["tags"],
 } as const;
+
+const itemTypeEnum = z.enum([
+  "snippet",
+  "prompt",
+  "command",
+  "note",
+  "link",
+  "file",
+  "image",
+]);
+
+export const generateSummarySchema = z.object({
+  title: z.string().trim().min(1, "Title is required").max(200),
+  content: z.string().trim().min(1, "Content is required").max(100_000),
+  type: itemTypeEnum,
+});
+
+export const summaryResponseSchema = z.object({
+  summary: z.string().trim().min(1).max(300),
+});
+
+export const modelSummaryResponseSchema = z.object({
+  summary: z.string().trim().min(1).max(500),
+});
+
+export const SUMMARY_JSON_SCHEMA = {
+  type: "object",
+  properties: {
+    summary: { type: "string" },
+  },
+  required: ["summary"],
+} as const;

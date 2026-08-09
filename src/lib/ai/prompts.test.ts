@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildAutoTagPrompt } from "./prompts";
+import { buildAutoTagPrompt, buildSummaryPrompt } from "./prompts";
 
 describe("buildAutoTagPrompt", () => {
   it("includes title, type, content, and existing tags in user content", () => {
@@ -28,5 +28,21 @@ describe("buildAutoTagPrompt", () => {
     });
 
     expect(result.userContent).toContain("Existing tags: none");
+  });
+});
+
+describe("buildSummaryPrompt", () => {
+  it("includes title, type, and content in user content", () => {
+    const result = buildSummaryPrompt({
+      title: "React hooks",
+      type: "snippet",
+      content: "useEffect cleanup",
+    });
+
+    expect(result.systemInstruction).toContain("summarizer");
+    expect(result.systemInstruction).toContain("JSON");
+    expect(result.userContent).toContain("Title: React hooks");
+    expect(result.userContent).toContain("Type: snippet");
+    expect(result.userContent).toContain("Content: useEffect cleanup");
   });
 });
