@@ -1,38 +1,16 @@
-# Current Feature: AI Auto-Tagging
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Pro users can generate contextual tag suggestions while creating or editing an item
-- Suggestions are reviewable — nothing is saved until the user accepts tags and submits the form
-- Server enforces Pro status, auth, validation, and rate limits
-- Reusable AI infrastructure for future features (summaries, code explanation, prompt optimization)
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-First AI feature — establishes shared foundation: Gemini client (`@google/genai`), server action pattern, rate limit config. See `docs/ai-integration-plan.md` for broader roadmap.
-
-**Model:** Gemini 3.5 Flash-Lite (`gemini-3.5-flash-lite`), optional override via `GEMINI_MODEL`.
-
-**Prerequisites:** Auth session, Pro subscription (`User.isPro`), `GEMINI_API_KEY` in server env, `@google/genai` package, Upstash Redis (optional — rate limit fails open).
-
-**Key implementation areas:**
-- `src/lib/ai/gemini.ts` — lazy singleton client, `AI_MODEL` constant
-- `src/lib/ai/prompts.ts` — `buildAutoTagPrompt` (system + user content)
-- `src/lib/ai/truncate-content.ts` — truncate content to 2000 chars
-- `src/lib/validations/ai.ts` — request/response Zod schemas
-- `src/lib/rate-limit.ts` — add `checkAiRateLimit` (20 req/hour per userId)
-- `src/actions/ai.ts` — `generateAutoTags` server action (no DB persistence)
-- `src/components/ai/suggest-tags-button.tsx` — Pro-only ghost button with Sparkles icon
-- `src/components/ai/suggested-tags.tsx` — accept/reject badge UI
-- Wire into `item-create-dialog.tsx` and `item-drawer.tsx` (edit mode); pass `isPro` to `ItemDrawer` from `DashboardShell`
-
-**Out of scope:** Auto-saving tags, streaming, view-mode suggestions, usage analytics, request caching.
-
-**Spec:** `context/features/ai-auto-tag-spec.md`
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -94,3 +72,4 @@ First AI feature — establishes shared foundation: Gemini client (`@google/gena
 - 2026-08-09: Completed **Stripe Integration — Phase 2 (Integration & UI)** — webhook handlers and `POST /api/stripe/webhook` route syncing `isPro` from checkout and subscription events; free-tier enforcement in create item/collection actions; `BillingCard` on settings and `UpgradePrompt` in create dialogs, top bar, and homepage pricing; usage limits on profile; Stripe subscription cancellation on account deletion; webhook handler and action unit tests
 - 2026-08-09: Completed **Gate Files & Images Routes for Free Users** — free users visiting `/items/files` or `/items/images` redirect to `/upgrade`; Pro users keep existing listings; item drawer action bar vertical centering fix
 - 2026-08-09: Completed **Code Language Dropdown** — shared `LanguageSelect` with curated Monaco language options above the code editor in item create and edit flows; live syntax highlighting on selection; unknown existing languages preserved in the dropdown; compact select widths for type and language; unit tests for language normalization and options
+- 2026-08-09: Completed **AI Auto-Tagging** — Gemini 3.5 Flash-Lite `generateAutoTags` server action with Pro gating, auth, Zod validation, and 20 req/hour AI rate limits; `SuggestTags` button and accept/reject suggestion UI in item create dialog and drawer edit mode; shared AI foundation (`@google/genai` client, prompts, truncation, schemas); unit tests for action, validations, and utilities
