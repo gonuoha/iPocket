@@ -1,16 +1,22 @@
-# Current Feature
+# Current Feature: Gate Files & Images Routes for Free Users
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- What success looks like for the active feature -->
+- Free users visiting `/items/files` or `/items/images` see an upgrade page instead of the listing
+- Pro users continue to see the existing file list and image gallery
+- Upgrade page offers Stripe checkout (monthly and yearly) consistent with existing billing UI
+- Do not fetch file/image listing data for free users
 
 ## Notes
 
-<!-- Additional context, constraints, or details from spec -->
+- Reuse `user.isPro` from `getCurrentUser()` already loaded on the items page
+- Gate inside `src/app/items/[type]/page.tsx` when the resolved type is file or image
+- Prefer an inline page (not a modal) since the user navigated to a dedicated URL
+- Existing upload and create flows already enforce Pro for files/images
 
 ## History
 

@@ -177,7 +177,7 @@ function ItemDrawerContent({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b border-border pb-4">
+      <div className="flex flex-wrap items-center gap-2 border-b border-border py-2">
         <ItemFavoriteButton
           itemId={item.id}
           isFavorite={item.isFavorite}
@@ -382,7 +382,7 @@ function ItemDrawerEditor({
 
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <div className="flex items-center justify-end gap-2 border-b border-border pb-4">
+      <div className="flex items-center justify-end gap-2 border-b border-border py-4">
         <Button
           type="button"
           variant="outline"

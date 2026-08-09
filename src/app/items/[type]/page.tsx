@@ -5,6 +5,7 @@ import { ImageGalleryGrid } from "@/components/items/image-thumbnail-card";
 import { ItemsGrid } from "@/components/items/item-card";
 import { PaginationControls } from "@/components/layout/pagination-controls";
 import { PageContainer, PageHeader } from "@/components/layout/page-container";
+import { ProFeatureUpgrade } from "@/components/shared/pro-feature-upgrade";
 import {
   getFileItemsByTypePaginated,
   getItemsByTypePaginated,
@@ -39,6 +40,10 @@ export default async function ItemsByTypePage({
 
   const isImageType = itemType.name.toLowerCase() === "image";
   const isFileType = itemType.name.toLowerCase() === "file";
+
+  if ((isFileType || isImageType) && !user.isPro) {
+    return <ProFeatureUpgrade feature={isFileType ? "files" : "images"} />;
+  }
 
   if (isFileType) {
     const result = await getFileItemsByTypePaginated(user.id, itemType.id, page);
