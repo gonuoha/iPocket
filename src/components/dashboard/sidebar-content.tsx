@@ -76,11 +76,16 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
               {itemTypes.map((type) => {
                 const Icon = getItemTypeIcon(type.icon);
                 const styles = getItemTypeStyles(type.color);
+                const isProType = isProItemType(type.name);
+                const href =
+                  isProType && !user.isPro
+                    ? "/upgrade"
+                    : `/items/${getTypeSlug(type.name)}`;
 
                 return (
                   <SidebarLink
                     key={type.id}
-                    href={`/items/${getTypeSlug(type.name)}`}
+                    href={href}
                     className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
                   >
                     <Icon
@@ -91,7 +96,7 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
                       <span className="truncate">
                         {getItemTypeLabel(type.name, { plural: true })}
                       </span>
-                      {isProItemType(type.name) ? (
+                      {isProType ? (
                         <Badge
                           variant="outline"
                           className="h-4 shrink-0 border-border/60 px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"

@@ -1,11 +1,10 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 import { FileList } from "@/components/items/file-list";
 import { ImageGalleryGrid } from "@/components/items/image-thumbnail-card";
 import { ItemsGrid } from "@/components/items/item-card";
 import { PaginationControls } from "@/components/layout/pagination-controls";
 import { PageContainer, PageHeader } from "@/components/layout/page-container";
-import { ProFeatureUpgrade } from "@/components/shared/pro-feature-upgrade";
 import {
   getFileItemsByTypePaginated,
   getItemsByTypePaginated,
@@ -42,7 +41,7 @@ export default async function ItemsByTypePage({
   const isFileType = itemType.name.toLowerCase() === "file";
 
   if ((isFileType || isImageType) && !user.isPro) {
-    return <ProFeatureUpgrade feature={isFileType ? "files" : "images"} />;
+    redirect("/upgrade");
   }
 
   if (isFileType) {

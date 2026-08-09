@@ -111,6 +111,17 @@ export function TopBar({
       </div>
 
       <div className="flex shrink-0 items-center gap-2 justify-self-end">
+        {!isPro ? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground"
+            nativeButton={false}
+            render={<Link href="/upgrade" />}
+          >
+            Upgrade
+          </Button>
+        ) : null}
         <Button
           variant="ghost"
           size="icon"

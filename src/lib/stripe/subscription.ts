@@ -42,7 +42,7 @@ export async function createCheckoutSession(
     mode: "subscription",
     line_items: [{ price: getStripePriceId(period), quantity: 1 }],
     success_url: `${appUrl}/settings?checkout=success`,
-    cancel_url: `${appUrl}/settings?checkout=cancelled`,
+    cancel_url: `${appUrl}/upgrade?checkout=cancelled`,
     metadata: { userId },
     subscription_data: { metadata: { userId } },
   });

@@ -1,7 +1,6 @@
 "use client";
 
-import { useState } from "react";
-import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -18,8 +17,6 @@ export type UpgradeReason =
   | "collection_limit"
   | "file_upload"
   | "general";
-
-type BillingPeriod = "monthly" | "yearly";
 
 const MESSAGES: Record<UpgradeReason, { title: string; description: string }> = {
   item_limit: {
@@ -50,33 +47,12 @@ type UpgradePromptProps = {
 };
 
 export function UpgradePrompt({ open, onOpenChange, reason }: UpgradePromptProps) {
-  const [loadingPeriod, setLoadingPeriod] = useState<BillingPeriod | null>(null);
+  const router = useRouter();
   const message = MESSAGES[reason];
-  const isLoading = loadingPeriod !== null;
 
-  async function handleUpgrade(period: BillingPeriod) {
-    setLoadingPeriod(period);
-
-    try {
-      const response = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ period }),
-      });
-
-      const data = (await response.json()) as { url?: string; error?: string };
-
-      if (!response.ok || !data.url) {
-        toast.error(data.error ?? "Checkout failed");
-        return;
-      }
-
-      window.location.href = data.url;
-    } catch {
-      toast.error("Checkout failed");
-    } finally {
-      setLoadingPeriod(null);
-    }
+  function handleViewPlans() {
+    onOpenChange(false);
+    router.push("/upgrade");
   }
 
   return (
@@ -86,23 +62,9 @@ export function UpgradePrompt({ open, onOpenChange, reason }: UpgradePromptProps
           <DialogTitle>{message.title}</DialogTitle>
           <DialogDescription>{message.description}</DialogDescription>
         </DialogHeader>
-        <DialogFooter className="flex-row flex-wrap gap-2 sm:flex-row">
-          <Button
-            type="button"
-            onClick={() => handleUpgrade("monthly")}
-            disabled={isLoading}
-          >
-            {loadingPeriod === "monthly" ? "Redirecting..." : "Upgrade $8/mo"}
-          </Button>
-          <Button
-            type="button"
-            variant="outline"
-            onClick={() => handleUpgrade("yearly")}
-            disabled={isLoading}
-          >
-            {loadingPeriod === "yearly"
-              ? "Redirecting..."
-              : "Upgrade $72/yr (save 25%)"}
+        <DialogFooter>
+          <Button type="button" onClick={handleViewPlans}>
+            View upgrade options
           </Button>
         </DialogFooter>
       </DialogContent>

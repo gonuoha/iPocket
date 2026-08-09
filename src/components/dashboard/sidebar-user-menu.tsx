@@ -51,7 +51,7 @@ export function SidebarUserMenu({ user }: SidebarUserMenuProps) {
           Settings
         </DropdownMenuItem>
         {!user.isPro ? (
-          <DropdownMenuItem onClick={() => router.push("/settings")}>
+          <DropdownMenuItem onClick={() => router.push("/upgrade")}>
             Upgrade to Pro
           </DropdownMenuItem>
         ) : null}

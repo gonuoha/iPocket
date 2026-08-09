@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
@@ -10,9 +11,6 @@ import {
   FREE_COLLECTION_LIMIT,
   FREE_ITEM_LIMIT,
 } from "@/lib/subscription-limits";
-import { cn } from "@/lib/utils";
-
-type BillingPeriod = "monthly" | "yearly";
 
 type BillingCardProps = {
   isPro: boolean;
@@ -29,7 +27,6 @@ export function BillingCard({
 }: BillingCardProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const [period, setPeriod] = useState<BillingPeriod>("monthly");
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
@@ -45,31 +42,6 @@ export function BillingCard({
       router.replace("/settings");
     }
   }, [router, searchParams]);
-
-  async function handleUpgrade() {
-    setIsLoading(true);
-
-    try {
-      const response = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ period }),
-      });
-
-      const data = (await response.json()) as { url?: string; error?: string };
-
-      if (!response.ok || !data.url) {
-        toast.error(data.error ?? "Checkout failed");
-        return;
-      }
-
-      window.location.href = data.url;
-    } catch {
-      toast.error("Checkout failed");
-    } finally {
-      setIsLoading(false);
-    }
-  }
 
   async function handleManageSubscription() {
     setIsLoading(true);
@@ -132,40 +104,13 @@ export function BillingCard({
             </div>
           </div>
 
-          <div className="mt-4 flex gap-2">
-            <button
-              type="button"
-              onClick={() => setPeriod("monthly")}
-              className={cn(
-                "rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors",
-                period === "monthly"
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-background text-muted-foreground hover:text-foreground",
-              )}
-            >
-              $8 / month
-            </button>
-            <button
-              type="button"
-              onClick={() => setPeriod("yearly")}
-              className={cn(
-                "rounded-lg border px-3 py-1.5 text-sm font-medium transition-colors",
-                period === "yearly"
-                  ? "border-primary bg-primary text-primary-foreground"
-                  : "border-border bg-background text-muted-foreground hover:text-foreground",
-              )}
-            >
-              $72 / year
-            </button>
-          </div>
-
           <Button
             type="button"
             className="mt-4"
-            onClick={handleUpgrade}
-            disabled={isLoading}
+            nativeButton={false}
+            render={<Link href="/upgrade" />}
           >
-            {isLoading ? "Redirecting..." : "Upgrade to Pro"}
+            Upgrade to Pro
           </Button>
         </>
       ) : (
