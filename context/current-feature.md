@@ -1,22 +1,16 @@
-# Current Feature: Gate Files & Images Routes for Free Users
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Free users visiting `/items/files` or `/items/images` see an upgrade page instead of the listing
-- Pro users continue to see the existing file list and image gallery
-- Upgrade page offers Stripe checkout (monthly and yearly) consistent with existing billing UI
-- Do not fetch file/image listing data for free users
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Reuse `user.isPro` from `getCurrentUser()` already loaded on the items page
-- Gate inside `src/app/items/[type]/page.tsx` when the resolved type is file or image
-- Prefer an inline page (not a modal) since the user navigated to a dedicated URL
-- Existing upload and create flows already enforce Pro for files/images
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -76,3 +70,4 @@ In Progress
 - 2026-08-08: Completed **Shared Navbar Across Marketing and Auth Pages** — homepage navbar on auth routes, open-folder brand icon on marketing and dashboard navbars, simplified sidebar nav (Favorites only), collapsed sidebar default below 1024px, hydration-safe viewport init, and auth anchor links routed to `/#features` and `/#pricing`
 - 2026-08-08: Completed **Stripe Integration — Phase 1 (Core Infrastructure)** — Stripe SDK with checkout and portal API routes, JWT `isPro` sync from database on every session validation, subscription-limits module (50 items / 3 collections) with unit tests, integration plan and phase specs
 - 2026-08-09: Completed **Stripe Integration — Phase 2 (Integration & UI)** — webhook handlers and `POST /api/stripe/webhook` route syncing `isPro` from checkout and subscription events; free-tier enforcement in create item/collection actions; `BillingCard` on settings and `UpgradePrompt` in create dialogs, top bar, and homepage pricing; usage limits on profile; Stripe subscription cancellation on account deletion; webhook handler and action unit tests
+- 2026-08-09: Completed **Gate Files & Images Routes for Free Users** — free users visiting `/items/files` or `/items/images` see a Pro upgrade page with Stripe checkout CTAs; Pro users keep existing listings; item drawer action bar vertical centering fix
