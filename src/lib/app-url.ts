@@ -1,6 +1,6 @@
 export function getAppUrl(): string {
-  if (process.env.AUTH_URL) {
-    return process.env.AUTH_URL.replace(/\/$/, "");
+  if (process.env.APP_URL) {
+    return process.env.APP_URL.replace(/\/$/, "");
   }
 
   if (process.env.VERCEL_URL) {
