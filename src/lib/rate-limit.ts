@@ -47,6 +47,7 @@ const registerLimiter = createLimiter("register", 3, "1 h");
 const forgotPasswordLimiter = createLimiter("forgot-password", 3, "1 h");
 const resetPasswordLimiter = createLimiter("reset-password", 5, "15 m");
 const resendVerificationLimiter = createLimiter("resend-verification", 3, "15 m");
+const aiLimiter = createLimiter("ai", 20, "1 h");
 
 function getClientIp(request: Request): string {
   const forwarded = request.headers.get("x-forwarded-for");
@@ -118,6 +119,10 @@ export async function checkResendVerificationRateLimit(
 ): Promise<RateLimitResult> {
   const ip = getClientIp(request);
   return checkLimiter(resendVerificationLimiter, buildIdentifier(ip, email));
+}
+
+export async function checkAiRateLimit(userId: string): Promise<RateLimitResult> {
+  return checkLimiter(aiLimiter, userId);
 }
 
 function getRetryAfterSeconds(reset: number): number {

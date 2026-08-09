@@ -1,16 +1,38 @@
-# Current Feature
+# Current Feature: AI Auto-Tagging
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- What success looks like for the active feature -->
+- Pro users can generate contextual tag suggestions while creating or editing an item
+- Suggestions are reviewable — nothing is saved until the user accepts tags and submits the form
+- Server enforces Pro status, auth, validation, and rate limits
+- Reusable AI infrastructure for future features (summaries, code explanation, prompt optimization)
 
 ## Notes
 
-<!-- Additional context, constraints, or details from spec -->
+First AI feature — establishes shared foundation: Gemini client (`@google/genai`), server action pattern, rate limit config. See `docs/ai-integration-plan.md` for broader roadmap.
+
+**Model:** Gemini 3.5 Flash-Lite (`gemini-3.5-flash-lite`), optional override via `GEMINI_MODEL`.
+
+**Prerequisites:** Auth session, Pro subscription (`User.isPro`), `GEMINI_API_KEY` in server env, `@google/genai` package, Upstash Redis (optional — rate limit fails open).
+
+**Key implementation areas:**
+- `src/lib/ai/gemini.ts` — lazy singleton client, `AI_MODEL` constant
+- `src/lib/ai/prompts.ts` — `buildAutoTagPrompt` (system + user content)
+- `src/lib/ai/truncate-content.ts` — truncate content to 2000 chars
+- `src/lib/validations/ai.ts` — request/response Zod schemas
+- `src/lib/rate-limit.ts` — add `checkAiRateLimit` (20 req/hour per userId)
+- `src/actions/ai.ts` — `generateAutoTags` server action (no DB persistence)
+- `src/components/ai/suggest-tags-button.tsx` — Pro-only ghost button with Sparkles icon
+- `src/components/ai/suggested-tags.tsx` — accept/reject badge UI
+- Wire into `item-create-dialog.tsx` and `item-drawer.tsx` (edit mode); pass `isPro` to `ItemDrawer` from `DashboardShell`
+
+**Out of scope:** Auto-saving tags, streaming, view-mode suggestions, usage analytics, request caching.
+
+**Spec:** `context/features/ai-auto-tag-spec.md`
 
 ## History
 

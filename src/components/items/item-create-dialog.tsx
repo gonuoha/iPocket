@@ -4,6 +4,7 @@ import { createElement, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
+import { generateAutoTags } from "@/actions/ai";
 import { createItem } from "@/actions/items";
 import {
   CollectionMultiSelect,
@@ -48,6 +49,9 @@ import {
   type CreatableItemType,
 } from "@/lib/validations/items";
 import { UpgradePrompt } from "@/components/shared/upgrade-prompt";
+import { SuggestTagsButton } from "@/components/ai/suggest-tags-button";
+import { SuggestedTags } from "@/components/ai/suggested-tags";
+import { appendTagToTagsString, parseTagsString } from "@/lib/parse-tags";
 
 const CREATABLE_ITEM_TYPES: {
   type: CreatableItemType;
@@ -110,7 +114,9 @@ export function ItemCreateDialog({
 }: ItemCreateDialogProps) {
   const router = useRouter();
   const [formState, setFormState] = useState<CreateFormState>(initialFormState);
+  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [isCreating, startCreating] = useTransition();
+  const [isSuggesting, startSuggesting] = useTransition();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const showContent = CONTENT_TYPE_NAMES.has(formState.type);
@@ -125,14 +131,23 @@ export function ItemCreateDialog({
     (!showFileUpload || formState.uploadedFile !== null) &&
     !isCreating;
 
+  const suggestContent =
+    formState.type === "link"
+      ? formState.content.trim() || formState.url.trim()
+      : formState.content.trim();
+  const canSuggestTags =
+    formState.title.trim().length > 0 && suggestContent.length > 0;
+
   function handleOpenChange(nextOpen: boolean) {
     if (nextOpen) {
       setFormState({
         ...initialFormState,
         type: resolveDefaultCreateType(defaultType, isPro),
       });
+      setSuggestedTags([]);
     } else {
       setFormState(initialFormState);
+      setSuggestedTags([]);
     }
 
     onOpenChange(nextOpen);
@@ -148,6 +163,34 @@ export function ItemCreateDialog({
       type,
       uploadedFile: null,
     }));
+    setSuggestedTags([]);
+  }
+
+  function handleSuggestTags() {
+    startSuggesting(async () => {
+      const result = await generateAutoTags({
+        title: formState.title.trim(),
+        content: suggestContent,
+        type: formState.type,
+        existingTags: parseTagsString(formState.tags),
+      });
+
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      setSuggestedTags(result.data.tags);
+    });
+  }
+
+  function handleAcceptSuggestedTag(tag: string) {
+    handleFormChange({ tags: appendTagToTagsString(formState.tags, tag) });
+    setSuggestedTags((previous) => previous.filter((value) => value !== tag));
+  }
+
+  function handleRejectSuggestedTag(tag: string) {
+    setSuggestedTags((previous) => previous.filter((value) => value !== tag));
   }
 
   function handleCreate() {
@@ -319,11 +362,26 @@ export function ItemCreateDialog({
 
           <div className="space-y-2">
             <Label htmlFor="item-create-tags">Tags</Label>
-            <Input
-              id="item-create-tags"
-              value={formState.tags}
-              onChange={(event) => handleFormChange({ tags: event.target.value })}
-              placeholder="Comma-separated tags"
+            <div className="flex items-center gap-2">
+              <Input
+                id="item-create-tags"
+                value={formState.tags}
+                onChange={(event) => handleFormChange({ tags: event.target.value })}
+                placeholder="Comma-separated tags"
+                className="min-w-0 flex-1"
+              />
+              <SuggestTagsButton
+                isPro={isPro}
+                disabled={!canSuggestTags}
+                onSuggest={handleSuggestTags}
+                isLoading={isSuggesting}
+              />
+            </div>
+            <SuggestedTags
+              tags={suggestedTags}
+              onAccept={handleAcceptSuggestedTag}
+              onReject={handleRejectSuggestedTag}
+              onDismiss={() => setSuggestedTags([])}
             />
           </div>
 

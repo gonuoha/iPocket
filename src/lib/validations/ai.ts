@@ -1,0 +1,40 @@
+import { z } from "zod";
+
+export const generateAutoTagsSchema = z.object({
+  title: z.string().trim().min(1, "Title is required").max(200),
+  content: z.string().trim().min(1, "Content is required").max(100_000),
+  type: z.enum([
+    "snippet",
+    "prompt",
+    "command",
+    "note",
+    "link",
+    "file",
+    "image",
+  ]),
+  existingTags: z
+    .array(z.string().trim().min(1).max(40))
+    .max(50)
+    .default([]),
+});
+
+export const autoTagsResponseSchema = z.object({
+  tags: z.array(z.string().trim().min(1).max(40)).min(3).max(5),
+});
+
+export const modelAutoTagsResponseSchema = z.object({
+  tags: z.array(z.string().trim().min(1).max(40)).min(1).max(8),
+});
+
+export const AUTO_TAGS_JSON_SCHEMA = {
+  type: "object",
+  properties: {
+    tags: {
+      type: "array",
+      items: { type: "string" },
+      minItems: 3,
+      maxItems: 8,
+    },
+  },
+  required: ["tags"],
+} as const;

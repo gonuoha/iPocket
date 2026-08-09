@@ -65,7 +65,7 @@ function DashboardShellInner({
         </main>
       </div>
 
-      <ItemDrawer collections={collections} />
+      <ItemDrawer collections={collections} isPro={isPro} />
       <CommandPalette />
     </div>
   );

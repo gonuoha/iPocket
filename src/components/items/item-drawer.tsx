@@ -14,12 +14,15 @@ import {
 import { toast } from "sonner";
 
 import { deleteItem, updateItem } from "@/actions/items";
+import { generateAutoTags } from "@/actions/ai";
 import {
   CollectionMultiSelect,
   type SelectableCollection,
 } from "@/components/collections/collection-multi-select";
 import { ItemFavoriteButton } from "@/components/items/item-favorite-button";
 import { ItemPinButton } from "@/components/items/item-pin-button";
+import { SuggestTagsButton } from "@/components/ai/suggest-tags-button";
+import { SuggestedTags } from "@/components/ai/suggested-tags";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,9 +59,15 @@ import type { ItemDetail } from "@/lib/db/items";
 import { getItemCopyText } from "@/lib/item-copy";
 import { formatFileSize } from "@/lib/file-upload";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
+import { appendTagToTagsString, parseTagsString } from "@/lib/parse-tags";
+import type { z } from "zod";
+
+import { generateAutoTagsSchema } from "@/lib/validations/ai";
 import { cn } from "@/lib/utils";
 
 import { useItemDrawer } from "./item-drawer-context";
+
+type AutoTagItemType = z.infer<typeof generateAutoTagsSchema>["type"];
 
 type ItemDetailResponse = Omit<ItemDetail, "createdAt" | "updatedAt"> & {
   createdAt: string;
@@ -360,17 +369,33 @@ function ItemDrawerEditor({
   item,
   formState,
   collections,
+  isPro,
+  suggestedTags,
+  isSuggesting,
+  canSuggestTags,
   onChange,
   onCancel,
   onSave,
+  onSuggestTags,
+  onAcceptSuggestedTag,
+  onRejectSuggestedTag,
+  onDismissSuggestedTags,
   isSaving,
 }: {
   item: ItemDetailResponse;
   formState: EditFormState;
   collections: SelectableCollection[];
+  isPro: boolean;
+  suggestedTags: string[];
+  isSuggesting: boolean;
+  canSuggestTags: boolean;
   onChange: (patch: Partial<EditFormState>) => void;
   onCancel: () => void;
   onSave: () => void;
+  onSuggestTags: () => void;
+  onAcceptSuggestedTag: (tag: string) => void;
+  onRejectSuggestedTag: (tag: string) => void;
+  onDismissSuggestedTags: () => void;
   isSaving: boolean;
 }) {
   const typeName = item.type.name.toLowerCase();
@@ -472,11 +497,26 @@ function ItemDrawerEditor({
 
           <div className="space-y-2">
             <Label htmlFor="item-edit-tags">Tags</Label>
-            <Input
-              id="item-edit-tags"
-              value={formState.tags}
-              onChange={(event) => onChange({ tags: event.target.value })}
-              placeholder="Comma-separated tags"
+            <div className="flex items-center gap-2">
+              <Input
+                id="item-edit-tags"
+                value={formState.tags}
+                onChange={(event) => onChange({ tags: event.target.value })}
+                placeholder="Comma-separated tags"
+                className="min-w-0 flex-1"
+              />
+              <SuggestTagsButton
+                isPro={isPro}
+                disabled={!canSuggestTags}
+                onSuggest={onSuggestTags}
+                isLoading={isSuggesting}
+              />
+            </div>
+            <SuggestedTags
+              tags={suggestedTags}
+              onAccept={onAcceptSuggestedTag}
+              onReject={onRejectSuggestedTag}
+              onDismiss={onDismissSuggestedTags}
             />
           </div>
 
@@ -515,9 +555,11 @@ function ItemDrawerEditor({
 function ItemDrawerPanel({
   itemId,
   collections,
+  isPro,
 }: {
   itemId: string;
   collections: SelectableCollection[];
+  isPro: boolean;
 }) {
   const router = useRouter();
   const { closeItem } = useItemDrawer();
@@ -527,7 +569,9 @@ function ItemDrawerPanel({
   const [mode, setMode] = useState<"view" | "edit">("view");
   const [formState, setFormState] = useState<EditFormState | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
   const [isSaving, startSaving] = useTransition();
+  const [isSuggesting, startSuggesting] = useTransition();
   const [isDeleting, startDeleting] = useTransition();
 
   useEffect(() => {
@@ -574,17 +618,67 @@ function ItemDrawerPanel({
       return;
     }
 
+    setSuggestedTags([]);
     setFormState(toFormState(item));
     setMode("edit");
   }
 
   function handleCancel() {
+    setSuggestedTags([]);
     setFormState(null);
     setMode("view");
   }
 
   function handleFormChange(patch: Partial<EditFormState>) {
     setFormState((previous) => (previous ? { ...previous, ...patch } : previous));
+  }
+
+  function getSuggestContent(state: EditFormState, typeName: string): string {
+    if (typeName === "link") {
+      return state.content.trim() || state.url.trim();
+    }
+
+    return state.content.trim();
+  }
+
+  function handleSuggestTags() {
+    if (!item || !formState) {
+      return;
+    }
+
+    const typeName = item.type.name.toLowerCase();
+    const content = getSuggestContent(formState, typeName);
+
+    startSuggesting(async () => {
+      const result = await generateAutoTags({
+        title: formState.title.trim(),
+        content,
+        type: typeName as AutoTagItemType,
+        existingTags: parseTagsString(formState.tags),
+      });
+
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      setSuggestedTags(result.data.tags);
+    });
+  }
+
+  function handleAcceptSuggestedTag(tag: string) {
+    if (!formState) {
+      return;
+    }
+
+    handleFormChange({
+      tags: appendTagToTagsString(formState.tags, tag),
+    });
+    setSuggestedTags((previous) => previous.filter((value) => value !== tag));
+  }
+
+  function handleRejectSuggestedTag(tag: string) {
+    setSuggestedTags((previous) => previous.filter((value) => value !== tag));
   }
 
   function handleDeleteConfirm() {
@@ -658,6 +752,15 @@ function ItemDrawerPanel({
   }
 
   const typeStyles = item ? getItemTypeStyles(item.type.color) : null;
+  const editTypeName = item?.type.name.toLowerCase() ?? "";
+  const suggestContent =
+    formState && item
+      ? getSuggestContent(formState, editTypeName)
+      : "";
+  const canSuggestTags =
+    formState !== null &&
+    formState.title.trim().length > 0 &&
+    suggestContent.length > 0;
 
   return (
     <>
@@ -719,9 +822,17 @@ function ItemDrawerPanel({
             item={item}
             formState={formState}
             collections={collections}
+            isPro={isPro}
+            suggestedTags={suggestedTags}
+            isSuggesting={isSuggesting}
+            canSuggestTags={canSuggestTags}
             onChange={handleFormChange}
             onCancel={handleCancel}
             onSave={handleSave}
+            onSuggestTags={handleSuggestTags}
+            onAcceptSuggestedTag={handleAcceptSuggestedTag}
+            onRejectSuggestedTag={handleRejectSuggestedTag}
+            onDismissSuggestedTags={() => setSuggestedTags([])}
             isSaving={isSaving}
           />
         ) : null}
@@ -754,8 +865,10 @@ function ItemDrawerPanel({
 
 export function ItemDrawer({
   collections,
+  isPro,
 }: {
   collections: SelectableCollection[];
+  isPro: boolean;
 }) {
   const { selectedItemId, closeItem } = useItemDrawer();
 
@@ -777,6 +890,7 @@ export function ItemDrawer({
             key={selectedItemId}
             itemId={selectedItemId}
             collections={collections}
+            isPro={isPro}
           />
         ) : null}
       </SheetContent>
