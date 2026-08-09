@@ -1,3 +1,4 @@
+import { auth } from "@/auth";
 import { HomepageAiSection } from "@/components/marketing/homepage-ai-section";
 import { HomepageCta } from "@/components/marketing/homepage-cta";
 import { HomepageFeatures } from "@/components/marketing/homepage-features";
@@ -8,7 +9,11 @@ import { HomepageNavbarActions } from "@/components/marketing/homepage-navbar-ac
 import { HomepagePricing } from "@/components/marketing/homepage-pricing";
 import { HomepageSocialProof } from "@/components/marketing/homepage-social-proof";
 
-export default function HomePage() {
+export default async function HomePage() {
+  const session = await auth();
+  const isLoggedIn = !!session?.user;
+  const isPro = session?.user?.isPro ?? false;
+
   return (
     <>
       <HomepageNavbar actions={<HomepageNavbarActions />} />
@@ -17,7 +22,7 @@ export default function HomePage() {
         <HomepageFeatures />
         <HomepageSocialProof />
         <HomepageAiSection />
-        <HomepagePricing />
+        <HomepagePricing isLoggedIn={isLoggedIn} isPro={isPro} />
         <HomepageCta />
       </main>
       <HomepageFooter />

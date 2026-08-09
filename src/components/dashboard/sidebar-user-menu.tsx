@@ -50,6 +50,11 @@ export function SidebarUserMenu({ user }: SidebarUserMenuProps) {
         <DropdownMenuItem onClick={() => router.push("/settings")}>
           Settings
         </DropdownMenuItem>
+        {!user.isPro ? (
+          <DropdownMenuItem onClick={() => router.push("/settings")}>
+            Upgrade to Pro
+          </DropdownMenuItem>
+        ) : null}
         <DropdownMenuItem
           variant="destructive"
           onClick={() => signOut({ callbackUrl: "/sign-in" })}

@@ -13,6 +13,7 @@ vi.mock("@/lib/db/collections", () => ({
 vi.mock("@/lib/db/items", () => ({
   createItem: vi.fn(),
   getItemTypeBySlug: vi.fn(),
+  getUserItemStats: vi.fn(),
   updateItem: vi.fn(),
   deleteItem: vi.fn(),
   toggleItemFavorite: vi.fn(),
@@ -33,6 +34,7 @@ import {
   createItem as createItemInDb,
   deleteItem as deleteItemInDb,
   getItemTypeBySlug,
+  getUserItemStats,
   toggleItemFavorite as toggleItemFavoriteInDb,
   toggleItemPin as toggleItemPinInDb,
 } from "@/lib/db/items";
@@ -44,6 +46,7 @@ import { createItem, deleteItem, toggleItemFavorite, toggleItemPin } from "./ite
 const mockAuth = vi.mocked(auth);
 const mockValidateUserCollectionIds = vi.mocked(validateUserCollectionIds);
 const mockGetItemTypeBySlug = vi.mocked(getItemTypeBySlug);
+const mockGetUserItemStats = vi.mocked(getUserItemStats);
 const mockCreateItemInDb = vi.mocked(createItemInDb);
 const mockDeleteItemInDb = vi.mocked(deleteItemInDb);
 const mockToggleItemFavoriteInDb = vi.mocked(toggleItemFavoriteInDb);
@@ -76,10 +79,20 @@ const createdItem: ItemDetail = {
   updatedAt: new Date("2026-08-05T00:00:00.000Z"),
 };
 
+const defaultStats = {
+  itemCount: 0,
+  collectionCount: 0,
+  favoriteItemCount: 0,
+  favoriteCollectionCount: 0,
+  pinnedCount: 0,
+};
+
 describe("createItem", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockValidateUserCollectionIds.mockResolvedValue(true);
+    mockGetUserIsPro.mockResolvedValue(false);
+    mockGetUserItemStats.mockResolvedValue(defaultStats);
   });
 
   it("returns unauthorized when there is no session", async () => {
@@ -254,6 +267,7 @@ describe("createItem", () => {
       color: "#64748b",
     });
     mockGetUserIsPro.mockResolvedValue(true);
+    mockGetUserItemStats.mockResolvedValue({ ...defaultStats, itemCount: 50 });
     mockCreateItemInDb.mockResolvedValue(createdItem);
 
     const result = await createItem({
@@ -274,6 +288,45 @@ describe("createItem", () => {
         contentType: "file",
       }),
     );
+  });
+
+  it("rejects item creation when a free user is at the item limit", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGetItemTypeBySlug.mockResolvedValue({
+      id: "type-snippet",
+      name: "snippet",
+      icon: "Code",
+      color: "#3b82f6",
+    });
+    mockGetUserIsPro.mockResolvedValue(false);
+    mockGetUserItemStats.mockResolvedValue({ ...defaultStats, itemCount: 50 });
+
+    const result = await createItem({ type: "snippet", title: "Test" });
+
+    expect(result).toEqual({
+      success: false,
+      error:
+        "Free plan is limited to 50 items. Upgrade to Pro for unlimited items.",
+    });
+    expect(mockCreateItemInDb).not.toHaveBeenCalled();
+  });
+
+  it("allows Pro users to create items above the free limit", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGetItemTypeBySlug.mockResolvedValue({
+      id: "type-snippet",
+      name: "snippet",
+      icon: "Code",
+      color: "#3b82f6",
+    });
+    mockGetUserIsPro.mockResolvedValue(true);
+    mockGetUserItemStats.mockResolvedValue({ ...defaultStats, itemCount: 50 });
+    mockCreateItemInDb.mockResolvedValue(createdItem);
+
+    const result = await createItem({ type: "snippet", title: "Test" });
+
+    expect(result).toEqual({ success: true, data: createdItem });
+    expect(mockCreateItemInDb).toHaveBeenCalled();
   });
 });
 

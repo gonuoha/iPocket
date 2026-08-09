@@ -6,12 +6,19 @@ import {
   parseEditorPreferences,
   type EditorPreferences,
 } from "@/lib/editor-preferences";
+import { getUserItemStats } from "@/lib/db/items";
 import { prisma } from "@/lib/prisma";
 
 export type SettingsData = {
   user: {
     email: string;
     hasPassword: boolean;
+    isPro: boolean;
+    stripeCustomerId: string | null;
+  };
+  usage: {
+    itemCount: number;
+    collectionCount: number;
   };
   editorPreferences: EditorPreferences;
 };
@@ -34,14 +41,19 @@ export const getSettingsData = cache(async (): Promise<SettingsData> => {
     redirect("/sign-in");
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: {
-      email: true,
-      password: true,
-      editorPreferences: true,
-    },
-  });
+  const [user, stats] = await Promise.all([
+    prisma.user.findUnique({
+      where: { id: session.user.id },
+      select: {
+        email: true,
+        password: true,
+        isPro: true,
+        stripeCustomerId: true,
+        editorPreferences: true,
+      },
+    }),
+    getUserItemStats(session.user.id),
+  ]);
 
   if (!user?.email) {
     redirect("/api/auth/signout?callbackUrl=/sign-in");
@@ -51,6 +63,12 @@ export const getSettingsData = cache(async (): Promise<SettingsData> => {
     user: {
       email: user.email,
       hasPassword: Boolean(user.password),
+      isPro: user.isPro,
+      stripeCustomerId: user.stripeCustomerId,
+    },
+    usage: {
+      itemCount: stats.itemCount,
+      collectionCount: stats.collectionCount,
     },
     editorPreferences: parseEditorPreferences(user.editorPreferences),
   };

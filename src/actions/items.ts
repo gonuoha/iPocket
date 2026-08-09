@@ -7,6 +7,7 @@ import {
   createItem as createItemInDb,
   deleteItem as deleteItemInDb,
   getItemTypeBySlug,
+  getUserItemStats,
   toggleItemFavorite as toggleItemFavoriteInDb,
   toggleItemPin as toggleItemPinInDb,
   updateItem as updateItemInDb,
@@ -21,6 +22,7 @@ import { validateUserCollectionIds } from "@/lib/db/collections";
 import { getUserIsPro } from "@/lib/db/user";
 import { isOwnedFileUrl } from "@/lib/file-upload";
 import { deleteObject } from "@/lib/r2/storage";
+import { FREE_ITEM_LIMIT } from "@/lib/subscription-limits";
 import { createItemSchema, updateItemSchema } from "@/lib/validations/items";
 
 type ActionResult<T> =
@@ -55,9 +57,20 @@ export async function createItem(
     return { success: false, error: "Invalid item type" };
   }
 
-  if (parsed.data.type === "file") {
-    const isPro = await getUserIsPro(session.user.id);
+  const isPro = await getUserIsPro(session.user.id);
 
+  if (!isPro) {
+    const stats = await getUserItemStats(session.user.id);
+
+    if (stats.itemCount >= FREE_ITEM_LIMIT) {
+      return {
+        success: false,
+        error: `Free plan is limited to ${FREE_ITEM_LIMIT} items. Upgrade to Pro for unlimited items.`,
+      };
+    }
+  }
+
+  if (parsed.data.type === "file") {
     if (!isPro) {
       return {
         success: false,

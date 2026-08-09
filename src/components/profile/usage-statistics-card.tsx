@@ -2,11 +2,16 @@ import { Code2, Folder } from "lucide-react";
 
 import { getItemTypeIcon, getItemTypeLabel, getItemTypeStyles } from "@/lib/item-type-styles";
 import type { ProfileItemTypeCount } from "@/lib/db/profile";
+import {
+  FREE_COLLECTION_LIMIT,
+  FREE_ITEM_LIMIT,
+} from "@/lib/subscription-limits";
 
 type UsageStatisticsCardProps = {
   itemCount: number;
   collectionCount: number;
   itemTypeCounts: ProfileItemTypeCount[];
+  isPro: boolean;
 };
 
 function StatCard({
@@ -41,7 +46,15 @@ export function UsageStatisticsCard({
   itemCount,
   collectionCount,
   itemTypeCounts,
+  isPro,
 }: UsageStatisticsCardProps) {
+  const itemLabel = isPro
+    ? "Total Items"
+    : `Total Items (${itemCount} / ${FREE_ITEM_LIMIT})`;
+  const collectionLabel = isPro
+    ? "Collections"
+    : `Collections (${collectionCount} / ${FREE_COLLECTION_LIMIT})`;
+
   return (
     <div className="rounded-xl border border-border bg-card p-4">
       <h2 className="text-lg font-semibold">Usage Statistics</h2>
@@ -52,14 +65,14 @@ export function UsageStatisticsCard({
           iconClassName="text-blue-500"
           iconBgClassName="bg-blue-500/15"
           value={itemCount}
-          label="Total Items"
+          label={itemLabel}
         />
         <StatCard
           icon={Folder}
           iconClassName="text-purple-500"
           iconBgClassName="bg-purple-500/15"
           value={collectionCount}
-          label="Collections"
+          label={collectionLabel}
         />
       </div>
 

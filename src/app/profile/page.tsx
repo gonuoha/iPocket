@@ -29,6 +29,7 @@ export default async function ProfilePage() {
           itemCount={stats.itemCount}
           collectionCount={stats.collectionCount}
           itemTypeCounts={itemTypeCounts}
+          isPro={user.isPro}
         />
       </PageContent>
     </PageContainer>

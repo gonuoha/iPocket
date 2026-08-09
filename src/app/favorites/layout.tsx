@@ -9,7 +9,7 @@ export default async function FavoritesLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { sidebarData, user, collections, searchData, editorPreferences } =
+  const { sidebarData, user, collections, searchData, editorPreferences, usage } =
     await getDashboardLayoutData();
 
   return (
@@ -19,6 +19,8 @@ export default async function FavoritesLayout({
       collections={collections}
       searchData={searchData}
       editorPreferences={editorPreferences}
+      itemCount={usage.itemCount}
+      collectionCount={usage.collectionCount}
     >
       {children}
     </DashboardShell>

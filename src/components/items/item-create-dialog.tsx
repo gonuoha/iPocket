@@ -41,10 +41,12 @@ import {
 } from "@/components/markdown-editor/markdown-editor";
 import { Textarea } from "@/components/ui/textarea";
 import { getItemTypeIcon, getItemTypeLabel } from "@/lib/item-type-styles";
+import { isAtItemLimit } from "@/lib/subscription-limits";
 import {
   resolveDefaultCreateType,
   type CreatableItemType,
 } from "@/lib/validations/items";
+import { UpgradePrompt } from "@/components/shared/upgrade-prompt";
 
 const CREATABLE_ITEM_TYPES: {
   type: CreatableItemType;
@@ -92,6 +94,7 @@ type ItemCreateDialogProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   isPro: boolean;
+  itemCount: number;
   defaultType?: CreatableItemType;
   collections: SelectableCollection[];
 };
@@ -100,12 +103,14 @@ export function ItemCreateDialog({
   open,
   onOpenChange,
   isPro,
+  itemCount,
   defaultType,
   collections,
 }: ItemCreateDialogProps) {
   const router = useRouter();
   const [formState, setFormState] = useState<CreateFormState>(initialFormState);
   const [isCreating, startCreating] = useTransition();
+  const [upgradeOpen, setUpgradeOpen] = useState(false);
 
   const showContent = CONTENT_TYPE_NAMES.has(formState.type);
   const showLanguage = LANGUAGE_TYPE_NAMES.has(formState.type);
@@ -151,6 +156,11 @@ export function ItemCreateDialog({
       return;
     }
 
+    if (isAtItemLimit(itemCount, isPro)) {
+      setUpgradeOpen(true);
+      return;
+    }
+
     startCreating(async () => {
       const result = await createItem({
         type: formState.type,
@@ -182,6 +192,7 @@ export function ItemCreateDialog({
   }
 
   return (
+    <>
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-lg">
         <DialogHeader>
@@ -343,5 +354,11 @@ export function ItemCreateDialog({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+    <UpgradePrompt
+      open={upgradeOpen}
+      onOpenChange={setUpgradeOpen}
+      reason="item_limit"
+    />
+    </>
   );
 }

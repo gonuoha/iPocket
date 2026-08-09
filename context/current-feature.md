@@ -1,16 +1,41 @@
-# Current Feature
+# Current Feature: Stripe Integration — Phase 2 (Integration & UI)
 
 ## Status
 
-Not Started
+In Progress
 
 ## Goals
 
-<!-- What success looks like for the active feature -->
+- Process Stripe webhook events and update `isPro` in the database
+- Enforce free-tier limits (50 items, 3 collections) in server actions
+- Add billing settings, upgrade prompts, and usage display across the app
+- Cancel Stripe subscription on account deletion
+- Verify full checkout → webhook → Pro unlock flow using Stripe CLI
 
 ## Notes
 
-<!-- Additional context, constraints, or details from spec -->
+- Spec: `context/features/stripe-phase-2-spec.md`
+- Depends on Phase 1 (`context/features/stripe-phase-1-spec.md`) — already merged
+- Stripe CLI required for integration testing: `stripe listen --forward-to localhost:3000/api/stripe/webhook`
+- Webhooks are source of truth for `isPro` — do not set it in checkout success redirect
+- No schema migration required
+
+### Files to create
+
+- `src/lib/stripe/webhook-handlers.ts`
+- `src/lib/stripe/webhook-handlers.test.ts`
+- `src/app/api/stripe/webhook/route.ts`
+- `src/components/settings/billing-card.tsx`
+- `src/components/shared/upgrade-prompt.tsx`
+
+### Files to modify
+
+- `src/actions/items.ts`, `src/actions/collections.ts` + tests
+- `src/lib/db/settings.ts`, `src/app/settings/page.tsx`
+- `src/components/profile/usage-statistics-card.tsx`, `src/app/profile/page.tsx`
+- `src/components/items/item-create-dialog.tsx`, `src/components/collections/collection-create-dialog.tsx`
+- `src/components/dashboard/sidebar-user-menu.tsx`, `src/components/marketing/homepage-pricing.tsx`
+- `src/components/dashboard/top-bar.tsx`, `src/app/api/auth/account/route.ts`
 
 ## History
 

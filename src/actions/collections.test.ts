@@ -13,6 +13,14 @@ vi.mock("@/lib/db/collections", () => ({
   toggleCollectionFavorite: vi.fn(),
 }));
 
+vi.mock("@/lib/db/items", () => ({
+  getUserItemStats: vi.fn(),
+}));
+
+vi.mock("@/lib/db/user", () => ({
+  getUserIsPro: vi.fn(),
+}));
+
 import { auth } from "@/auth";
 import {
   createCollection as createCollectionInDb,
@@ -20,6 +28,8 @@ import {
   toggleCollectionFavorite as toggleCollectionFavoriteInDb,
   updateCollection as updateCollectionInDb,
 } from "@/lib/db/collections";
+import { getUserItemStats } from "@/lib/db/items";
+import { getUserIsPro } from "@/lib/db/user";
 
 import {
   createCollection,
@@ -33,6 +43,16 @@ const mockCreateCollectionInDb = vi.mocked(createCollectionInDb);
 const mockUpdateCollectionInDb = vi.mocked(updateCollectionInDb);
 const mockDeleteCollectionInDb = vi.mocked(deleteCollectionInDb);
 const mockToggleCollectionFavoriteInDb = vi.mocked(toggleCollectionFavoriteInDb);
+const mockGetUserItemStats = vi.mocked(getUserItemStats);
+const mockGetUserIsPro = vi.mocked(getUserIsPro);
+
+const defaultStats = {
+  itemCount: 0,
+  collectionCount: 0,
+  favoriteItemCount: 0,
+  favoriteCollectionCount: 0,
+  pinnedCount: 0,
+};
 
 const createdCollection: CreatedCollection = {
   id: "collection-1",
@@ -44,6 +64,8 @@ const createdCollection: CreatedCollection = {
 describe("createCollection", () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    mockGetUserIsPro.mockResolvedValue(false);
+    mockGetUserItemStats.mockResolvedValue(defaultStats);
   });
 
   it("returns unauthorized when there is no session", async () => {
@@ -101,6 +123,39 @@ describe("createCollection", () => {
       success: false,
       error: "A collection with this name already exists",
     });
+  });
+
+  it("rejects collection creation when a free user is at the collection limit", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGetUserIsPro.mockResolvedValue(false);
+    mockGetUserItemStats.mockResolvedValue({ ...defaultStats, collectionCount: 3 });
+
+    const result = await createCollection({
+      name: "My Collection",
+      description: "A useful collection",
+    });
+
+    expect(result).toEqual({
+      success: false,
+      error:
+        "Free plan is limited to 3 collections. Upgrade to Pro for unlimited collections.",
+    });
+    expect(mockCreateCollectionInDb).not.toHaveBeenCalled();
+  });
+
+  it("allows Pro users to create collections above the free limit", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGetUserIsPro.mockResolvedValue(true);
+    mockGetUserItemStats.mockResolvedValue({ ...defaultStats, collectionCount: 3 });
+    mockCreateCollectionInDb.mockResolvedValue(createdCollection);
+
+    const result = await createCollection({
+      name: "My Collection",
+      description: "A useful collection",
+    });
+
+    expect(result).toEqual({ success: true, data: createdCollection });
+    expect(mockCreateCollectionInDb).toHaveBeenCalled();
   });
 });
 

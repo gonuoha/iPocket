@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { FadeInOnScroll } from "@/components/marketing/fade-in-on-scroll";
 import { buttonVariants } from "@/components/ui/button";
@@ -10,9 +11,75 @@ import { cn } from "@/lib/utils";
 
 type BillingPeriod = "monthly" | "yearly";
 
-export function HomepagePricing() {
+type HomepagePricingProps = {
+  isLoggedIn: boolean;
+  isPro: boolean;
+};
+
+export function HomepagePricing({ isLoggedIn, isPro }: HomepagePricingProps) {
   const [period, setPeriod] = useState<BillingPeriod>("monthly");
+  const [isLoading, setIsLoading] = useState(false);
   const { free, pro } = PRICING_PLANS;
+
+  async function handleProCheckout() {
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ period }),
+      });
+
+      const data = (await response.json()) as { url?: string; error?: string };
+
+      if (!response.ok || !data.url) {
+        toast.error(data.error ?? "Checkout failed");
+        return;
+      }
+
+      window.location.href = data.url;
+    } catch {
+      toast.error("Checkout failed");
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
+  function renderProCta() {
+    if (!isLoggedIn) {
+      return (
+        <Link
+          href="/register"
+          className={cn(buttonVariants({ variant: pro.variant }), "w-full")}
+        >
+          {pro.cta}
+        </Link>
+      );
+    }
+
+    if (isPro) {
+      return (
+        <Link
+          href="/settings"
+          className={cn(buttonVariants({ variant: pro.variant }), "w-full")}
+        >
+          Manage subscription
+        </Link>
+      );
+    }
+
+    return (
+      <button
+        type="button"
+        className={cn(buttonVariants({ variant: pro.variant }), "w-full")}
+        onClick={handleProCheckout}
+        disabled={isLoading}
+      >
+        {isLoading ? "Redirecting..." : pro.cta}
+      </button>
+    );
+  }
 
   return (
     <section id="pricing" className="scroll-mt-20 px-6 py-20">
@@ -72,10 +139,10 @@ export function HomepagePricing() {
                 ))}
               </ul>
               <Link
-                href="/register"
+                href={isLoggedIn ? "/dashboard" : "/register"}
                 className={cn(buttonVariants({ variant: free.variant }), "w-full")}
               >
-                {free.cta}
+                {isLoggedIn ? "Go to Dashboard" : free.cta}
               </Link>
             </article>
           </FadeInOnScroll>
@@ -104,12 +171,7 @@ export function HomepagePricing() {
                   </li>
                 ))}
               </ul>
-              <Link
-                href="/register"
-                className={cn(buttonVariants({ variant: pro.variant }), "w-full")}
-              >
-                {pro.cta}
-              </Link>
+              {renderProCta()}
             </article>
           </FadeInOnScroll>
         </div>

@@ -19,17 +19,26 @@ function DashboardShellInner({
   sidebar,
   isPro,
   collections,
+  itemCount,
+  collectionCount,
 }: {
   children: React.ReactNode;
   sidebar: React.ReactNode;
   isPro: boolean;
   collections: SelectableCollection[];
+  itemCount: number;
+  collectionCount: number;
 }) {
   const { collapsed, mobileOpen, setMobileOpen } = useSidebar();
 
   return (
     <div className="flex h-svh flex-col overflow-hidden">
-      <TopBar isPro={isPro} collections={collections} />
+      <TopBar
+        isPro={isPro}
+        collections={collections}
+        itemCount={itemCount}
+        collectionCount={collectionCount}
+      />
 
       <div className="flex min-h-0 flex-1 overflow-hidden">
         <aside
@@ -69,6 +78,8 @@ export function DashboardShell({
   collections,
   searchData,
   editorPreferences,
+  itemCount,
+  collectionCount,
 }: {
   children: React.ReactNode;
   sidebar: React.ReactNode;
@@ -76,6 +87,8 @@ export function DashboardShell({
   collections: SelectableCollection[];
   searchData: DashboardSearchData;
   editorPreferences: EditorPreferences;
+  itemCount: number;
+  collectionCount: number;
 }) {
   return (
     <SidebarProvider>
@@ -86,6 +99,8 @@ export function DashboardShell({
               sidebar={sidebar}
               isPro={isPro}
               collections={collections}
+              itemCount={itemCount}
+              collectionCount={collectionCount}
             >
               {children}
             </DashboardShellInner>

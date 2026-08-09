@@ -1,14 +1,17 @@
+import { Suspense } from "react";
+
 import {
   PageContainer,
   PageContent,
   PageHeader,
 } from "@/components/layout/page-container";
 import { AccountActionsCard } from "@/components/settings/account-actions-card";
+import { BillingCard } from "@/components/settings/billing-card";
 import { EditorPreferencesCard } from "@/components/settings/editor-preferences-card";
 import { getSettingsData } from "@/lib/db/settings";
 
 export default async function SettingsPage() {
-  const { user } = await getSettingsData();
+  const { user, usage } = await getSettingsData();
 
   return (
     <PageContainer>
@@ -19,6 +22,14 @@ export default async function SettingsPage() {
 
       <PageContent className="space-y-6">
         <EditorPreferencesCard />
+        <Suspense fallback={null}>
+          <BillingCard
+            isPro={user.isPro}
+            stripeCustomerId={user.stripeCustomerId}
+            itemCount={usage.itemCount}
+            collectionCount={usage.collectionCount}
+          />
+        </Suspense>
         <AccountActionsCard email={user.email} hasPassword={user.hasPassword} />
       </PageContent>
     </PageContainer>

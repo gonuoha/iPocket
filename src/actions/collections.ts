@@ -12,6 +12,9 @@ import {
   type DeletedCollection,
   type ToggleCollectionFavoriteResult,
 } from "@/lib/db/collections";
+import { getUserItemStats } from "@/lib/db/items";
+import { getUserIsPro } from "@/lib/db/user";
+import { FREE_COLLECTION_LIMIT } from "@/lib/subscription-limits";
 import {
   createCollectionSchema,
   updateCollectionSchema,
@@ -46,6 +49,19 @@ export async function createCollection(
       success: false,
       error: parsed.error.issues[0]?.message ?? "Invalid input",
     };
+  }
+
+  const isPro = await getUserIsPro(session.user.id);
+
+  if (!isPro) {
+    const stats = await getUserItemStats(session.user.id);
+
+    if (stats.collectionCount >= FREE_COLLECTION_LIMIT) {
+      return {
+        success: false,
+        error: `Free plan is limited to ${FREE_COLLECTION_LIMIT} collections. Upgrade to Pro for unlimited collections.`,
+      };
+    }
   }
 
   try {

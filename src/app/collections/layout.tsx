@@ -9,7 +9,8 @@ export default async function CollectionsLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { sidebarData, user, collections, searchData, editorPreferences } = await getDashboardLayoutData();
+  const { sidebarData, user, collections, searchData, editorPreferences, usage } =
+    await getDashboardLayoutData();
 
   return (
     <DashboardShell
@@ -18,6 +19,8 @@ export default async function CollectionsLayout({
       collections={collections}
       searchData={searchData}
       editorPreferences={editorPreferences}
+      itemCount={usage.itemCount}
+      collectionCount={usage.collectionCount}
     >
       {children}
     </DashboardShell>
