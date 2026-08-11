@@ -1,30 +1,16 @@
-# Current Feature: AI Explain Code
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Create `explainCode` server action with auth, Pro gating, Zod validation, and rate limiting
-- Add "Explain" button (Sparkles icon) to code editor window controls header, next to Copy
-- Show only for snippet and command types in the item drawer read view (not in create/edit forms)
-- After generating, show Code/Explain tabs in the editor header to toggle between views
-- Render explanation as markdown in the same container space as the code editor
-- Keep explanations concise (~200–300 words): what the code does and key concepts
-- Show Loader2 spinner while generating
-- Pro gating in UI: Crown icon + tooltip ("AI features require Pro subscription") for free users
-- Handle errors via toast (Pro gating, rate limit, AI service errors)
-- Follow existing AI integration patterns
-- Add unit tests for the server action
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-- Explanations are not saved to the database — regenerated on each click
-- Not available in create/edit forms, only in the item drawer read view
-- `isPro` needs to be passed as a prop to the item drawer / code editor
-- Uses OpenAI `gpt-5-nano` model
-- See `docs/ai-integration-plan.md` for full architectural context
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -88,3 +74,4 @@ In Progress
 - 2026-08-09: Completed **Code Language Dropdown** — shared `LanguageSelect` with curated Monaco language options above the code editor in item create and edit flows; live syntax highlighting on selection; unknown existing languages preserved in the dropdown; compact select widths for type and language; unit tests for language normalization and options
 - 2026-08-09: Completed **AI Auto-Tagging** — Gemini 3.5 Flash-Lite `generateAutoTags` server action with Pro gating, auth, Zod validation, and 20 req/hour AI rate limits; `SuggestTags` button and accept/reject suggestion UI in item create dialog and drawer edit mode; shared AI foundation (`@google/genai` client, prompts, truncation, schemas); unit tests for action, validations, and utilities
 - 2026-08-09: Completed **AI-Generated Summary** — `generateSummary` server action with Pro gating and AI rate limits; sparkles icon button on Description in create dialog and drawer edit mode; builds context from current form inputs (content, URL, filename, language) for all item types; accept/reject inline suggestion before save; `buildSummaryContent` utility and unit tests for action, validations, prompts, and content builder
+- 2026-08-11: Completed **AI Explain Code** — `explainCode` server action with Pro gating, auth, Zod validation, and AI rate limits; Explain button with Code/Explain tabs in item drawer read view for snippets and commands; markdown explanation rendered inline in the code editor; Crown icon and upgrade prompt for free users; unit tests for action, validations, and prompts
