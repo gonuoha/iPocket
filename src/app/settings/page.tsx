@@ -7,11 +7,12 @@ import {
 } from "@/components/layout/page-container";
 import { AccountActionsCard } from "@/components/settings/account-actions-card";
 import { BillingCard } from "@/components/settings/billing-card";
+import { UserPreferencesCard } from "@/components/settings/user-preferences-card";
 import { EditorPreferencesCard } from "@/components/settings/editor-preferences-card";
 import { getSettingsData } from "@/lib/db/settings";
 
 export default async function SettingsPage() {
-  const { user, usage } = await getSettingsData();
+  const { user, usage, userPreferences } = await getSettingsData();
 
   return (
     <PageContainer>
@@ -21,6 +22,7 @@ export default async function SettingsPage() {
       />
 
       <PageContent className="space-y-6">
+        <UserPreferencesCard initialPreferences={userPreferences} />
         <EditorPreferencesCard />
         <Suspense fallback={null}>
           <BillingCard

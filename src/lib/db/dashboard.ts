@@ -24,7 +24,7 @@ import {
   type SearchableItem,
 } from "@/lib/db/items";
 import { getSidebarData, type SidebarData } from "@/lib/db/sidebar";
-import { getEditorPreferences } from "@/lib/db/settings";
+import { getUserPreferences, getEditorPreferences } from "@/lib/db/settings";
 import { getCurrentUser, type DashboardUser } from "@/lib/db/user";
 import type { EditorPreferences } from "@/lib/editor-preferences";
 
@@ -33,6 +33,7 @@ export type DashboardPageData = {
   stats: DashboardStats;
   pinnedItems: DashboardItem[];
   recentItems: DashboardItem[];
+  showOverview: boolean;
 };
 
 export type DashboardSearchData = {
@@ -55,18 +56,21 @@ export type DashboardLayoutData = {
 export const getDashboardPageData = cache(
   async (): Promise<DashboardPageData> => {
     const user = await getCurrentUser();
-    const [stats, collections, pinnedItems, recentItems] = await Promise.all([
-      getUserItemStats(user.id),
-      getRecentCollections(user.id, DASHBOARD_COLLECTIONS_LIMIT),
-      getPinnedItems(user.id),
-      getRecentItems(user.id, DASHBOARD_RECENT_ITEMS_LIMIT),
-    ]);
+    const [userPreferences, stats, collections, pinnedItems, recentItems] =
+      await Promise.all([
+        getUserPreferences(user.id),
+        getUserItemStats(user.id),
+        getRecentCollections(user.id, DASHBOARD_COLLECTIONS_LIMIT),
+        getPinnedItems(user.id),
+        getRecentItems(user.id, DASHBOARD_RECENT_ITEMS_LIMIT),
+      ]);
 
     return {
       collections,
       stats: toDashboardStats(stats),
       pinnedItems,
       recentItems,
+      showOverview: userPreferences.showOverview,
     };
   },
 );

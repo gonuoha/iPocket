@@ -107,7 +107,7 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
                       <span className="truncate">
                         {getItemTypeLabel(type.name, { plural: true })}
                       </span>
-                      {isProType ? (
+                      {isProType && !user.isPro ? (
                         <Badge
                           variant="outline"
                           className="h-4 shrink-0 border-border/60 px-1 text-[10px] font-medium uppercase tracking-wide text-muted-foreground"

@@ -12,7 +12,7 @@ import {
 import { getDashboardPageData } from "@/lib/db/dashboard";
 
 export default async function DashboardPage() {
-  const { collections, stats, pinnedItems, recentItems } =
+  const { collections, stats, pinnedItems, recentItems, showOverview } =
     await getDashboardPageData();
 
   return (
@@ -23,12 +23,14 @@ export default async function DashboardPage() {
       />
 
       <PageContent>
-        <PageSection
-          title="Overview"
-          className="rounded-none border-0 bg-background p-0"
-        >
-          <StatsCards {...stats} />
-        </PageSection>
+        {showOverview ? (
+          <PageSection
+            title="Overview"
+            className="rounded-none border-0 bg-background p-0"
+          >
+            <StatsCards {...stats} />
+          </PageSection>
+        ) : null}
 
         <section>
           <div className="flex items-center justify-between gap-3">

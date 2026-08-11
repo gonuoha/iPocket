@@ -1,23 +1,29 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { EditorPreferences } from "@/lib/editor-preferences";
+import type { UserPreferences } from "@/lib/user-preferences";
 
 import { mockAuth, mockUnauthenticated } from "./__tests__/mock-auth";
 
 vi.mock("@/lib/db/settings", () => ({
   updateEditorPreferences: vi.fn(),
+  updateUserPreferences: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-import { updateEditorPreferences as updateEditorPreferencesInDb } from "@/lib/db/settings";
+import {
+  updateEditorPreferences as updateEditorPreferencesInDb,
+  updateUserPreferences as updateUserPreferencesInDb,
+} from "@/lib/db/settings";
 import { revalidatePath } from "next/cache";
 
-import { updateEditorPreferences } from "./settings";
+import { updateEditorPreferences, updateUserPreferences } from "./settings";
 
 const mockUpdateEditorPreferencesInDb = vi.mocked(updateEditorPreferencesInDb);
+const mockUpdateUserPreferencesInDb = vi.mocked(updateUserPreferencesInDb);
 const mockRevalidatePath = vi.mocked(revalidatePath);
 
 const preferences: EditorPreferences = {
@@ -26,6 +32,10 @@ const preferences: EditorPreferences = {
   wordWrap: false,
   minimap: true,
   theme: "monokai",
+};
+
+const userPreferences: UserPreferences = {
+  showOverview: false,
 };
 
 describe("updateEditorPreferences", () => {
@@ -82,6 +92,65 @@ describe("updateEditorPreferences", () => {
     expect(result).toEqual({
       success: false,
       error: "Failed to save editor preferences",
+    });
+    expect(mockRevalidatePath).not.toHaveBeenCalled();
+  });
+});
+
+describe("updateUserPreferences", () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+  });
+
+  it("returns unauthorized when there is no session", async () => {
+    mockUnauthenticated();
+
+    const result = await updateUserPreferences(userPreferences);
+
+    expect(result).toEqual({ success: false, error: "Unauthorized" });
+    expect(mockUpdateUserPreferencesInDb).not.toHaveBeenCalled();
+    expect(mockRevalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("returns a validation error for invalid input", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+
+    const result = await updateUserPreferences({
+      showOverview: "no",
+    });
+
+    expect(result.success).toBe(false);
+    if (!result.success) {
+      expect(result.error).toBeTruthy();
+    }
+    expect(mockUpdateUserPreferencesInDb).not.toHaveBeenCalled();
+    expect(mockRevalidatePath).not.toHaveBeenCalled();
+  });
+
+  it("saves preferences and revalidates settings and dashboard", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockUpdateUserPreferencesInDb.mockResolvedValue(userPreferences);
+
+    const result = await updateUserPreferences(userPreferences);
+
+    expect(result).toEqual({ success: true, data: userPreferences });
+    expect(mockUpdateUserPreferencesInDb).toHaveBeenCalledWith(
+      "user-1",
+      userPreferences,
+    );
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/settings");
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/dashboard");
+  });
+
+  it("returns an error when the database update fails", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockUpdateUserPreferencesInDb.mockRejectedValue(new Error("db error"));
+
+    const result = await updateUserPreferences(userPreferences);
+
+    expect(result).toEqual({
+      success: false,
+      error: "Failed to save user preferences",
     });
     expect(mockRevalidatePath).not.toHaveBeenCalled();
   });

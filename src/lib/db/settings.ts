@@ -6,6 +6,10 @@ import {
   parseEditorPreferences,
   type EditorPreferences,
 } from "@/lib/editor-preferences";
+import {
+  parseUserPreferences,
+  type UserPreferences,
+} from "@/lib/user-preferences";
 import { getUserItemStats } from "@/lib/db/items";
 import { prisma } from "@/lib/prisma";
 
@@ -21,7 +25,19 @@ export type SettingsData = {
     collectionCount: number;
   };
   editorPreferences: EditorPreferences;
+  userPreferences: UserPreferences;
 };
+
+export const getUserPreferences = cache(
+  async (userId: string): Promise<UserPreferences> => {
+    const user = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { userPreferences: true },
+    });
+
+    return parseUserPreferences(user?.userPreferences);
+  },
+);
 
 export const getEditorPreferences = cache(
   async (userId: string): Promise<EditorPreferences> => {
@@ -50,6 +66,7 @@ export const getSettingsData = cache(async (): Promise<SettingsData> => {
         isPro: true,
         stripeCustomerId: true,
         editorPreferences: true,
+        userPreferences: true,
       },
     }),
     getUserItemStats(session.user.id),
@@ -71,8 +88,22 @@ export const getSettingsData = cache(async (): Promise<SettingsData> => {
       collectionCount: stats.collectionCount,
     },
     editorPreferences: parseEditorPreferences(user.editorPreferences),
+    userPreferences: parseUserPreferences(user.userPreferences),
   };
 });
+
+export async function updateUserPreferences(
+  userId: string,
+  preferences: UserPreferences,
+): Promise<UserPreferences> {
+  const updated = await prisma.user.update({
+    where: { id: userId },
+    data: { userPreferences: preferences },
+    select: { userPreferences: true },
+  });
+
+  return parseUserPreferences(updated.userPreferences);
+}
 
 export async function updateEditorPreferences(
   userId: string,
