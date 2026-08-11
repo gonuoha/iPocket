@@ -2,9 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { CreatedCollection } from "@/lib/db/collections";
 
-vi.mock("@/auth", () => ({
-  auth: vi.fn(),
-}));
+import { defaultStats } from "./__tests__/fixtures";
+import { mockAuth, mockUnauthenticated } from "./__tests__/mock-auth";
 
 vi.mock("@/lib/db/collections", () => ({
   createCollection: vi.fn(),
@@ -21,7 +20,6 @@ vi.mock("@/lib/db/user", () => ({
   getUserIsPro: vi.fn(),
 }));
 
-import { auth } from "@/auth";
 import {
   createCollection as createCollectionInDb,
   deleteCollection as deleteCollectionInDb,
@@ -38,21 +36,12 @@ import {
   updateCollection,
 } from "./collections";
 
-const mockAuth = vi.mocked(auth);
 const mockCreateCollectionInDb = vi.mocked(createCollectionInDb);
 const mockUpdateCollectionInDb = vi.mocked(updateCollectionInDb);
 const mockDeleteCollectionInDb = vi.mocked(deleteCollectionInDb);
 const mockToggleCollectionFavoriteInDb = vi.mocked(toggleCollectionFavoriteInDb);
 const mockGetUserItemStats = vi.mocked(getUserItemStats);
 const mockGetUserIsPro = vi.mocked(getUserIsPro);
-
-const defaultStats = {
-  itemCount: 0,
-  collectionCount: 0,
-  favoriteItemCount: 0,
-  favoriteCollectionCount: 0,
-  pinnedCount: 0,
-};
 
 const createdCollection: CreatedCollection = {
   id: "collection-1",
@@ -69,7 +58,7 @@ describe("createCollection", () => {
   });
 
   it("returns unauthorized when there is no session", async () => {
-    mockAuth.mockResolvedValue(null);
+    mockUnauthenticated();
 
     const result = await createCollection({
       name: "My Collection",
@@ -165,7 +154,7 @@ describe("updateCollection", () => {
   });
 
   it("returns unauthorized when there is no session", async () => {
-    mockAuth.mockResolvedValue(null);
+    mockUnauthenticated();
 
     const result = await updateCollection("collection-1", {
       name: "Updated Collection",
@@ -250,7 +239,7 @@ describe("deleteCollection", () => {
   });
 
   it("returns unauthorized when there is no session", async () => {
-    mockAuth.mockResolvedValue(null);
+    mockUnauthenticated();
 
     const result = await deleteCollection("collection-1");
 
@@ -293,7 +282,7 @@ describe("toggleCollectionFavorite", () => {
   });
 
   it("returns unauthorized when there is no session", async () => {
-    mockAuth.mockResolvedValue(null);
+    mockUnauthenticated();
 
     const result = await toggleCollectionFavorite("collection-1");
 

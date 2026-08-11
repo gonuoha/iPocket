@@ -2,8 +2,11 @@
 
 import { ThinkingLevel } from "@google/genai";
 
-import { auth } from "@/auth";
+import { parseActionInput } from "@/lib/actions/parse-action-input";
+import { requireAiAccess } from "@/lib/actions/require-ai-access";
+import { requireSession } from "@/lib/actions/require-session";
 import { getGeminiClient, AI_MODEL } from "@/lib/ai/gemini";
+import { handleAiActionError } from "@/lib/ai/handle-ai-error";
 import {
   buildAutoTagPrompt,
   buildExplainPrompt,
@@ -11,8 +14,7 @@ import {
   buildSummaryPrompt,
 } from "@/lib/ai/prompts";
 import { truncateForAi } from "@/lib/ai/truncate-content";
-import { getUserIsPro } from "@/lib/db/user";
-import { checkAiRateLimit } from "@/lib/rate-limit";
+import type { ActionResult } from "@/types/actions";
 import {
   AUTO_TAGS_JSON_SCHEMA,
   explainCodeResponseSchema,
@@ -29,10 +31,6 @@ import {
   SUMMARY_JSON_SCHEMA,
   summaryResponseSchema,
 } from "@/lib/validations/ai";
-
-type ActionResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
 
 function normalizeSuggestedTags(tags: string[]): string[] {
   const seen = new Set<string>();
@@ -81,37 +79,20 @@ function normalizeExplanation(explanation: string): string {
 export async function generateSummary(
   data: unknown,
 ): Promise<ActionResult<{ summary: string }>> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+  const sessionResult = await requireSession();
+  if (!sessionResult.success) {
+    return sessionResult;
   }
+  const { userId } = sessionResult;
 
-  const parsed = generateSummarySchema.safeParse(data);
-
+  const parsed = parseActionInput(generateSummarySchema, data);
   if (!parsed.success) {
-    return {
-      success: false,
-      error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    return parsed;
   }
 
-  const isPro = await getUserIsPro(session.user.id);
-
-  if (!isPro) {
-    return {
-      success: false,
-      error: "AI features require a Pro subscription",
-    };
-  }
-
-  const rateLimit = await checkAiRateLimit(session.user.id);
-
-  if (!rateLimit.success) {
-    return {
-      success: false,
-      error: "You've reached your AI limit. Try again later.",
-    };
+  const access = await requireAiAccess(userId);
+  if (!access.success) {
+    return access;
   }
 
   const truncatedContent = truncateForAi(parsed.data.content);
@@ -158,45 +139,27 @@ export async function generateSummary(
 
     return { success: true, data: { summary: validated.data.summary } };
   } catch (error) {
-    console.error("generateSummary failed:", error);
-    return { success: false, error: "AI is temporarily unavailable" };
+    return handleAiActionError("generateSummary", error);
   }
 }
 
 export async function generateAutoTags(
   data: unknown,
 ): Promise<ActionResult<{ tags: string[] }>> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+  const sessionResult = await requireSession();
+  if (!sessionResult.success) {
+    return sessionResult;
   }
+  const { userId } = sessionResult;
 
-  const parsed = generateAutoTagsSchema.safeParse(data);
-
+  const parsed = parseActionInput(generateAutoTagsSchema, data);
   if (!parsed.success) {
-    return {
-      success: false,
-      error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    return parsed;
   }
 
-  const isPro = await getUserIsPro(session.user.id);
-
-  if (!isPro) {
-    return {
-      success: false,
-      error: "AI features require a Pro subscription",
-    };
-  }
-
-  const rateLimit = await checkAiRateLimit(session.user.id);
-
-  if (!rateLimit.success) {
-    return {
-      success: false,
-      error: "You've reached your AI limit. Try again later.",
-    };
+  const access = await requireAiAccess(userId);
+  if (!access.success) {
+    return access;
   }
 
   const truncatedContent = truncateForAi(parsed.data.content);
@@ -248,45 +211,27 @@ export async function generateAutoTags(
 
     return { success: true, data: { tags: filtered } };
   } catch (error) {
-    console.error("generateAutoTags failed:", error);
-    return { success: false, error: "AI is temporarily unavailable" };
+    return handleAiActionError("generateAutoTags", error);
   }
 }
 
 export async function explainCode(
   data: unknown,
 ): Promise<ActionResult<{ explanation: string }>> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+  const sessionResult = await requireSession();
+  if (!sessionResult.success) {
+    return sessionResult;
   }
+  const { userId } = sessionResult;
 
-  const parsed = explainCodeSchema.safeParse(data);
-
+  const parsed = parseActionInput(explainCodeSchema, data);
   if (!parsed.success) {
-    return {
-      success: false,
-      error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    return parsed;
   }
 
-  const isPro = await getUserIsPro(session.user.id);
-
-  if (!isPro) {
-    return {
-      success: false,
-      error: "AI features require a Pro subscription",
-    };
-  }
-
-  const rateLimit = await checkAiRateLimit(session.user.id);
-
-  if (!rateLimit.success) {
-    return {
-      success: false,
-      error: "You've reached your AI limit. Try again later.",
-    };
+  const access = await requireAiAccess(userId);
+  if (!access.success) {
+    return access;
   }
 
   const truncatedContent = truncateForAi(parsed.data.content, 16_000);
@@ -337,45 +282,27 @@ export async function explainCode(
       data: { explanation: validated.data.explanation },
     };
   } catch (error) {
-    console.error("explainCode failed:", error);
-    return { success: false, error: "AI is temporarily unavailable" };
+    return handleAiActionError("explainCode", error);
   }
 }
 
 export async function optimizePrompt(
   data: unknown,
 ): Promise<ActionResult<{ prompt: string; improved: boolean }>> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+  const sessionResult = await requireSession();
+  if (!sessionResult.success) {
+    return sessionResult;
   }
+  const { userId } = sessionResult;
 
-  const parsed = optimizePromptSchema.safeParse(data);
-
+  const parsed = parseActionInput(optimizePromptSchema, data);
   if (!parsed.success) {
-    return {
-      success: false,
-      error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    return parsed;
   }
 
-  const isPro = await getUserIsPro(session.user.id);
-
-  if (!isPro) {
-    return {
-      success: false,
-      error: "AI features require a Pro subscription",
-    };
-  }
-
-  const rateLimit = await checkAiRateLimit(session.user.id);
-
-  if (!rateLimit.success) {
-    return {
-      success: false,
-      error: "You've reached your AI limit. Try again later.",
-    };
+  const access = await requireAiAccess(userId);
+  if (!access.success) {
+    return access;
   }
 
   const truncatedContent = truncateForAi(parsed.data.content, 16_000);
@@ -429,7 +356,6 @@ export async function optimizePrompt(
       },
     };
   } catch (error) {
-    console.error("optimizePrompt failed:", error);
-    return { success: false, error: "AI is temporarily unavailable" };
+    return handleAiActionError("optimizePrompt", error);
   }
 }

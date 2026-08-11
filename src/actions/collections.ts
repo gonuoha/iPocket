@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
-import { auth } from "@/auth";
+import { parseActionInput } from "@/lib/actions/parse-action-input";
+import { requireSession } from "@/lib/actions/require-session";
 import {
   createCollection as createCollectionInDb,
   deleteCollection as deleteCollectionInDb,
@@ -12,60 +13,45 @@ import {
   type DeletedCollection,
   type ToggleCollectionFavoriteResult,
 } from "@/lib/db/collections";
+import { isUniqueConstraintError } from "@/lib/db/prisma-errors";
 import { getUserItemStats } from "@/lib/db/items";
 import { getUserIsPro } from "@/lib/db/user";
-import { FREE_COLLECTION_LIMIT } from "@/lib/subscription-limits";
+import {
+  collectionLimitErrorMessage,
+  isAtCollectionLimit,
+} from "@/lib/subscription-limits";
+import type { ActionResult } from "@/types/actions";
 import {
   createCollectionSchema,
   updateCollectionSchema,
 } from "@/lib/validations/collections";
 
-type ActionResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
-
-function isUniqueConstraintError(error: unknown) {
-  return (
-    typeof error === "object" &&
-    error !== null &&
-    "code" in error &&
-    error.code === "P2002"
-  );
-}
-
 export async function createCollection(
   data: unknown,
 ): Promise<ActionResult<CreatedCollection>> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+  const sessionResult = await requireSession();
+  if (!sessionResult.success) {
+    return sessionResult;
   }
+  const { userId } = sessionResult;
 
-  const parsed = createCollectionSchema.safeParse(data);
-
+  const parsed = parseActionInput(createCollectionSchema, data);
   if (!parsed.success) {
-    return {
-      success: false,
-      error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    return parsed;
   }
 
-  const isPro = await getUserIsPro(session.user.id);
+  const isPro = await getUserIsPro(userId);
 
   if (!isPro) {
-    const stats = await getUserItemStats(session.user.id);
+    const stats = await getUserItemStats(userId);
 
-    if (stats.collectionCount >= FREE_COLLECTION_LIMIT) {
-      return {
-        success: false,
-        error: `Free plan is limited to ${FREE_COLLECTION_LIMIT} collections. Upgrade to Pro for unlimited collections.`,
-      };
+    if (isAtCollectionLimit(stats.collectionCount, isPro)) {
+      return { success: false, error: collectionLimitErrorMessage() };
     }
   }
 
   try {
-    const created = await createCollectionInDb(session.user.id, {
+    const created = await createCollectionInDb(userId, {
       name: parsed.data.name,
       description: parsed.data.description ?? null,
     });
@@ -100,23 +86,19 @@ export async function updateCollection(
   collectionId: string,
   data: unknown,
 ): Promise<ActionResult<CreatedCollection>> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+  const sessionResult = await requireSession();
+  if (!sessionResult.success) {
+    return sessionResult;
   }
+  const { userId } = sessionResult;
 
-  const parsed = updateCollectionSchema.safeParse(data);
-
+  const parsed = parseActionInput(updateCollectionSchema, data);
   if (!parsed.success) {
-    return {
-      success: false,
-      error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    return parsed;
   }
 
   try {
-    const updated = await updateCollectionInDb(session.user.id, collectionId, {
+    const updated = await updateCollectionInDb(userId, collectionId, {
       name: parsed.data.name,
       description: parsed.data.description ?? null,
     });
@@ -143,13 +125,13 @@ export async function updateCollection(
 export async function deleteCollection(
   collectionId: string,
 ): Promise<ActionResult<DeletedCollection>> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+  const sessionResult = await requireSession();
+  if (!sessionResult.success) {
+    return sessionResult;
   }
+  const { userId } = sessionResult;
 
-  const deleted = await deleteCollectionInDb(session.user.id, collectionId);
+  const deleted = await deleteCollectionInDb(userId, collectionId);
 
   if (!deleted) {
     return { success: false, error: "Collection not found" };
@@ -163,16 +145,13 @@ export async function deleteCollection(
 export async function toggleCollectionFavorite(
   collectionId: string,
 ): Promise<ActionResult<ToggleCollectionFavoriteResult>> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+  const sessionResult = await requireSession();
+  if (!sessionResult.success) {
+    return sessionResult;
   }
+  const { userId } = sessionResult;
 
-  const result = await toggleCollectionFavoriteInDb(
-    session.user.id,
-    collectionId,
-  );
+  const result = await toggleCollectionFavoriteInDb(userId, collectionId);
 
   if (!result) {
     return { success: false, error: "Collection not found" };

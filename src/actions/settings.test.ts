@@ -2,9 +2,7 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { EditorPreferences } from "@/lib/editor-preferences";
 
-vi.mock("@/auth", () => ({
-  auth: vi.fn(),
-}));
+import { mockAuth, mockUnauthenticated } from "./__tests__/mock-auth";
 
 vi.mock("@/lib/db/settings", () => ({
   updateEditorPreferences: vi.fn(),
@@ -14,13 +12,11 @@ vi.mock("next/cache", () => ({
   revalidatePath: vi.fn(),
 }));
 
-import { auth } from "@/auth";
 import { updateEditorPreferences as updateEditorPreferencesInDb } from "@/lib/db/settings";
 import { revalidatePath } from "next/cache";
 
 import { updateEditorPreferences } from "./settings";
 
-const mockAuth = vi.mocked(auth);
 const mockUpdateEditorPreferencesInDb = vi.mocked(updateEditorPreferencesInDb);
 const mockRevalidatePath = vi.mocked(revalidatePath);
 
@@ -38,7 +34,7 @@ describe("updateEditorPreferences", () => {
   });
 
   it("returns unauthorized when there is no session", async () => {
-    mockAuth.mockResolvedValue(null);
+    mockUnauthenticated();
 
     const result = await updateEditorPreferences(preferences);
 

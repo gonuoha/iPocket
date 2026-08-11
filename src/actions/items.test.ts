@@ -2,9 +2,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import type { ItemDetail } from "@/lib/db/items";
 
-vi.mock("@/auth", () => ({
-  auth: vi.fn(),
-}));
+import { defaultStats } from "./__tests__/fixtures";
+import { mockAuth, mockUnauthenticated } from "./__tests__/mock-auth";
 
 vi.mock("@/lib/db/collections", () => ({
   validateUserCollectionIds: vi.fn(),
@@ -28,7 +27,6 @@ vi.mock("@/lib/r2/storage", () => ({
   deleteObject: vi.fn(),
 }));
 
-import { auth } from "@/auth";
 import { validateUserCollectionIds } from "@/lib/db/collections";
 import {
   createItem as createItemInDb,
@@ -43,7 +41,6 @@ import { deleteObject } from "@/lib/r2/storage";
 
 import { createItem, deleteItem, toggleItemFavorite, toggleItemPin } from "./items";
 
-const mockAuth = vi.mocked(auth);
 const mockValidateUserCollectionIds = vi.mocked(validateUserCollectionIds);
 const mockGetItemTypeBySlug = vi.mocked(getItemTypeBySlug);
 const mockGetUserItemStats = vi.mocked(getUserItemStats);
@@ -79,14 +76,6 @@ const createdItem: ItemDetail = {
   updatedAt: new Date("2026-08-05T00:00:00.000Z"),
 };
 
-const defaultStats = {
-  itemCount: 0,
-  collectionCount: 0,
-  favoriteItemCount: 0,
-  favoriteCollectionCount: 0,
-  pinnedCount: 0,
-};
-
 describe("createItem", () => {
   beforeEach(() => {
     vi.clearAllMocks();
@@ -96,7 +85,7 @@ describe("createItem", () => {
   });
 
   it("returns unauthorized when there is no session", async () => {
-    mockAuth.mockResolvedValue(null);
+    mockUnauthenticated();
 
     const result = await createItem({ type: "snippet", title: "Test" });
 
@@ -336,7 +325,7 @@ describe("deleteItem", () => {
   });
 
   it("returns unauthorized when there is no session", async () => {
-    mockAuth.mockResolvedValue(null);
+    mockUnauthenticated();
 
     const result = await deleteItem("item-1");
 
@@ -402,7 +391,7 @@ describe("toggleItemFavorite", () => {
   });
 
   it("returns unauthorized when there is no session", async () => {
-    mockAuth.mockResolvedValue(null);
+    mockUnauthenticated();
 
     const result = await toggleItemFavorite("item-1");
 
@@ -446,7 +435,7 @@ describe("toggleItemPin", () => {
   });
 
   it("returns unauthorized when there is no session", async () => {
-    mockAuth.mockResolvedValue(null);
+    mockUnauthenticated();
 
     const result = await toggleItemPin("item-1");
 

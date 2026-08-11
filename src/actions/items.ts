@@ -2,7 +2,8 @@
 
 import { revalidatePath } from "next/cache";
 
-import { auth } from "@/auth";
+import { parseActionInput } from "@/lib/actions/parse-action-input";
+import { requireSession } from "@/lib/actions/require-session";
 import {
   createItem as createItemInDb,
   deleteItem as deleteItemInDb,
@@ -22,12 +23,12 @@ import { validateUserCollectionIds } from "@/lib/db/collections";
 import { getUserIsPro } from "@/lib/db/user";
 import { isOwnedFileUrl } from "@/lib/file-upload";
 import { deleteObject } from "@/lib/r2/storage";
-import { FREE_ITEM_LIMIT } from "@/lib/subscription-limits";
+import {
+  isAtItemLimit,
+  itemLimitErrorMessage,
+} from "@/lib/subscription-limits";
+import type { ActionResult } from "@/types/actions";
 import { createItemSchema, updateItemSchema } from "@/lib/validations/items";
-
-type ActionResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
 
 function isFileItemType(typeName: string) {
   return typeName === "file" || typeName === "image";
@@ -36,37 +37,30 @@ function isFileItemType(typeName: string) {
 export async function createItem(
   data: unknown,
 ): Promise<ActionResult<ItemDetail>> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+  const sessionResult = await requireSession();
+  if (!sessionResult.success) {
+    return sessionResult;
   }
+  const { userId } = sessionResult;
 
-  const parsed = createItemSchema.safeParse(data);
-
+  const parsed = parseActionInput(createItemSchema, data);
   if (!parsed.success) {
-    return {
-      success: false,
-      error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    return parsed;
   }
 
-  const itemType = await getItemTypeBySlug(session.user.id, parsed.data.type);
+  const itemType = await getItemTypeBySlug(userId, parsed.data.type);
 
   if (!itemType) {
     return { success: false, error: "Invalid item type" };
   }
 
-  const isPro = await getUserIsPro(session.user.id);
+  const isPro = await getUserIsPro(userId);
 
   if (!isPro) {
-    const stats = await getUserItemStats(session.user.id);
+    const stats = await getUserItemStats(userId);
 
-    if (stats.itemCount >= FREE_ITEM_LIMIT) {
-      return {
-        success: false,
-        error: `Free plan is limited to ${FREE_ITEM_LIMIT} items. Upgrade to Pro for unlimited items.`,
-      };
+    if (isAtItemLimit(stats.itemCount, isPro)) {
+      return { success: false, error: itemLimitErrorMessage() };
     }
   }
 
@@ -84,13 +78,13 @@ export async function createItem(
   if (
     usesFileContent &&
     parsed.data.fileUrl &&
-    !isOwnedFileUrl(parsed.data.fileUrl, session.user.id)
+    !isOwnedFileUrl(parsed.data.fileUrl, userId)
   ) {
     return { success: false, error: "Invalid file reference" };
   }
 
   const hasValidCollections = await validateUserCollectionIds(
-    session.user.id,
+    userId,
     parsed.data.collectionIds,
   );
 
@@ -98,7 +92,7 @@ export async function createItem(
     return { success: false, error: "Invalid collection selection" };
   }
 
-  const created = await createItemInDb(session.user.id, {
+  const created = await createItemInDb(userId, {
     typeId: itemType.id,
     title: parsed.data.title,
     description: parsed.data.description ?? null,
@@ -123,23 +117,19 @@ export async function updateItem(
   itemId: string,
   data: unknown,
 ): Promise<ActionResult<ItemDetail>> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+  const sessionResult = await requireSession();
+  if (!sessionResult.success) {
+    return sessionResult;
   }
+  const { userId } = sessionResult;
 
-  const parsed = updateItemSchema.safeParse(data);
-
+  const parsed = parseActionInput(updateItemSchema, data);
   if (!parsed.success) {
-    return {
-      success: false,
-      error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    return parsed;
   }
 
   const hasValidCollections = await validateUserCollectionIds(
-    session.user.id,
+    userId,
     parsed.data.collectionIds,
   );
 
@@ -147,7 +137,7 @@ export async function updateItem(
     return { success: false, error: "Invalid collection selection" };
   }
 
-  const updated = await updateItemInDb(session.user.id, itemId, {
+  const updated = await updateItemInDb(userId, itemId, {
     title: parsed.data.title,
     description: parsed.data.description ?? null,
     content: parsed.data.content ?? null,
@@ -170,13 +160,13 @@ export async function updateItem(
 export async function deleteItem(
   itemId: string,
 ): Promise<ActionResult<DeleteItemResult>> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+  const sessionResult = await requireSession();
+  if (!sessionResult.success) {
+    return sessionResult;
   }
+  const { userId } = sessionResult;
 
-  const deleted = await deleteItemInDb(session.user.id, itemId);
+  const deleted = await deleteItemInDb(userId, itemId);
 
   if (!deleted) {
     return { success: false, error: "Item not found" };
@@ -207,13 +197,13 @@ function revalidateItemFavoritePaths(typeName: string) {
 export async function toggleItemFavorite(
   itemId: string,
 ): Promise<ActionResult<ToggleItemFavoriteResult>> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+  const sessionResult = await requireSession();
+  if (!sessionResult.success) {
+    return sessionResult;
   }
+  const { userId } = sessionResult;
 
-  const result = await toggleItemFavoriteInDb(session.user.id, itemId);
+  const result = await toggleItemFavoriteInDb(userId, itemId);
 
   if (!result) {
     return { success: false, error: "Item not found" };
@@ -233,13 +223,13 @@ function revalidateItemPinPaths(typeName: string) {
 export async function toggleItemPin(
   itemId: string,
 ): Promise<ActionResult<ToggleItemPinResult>> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+  const sessionResult = await requireSession();
+  if (!sessionResult.success) {
+    return sessionResult;
   }
+  const { userId } = sessionResult;
 
-  const result = await toggleItemPinInDb(session.user.id, itemId);
+  const result = await toggleItemPinInDb(userId, itemId);
 
   if (!result) {
     return { success: false, error: "Item not found" };

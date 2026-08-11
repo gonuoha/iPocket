@@ -2,38 +2,29 @@
 
 import { revalidatePath } from "next/cache";
 
-import { auth } from "@/auth";
+import { parseActionInput } from "@/lib/actions/parse-action-input";
+import { requireSession } from "@/lib/actions/require-session";
 import { updateEditorPreferences as updateEditorPreferencesInDb } from "@/lib/db/settings";
 import type { EditorPreferences } from "@/lib/editor-preferences";
+import type { ActionResult } from "@/types/actions";
 import { editorPreferencesSchema } from "@/lib/validations/editor-preferences";
-
-type ActionResult<T> =
-  | { success: true; data: T }
-  | { success: false; error: string };
 
 export async function updateEditorPreferences(
   data: unknown,
 ): Promise<ActionResult<EditorPreferences>> {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
+  const sessionResult = await requireSession();
+  if (!sessionResult.success) {
+    return sessionResult;
   }
+  const { userId } = sessionResult;
 
-  const parsed = editorPreferencesSchema.safeParse(data);
-
+  const parsed = parseActionInput(editorPreferencesSchema, data);
   if (!parsed.success) {
-    return {
-      success: false,
-      error: parsed.error.issues[0]?.message ?? "Invalid input",
-    };
+    return parsed;
   }
 
   try {
-    const updated = await updateEditorPreferencesInDb(
-      session.user.id,
-      parsed.data,
-    );
+    const updated = await updateEditorPreferencesInDb(userId, parsed.data);
 
     revalidatePath("/settings");
 

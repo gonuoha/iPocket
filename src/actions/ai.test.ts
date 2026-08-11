@@ -1,8 +1,6 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-vi.mock("@/auth", () => ({
-  auth: vi.fn(),
-}));
+import { mockAuth } from "./__tests__/mock-auth";
 
 vi.mock("@/lib/db/user", () => ({
   getUserIsPro: vi.fn(),
@@ -17,17 +15,23 @@ vi.mock("@/lib/ai/gemini", () => ({
   getGeminiClient: vi.fn(),
 }));
 
-import { auth } from "@/auth";
 import { getGeminiClient } from "@/lib/ai/gemini";
 import { getUserIsPro } from "@/lib/db/user";
 import { checkAiRateLimit } from "@/lib/rate-limit";
 
+import { describeAiActionGuards } from "./__tests__/ai-guard-tests";
 import { generateAutoTags, generateSummary, explainCode, optimizePrompt } from "./ai";
 
-const mockAuth = vi.mocked(auth);
 const mockGetUserIsPro = vi.mocked(getUserIsPro);
 const mockCheckAiRateLimit = vi.mocked(checkAiRateLimit);
 const mockGetGeminiClient = vi.mocked(getGeminiClient);
+
+const guardMocks = {
+  mockAuth,
+  mockGetUserIsPro,
+  mockCheckAiRateLimit,
+  mockGenerateContent: vi.fn(),
+};
 
 const validInput = {
   title: "React hooks",
@@ -36,7 +40,25 @@ const validInput = {
   existingTags: ["react"],
 };
 
-const mockGenerateContent = vi.fn();
+const summaryInput = {
+  title: "React hooks",
+  content: "useEffect cleanup example",
+  type: "snippet" as const,
+};
+
+const explainInput = {
+  title: "React hooks",
+  content: "useEffect(() => { return () => cleanup(); }, []);",
+  language: "javascript",
+  type: "snippet" as const,
+};
+
+const optimizeInput = {
+  title: "Code review",
+  content: "Review this pull request for bugs and style issues.",
+};
+
+const mockGenerateContent = guardMocks.mockGenerateContent;
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -56,54 +78,40 @@ beforeEach(() => {
   });
 });
 
+describe.each([
+  [
+    "generateAutoTags",
+    generateAutoTags,
+    validInput,
+    { ...validInput, title: "" },
+    "Title is required",
+  ],
+  [
+    "generateSummary",
+    generateSummary,
+    summaryInput,
+    { ...summaryInput, title: "" },
+    "Title is required",
+  ],
+  [
+    "explainCode",
+    explainCode,
+    explainInput,
+    { ...explainInput, title: "" },
+    "Title is required",
+  ],
+  [
+    "optimizePrompt",
+    optimizePrompt,
+    optimizeInput,
+    { ...optimizeInput, title: "" },
+    "Title is required",
+  ],
+] as const)("%s guards", (_name, action, valid, invalid, errMsg) => {
+  describeAiActionGuards(guardMocks, action, valid, invalid, errMsg);
+});
+
 describe("generateAutoTags", () => {
-  it("returns unauthorized when there is no session", async () => {
-    mockAuth.mockResolvedValue(null);
-
-    const result = await generateAutoTags(validInput);
-
-    expect(result).toEqual({ success: false, error: "Unauthorized" });
-    expect(mockGenerateContent).not.toHaveBeenCalled();
-  });
-
-  it("returns a validation error for invalid payload", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
-
-    const result = await generateAutoTags({ ...validInput, title: "" });
-
-    expect(result).toEqual({ success: false, error: "Title is required" });
-    expect(mockGenerateContent).not.toHaveBeenCalled();
-  });
-
-  it("returns pro subscription error for free users", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
-    mockGetUserIsPro.mockResolvedValue(false);
-
-    const result = await generateAutoTags(validInput);
-
-    expect(result).toEqual({
-      success: false,
-      error: "AI features require a Pro subscription",
-    });
-    expect(mockCheckAiRateLimit).not.toHaveBeenCalled();
-  });
-
-  it("returns rate limit error when limited", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
-    mockCheckAiRateLimit.mockResolvedValue({
-      success: false,
-      remaining: 0,
-      reset: Date.now() + 3600000,
-    });
-
-    const result = await generateAutoTags(validInput);
-
-    expect(result).toEqual({
-      success: false,
-      error: "You've reached your AI limit. Try again later.",
-    });
-  });
-
   it("returns tags for pro users with valid input", async () => {
     mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
 
@@ -217,60 +225,7 @@ describe("generateAutoTags", () => {
   });
 });
 
-const summaryInput = {
-  title: "React hooks",
-  content: "useEffect cleanup example",
-  type: "snippet" as const,
-};
-
 describe("generateSummary", () => {
-  it("returns unauthorized when there is no session", async () => {
-    mockAuth.mockResolvedValue(null);
-
-    const result = await generateSummary(summaryInput);
-
-    expect(result).toEqual({ success: false, error: "Unauthorized" });
-    expect(mockGenerateContent).not.toHaveBeenCalled();
-  });
-
-  it("returns a validation error for invalid payload", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
-
-    const result = await generateSummary({ ...summaryInput, title: "" });
-
-    expect(result).toEqual({ success: false, error: "Title is required" });
-    expect(mockGenerateContent).not.toHaveBeenCalled();
-  });
-
-  it("returns pro subscription error for free users", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
-    mockGetUserIsPro.mockResolvedValue(false);
-
-    const result = await generateSummary(summaryInput);
-
-    expect(result).toEqual({
-      success: false,
-      error: "AI features require a Pro subscription",
-    });
-    expect(mockCheckAiRateLimit).not.toHaveBeenCalled();
-  });
-
-  it("returns rate limit error when limited", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
-    mockCheckAiRateLimit.mockResolvedValue({
-      success: false,
-      remaining: 0,
-      reset: Date.now() + 3600000,
-    });
-
-    const result = await generateSummary(summaryInput);
-
-    expect(result).toEqual({
-      success: false,
-      error: "You've reached your AI limit. Try again later.",
-    });
-  });
-
   it("returns summary for pro users with valid input", async () => {
     mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
     mockGenerateContent.mockResolvedValue({
@@ -332,61 +287,7 @@ describe("generateSummary", () => {
   });
 });
 
-const explainInput = {
-  title: "React hooks",
-  content: "useEffect(() => { return () => cleanup(); }, []);",
-  language: "javascript",
-  type: "snippet" as const,
-};
-
 describe("explainCode", () => {
-  it("returns unauthorized when there is no session", async () => {
-    mockAuth.mockResolvedValue(null);
-
-    const result = await explainCode(explainInput);
-
-    expect(result).toEqual({ success: false, error: "Unauthorized" });
-    expect(mockGenerateContent).not.toHaveBeenCalled();
-  });
-
-  it("returns a validation error for invalid payload", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
-
-    const result = await explainCode({ ...explainInput, title: "" });
-
-    expect(result).toEqual({ success: false, error: "Title is required" });
-    expect(mockGenerateContent).not.toHaveBeenCalled();
-  });
-
-  it("returns pro subscription error for free users", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
-    mockGetUserIsPro.mockResolvedValue(false);
-
-    const result = await explainCode(explainInput);
-
-    expect(result).toEqual({
-      success: false,
-      error: "AI features require a Pro subscription",
-    });
-    expect(mockCheckAiRateLimit).not.toHaveBeenCalled();
-  });
-
-  it("returns rate limit error when limited", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
-    mockCheckAiRateLimit.mockResolvedValue({
-      success: false,
-      remaining: 0,
-      reset: Date.now() + 3600000,
-    });
-
-    const result = await explainCode(explainInput);
-
-    expect(result).toEqual({
-      success: false,
-      error: "You've reached your AI limit. Try again later.",
-    });
-  });
-
   it("returns explanation for pro users with valid input", async () => {
     mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
     mockGenerateContent.mockResolvedValue({
@@ -444,59 +345,7 @@ describe("explainCode", () => {
   });
 });
 
-const optimizeInput = {
-  title: "Code review",
-  content: "Review this pull request for bugs and style issues.",
-};
-
 describe("optimizePrompt", () => {
-  it("returns unauthorized when there is no session", async () => {
-    mockAuth.mockResolvedValue(null);
-
-    const result = await optimizePrompt(optimizeInput);
-
-    expect(result).toEqual({ success: false, error: "Unauthorized" });
-    expect(mockGenerateContent).not.toHaveBeenCalled();
-  });
-
-  it("returns a validation error for invalid payload", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
-
-    const result = await optimizePrompt({ ...optimizeInput, title: "" });
-
-    expect(result).toEqual({ success: false, error: "Title is required" });
-    expect(mockGenerateContent).not.toHaveBeenCalled();
-  });
-
-  it("returns pro subscription error for free users", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
-    mockGetUserIsPro.mockResolvedValue(false);
-
-    const result = await optimizePrompt(optimizeInput);
-
-    expect(result).toEqual({
-      success: false,
-      error: "AI features require a Pro subscription",
-    });
-    expect(mockCheckAiRateLimit).not.toHaveBeenCalled();
-  });
-
-  it("returns rate limit error when limited", async () => {
-    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
-    mockCheckAiRateLimit.mockResolvedValue({
-      success: false,
-      remaining: 0,
-      reset: Date.now() + 3600000,
-    });
-
-    const result = await optimizePrompt(optimizeInput);
-
-    expect(result).toEqual({
-      success: false,
-      error: "You've reached your AI limit. Try again later.",
-    });
-  });
-
   it("returns optimized prompt for pro users with valid input", async () => {
     mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
     mockGenerateContent.mockResolvedValue({

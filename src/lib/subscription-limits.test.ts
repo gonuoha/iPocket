@@ -3,8 +3,10 @@ import { describe, expect, it } from "vitest";
 import {
   FREE_COLLECTION_LIMIT,
   FREE_ITEM_LIMIT,
+  collectionLimitErrorMessage,
   isAtCollectionLimit,
   isAtItemLimit,
+  itemLimitErrorMessage,
 } from "./subscription-limits";
 
 describe("subscription-limits", () => {
@@ -46,6 +48,22 @@ describe("subscription-limits", () => {
 
     it("returns false for pro users regardless of count", () => {
       expect(isAtCollectionLimit(3, true)).toBe(false);
+    });
+  });
+
+  describe("itemLimitErrorMessage", () => {
+    it("returns the free tier item limit message", () => {
+      expect(itemLimitErrorMessage()).toBe(
+        "Free plan is limited to 50 items. Upgrade to Pro for unlimited items.",
+      );
+    });
+  });
+
+  describe("collectionLimitErrorMessage", () => {
+    it("returns the free tier collection limit message", () => {
+      expect(collectionLimitErrorMessage()).toBe(
+        "Free plan is limited to 3 collections. Upgrade to Pro for unlimited collections.",
+      );
     });
   });
 });
