@@ -6,6 +6,7 @@ import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { toast } from "sonner";
 
+import { OptimizePromptButton } from "@/components/ai/optimize-prompt-button";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
@@ -18,12 +19,25 @@ const PADDING = 16;
 
 type MarkdownTab = "write" | "preview";
 
+export type MarkdownEditorView = "original" | "optimized";
+
 export type MarkdownEditorProps = {
   id?: string;
   value: string;
   readOnly?: boolean;
   onChange?: (value: string) => void;
   className?: string;
+  enableOptimize?: boolean;
+  isPro?: boolean;
+  optimizedValue?: string | null;
+  activeView?: MarkdownEditorView;
+  onViewChange?: (view: MarkdownEditorView) => void;
+  onOptimize?: () => void;
+  onUpgrade?: () => void;
+  isOptimizing?: boolean;
+  onAcceptOptimized?: () => void;
+  onRejectOptimized?: () => void;
+  isAcceptingOptimized?: boolean;
 };
 
 function getEditorHeight(value: string): number {
@@ -58,16 +72,33 @@ export function MarkdownEditor({
   readOnly = false,
   onChange,
   className,
+  enableOptimize = false,
+  isPro = false,
+  optimizedValue = null,
+  activeView = "original",
+  onViewChange,
+  onOptimize,
+  onUpgrade,
+  isOptimizing = false,
+  onAcceptOptimized,
+  onRejectOptimized,
+  isAcceptingOptimized = false,
 }: MarkdownEditorProps) {
   const [activeTab, setActiveTab] = useState<MarkdownTab>("write");
   const [copied, setCopied] = useState(false);
-  const height = useMemo(() => getEditorHeight(value), [value]);
   const showWriteTab = !readOnly;
-  const currentTab = readOnly ? "preview" : activeTab;
+  const showOptimizeTabs =
+    enableOptimize && (Boolean(optimizedValue) || isOptimizing);
+  const currentView = showOptimizeTabs ? activeView : "original";
+  const displayValue =
+    currentView === "optimized" && optimizedValue ? optimizedValue : value;
+  const height = useMemo(() => getEditorHeight(displayValue), [displayValue]);
+  const currentTab =
+    readOnly && currentView === "optimized" ? "preview" : readOnly ? "preview" : activeTab;
 
   async function handleCopy() {
     try {
-      await navigator.clipboard.writeText(value);
+      await navigator.clipboard.writeText(displayValue);
       setCopied(true);
       toast.success("Copied to clipboard");
       window.setTimeout(() => setCopied(false), 2000);
@@ -85,7 +116,34 @@ export function MarkdownEditor({
     >
       <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-[#2d2d2d] px-3 py-2">
         <div className="flex items-center gap-1">
-          {showWriteTab ? (
+          {showOptimizeTabs ? (
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                className={cn(
+                  "rounded px-2.5 py-1 text-xs font-medium transition-colors",
+                  currentView === "original"
+                    ? "bg-white/10 text-zinc-100"
+                    : "text-zinc-400 hover:text-zinc-200",
+                )}
+                onClick={() => onViewChange?.("original")}
+              >
+                Original
+              </button>
+              <button
+                type="button"
+                className={cn(
+                  "rounded px-2.5 py-1 text-xs font-medium transition-colors",
+                  currentView === "optimized"
+                    ? "bg-white/10 text-zinc-100"
+                    : "text-zinc-400 hover:text-zinc-200",
+                )}
+                onClick={() => onViewChange?.("optimized")}
+              >
+                Optimized
+              </button>
+            </div>
+          ) : showWriteTab ? (
             <>
               <button
                 type="button"
@@ -118,19 +176,30 @@ export function MarkdownEditor({
             </span>
           )}
         </div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon-xs"
-          className="size-7 text-zinc-400 hover:bg-white/10 hover:text-zinc-100"
-          onClick={handleCopy}
-          aria-label="Copy markdown"
-        >
-          {copied ? <Check /> : <Copy />}
-        </Button>
+        <div className="flex items-center gap-2">
+          {enableOptimize ? (
+            <OptimizePromptButton
+              isPro={isPro}
+              onOptimize={() => onOptimize?.()}
+              onUpgrade={onUpgrade}
+              isLoading={isOptimizing}
+              disabled={!value.trim()}
+            />
+          ) : null}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-xs"
+            className="size-7 text-zinc-400 hover:bg-white/10 hover:text-zinc-100"
+            onClick={handleCopy}
+            aria-label="Copy markdown"
+          >
+            {copied ? <Check /> : <Copy />}
+          </Button>
+        </div>
       </div>
 
-      {currentTab === "write" ? (
+      {currentTab === "write" && currentView === "original" ? (
         <textarea
           {...(id ? { id } : {})}
           value={value}
@@ -145,13 +214,39 @@ export function MarkdownEditor({
           className="markdown-preview overflow-y-auto px-4 py-3"
           style={{ maxHeight: MAX_HEIGHT, minHeight: MIN_HEIGHT }}
         >
-          {value.trim() ? (
-            <MarkdownPreview content={value} />
+          {displayValue.trim() ? (
+            isOptimizing && currentView === "optimized" ? (
+              <p className="text-sm text-zinc-500">Optimizing prompt...</p>
+            ) : (
+              <MarkdownPreview content={displayValue} />
+            )
           ) : (
             <p className="text-sm text-zinc-500">Nothing to preview</p>
           )}
         </div>
       )}
+
+      {currentView === "optimized" && optimizedValue ? (
+        <div className="flex items-center gap-2 border-t border-white/10 bg-[#252526] px-3 py-2">
+          <Button
+            type="button"
+            size="sm"
+            onClick={onAcceptOptimized}
+            disabled={isAcceptingOptimized}
+          >
+            {isAcceptingOptimized ? "Saving..." : "Use optimized prompt"}
+          </Button>
+          <Button
+            type="button"
+            size="sm"
+            variant="outline"
+            onClick={onRejectOptimized}
+            disabled={isAcceptingOptimized}
+          >
+            Keep original
+          </Button>
+        </div>
+      ) : null}
     </div>
   );
 }

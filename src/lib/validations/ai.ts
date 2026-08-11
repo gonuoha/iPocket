@@ -85,3 +85,27 @@ export const explainCodeResponseSchema = z.object({
 export const modelExplainCodeResponseSchema = z.object({
   explanation: z.string().trim().min(1).max(4_000),
 });
+
+export const optimizePromptSchema = z.object({
+  title: z.string().trim().min(1, "Title is required").max(200),
+  content: z.string().trim().min(1, "Content is required").max(100_000),
+});
+
+export const optimizePromptResponseSchema = z.object({
+  prompt: z.string().trim().min(1).max(100_000),
+  improved: z.boolean(),
+});
+
+export const modelOptimizePromptResponseSchema = z.object({
+  prompt: z.string().trim().min(1).max(100_000),
+  improved: z.boolean(),
+});
+
+export const OPTIMIZE_PROMPT_JSON_SCHEMA = {
+  type: "object",
+  properties: {
+    prompt: { type: "string" },
+    improved: { type: "boolean" },
+  },
+  required: ["prompt", "improved"],
+} as const;

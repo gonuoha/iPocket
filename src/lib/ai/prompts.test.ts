@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildAutoTagPrompt, buildExplainPrompt, buildSummaryPrompt } from "./prompts";
+import { buildAutoTagPrompt, buildExplainPrompt, buildOptimizePrompt, buildSummaryPrompt } from "./prompts";
 
 describe("buildAutoTagPrompt", () => {
   it("includes title, type, content, and existing tags in user content", () => {
@@ -71,5 +71,19 @@ describe("buildExplainPrompt", () => {
     });
 
     expect(result.userContent).toContain("Language: unknown");
+  });
+});
+
+describe("buildOptimizePrompt", () => {
+  it("includes title and prompt content in user content", () => {
+    const result = buildOptimizePrompt({
+      title: "Code review",
+      content: "Review this pull request for bugs.",
+    });
+
+    expect(result.systemInstruction).toContain("prompt optimizer");
+    expect(result.systemInstruction).toContain("JSON");
+    expect(result.userContent).toContain("Title: Code review");
+    expect(result.userContent).toContain("Prompt:\nReview this pull request for bugs.");
   });
 });

@@ -14,7 +14,7 @@ import {
 import { toast } from "sonner";
 
 import { deleteItem, updateItem } from "@/actions/items";
-import { explainCode, generateAutoTags, generateSummary } from "@/actions/ai";
+import { explainCode, generateAutoTags, generateSummary, optimizePrompt } from "@/actions/ai";
 import {
   CollectionMultiSelect,
   type SelectableCollection,
@@ -61,6 +61,7 @@ import { LanguageSelect } from "@/components/code-editor/language-select";
 import {
   MARKDOWN_EDITOR_TYPE_NAMES,
   MarkdownEditor,
+  type MarkdownEditorView,
 } from "@/components/markdown-editor/markdown-editor";
 import { Textarea } from "@/components/ui/textarea";
 import type { ItemDetail } from "@/lib/db/items";
@@ -178,6 +179,7 @@ function ItemDrawerContent({
   onDelete,
   onFavoriteToggle,
   onPinToggle,
+  onItemUpdate,
 }: {
   item: ItemDetailResponse;
   isPro: boolean;
@@ -185,13 +187,19 @@ function ItemDrawerContent({
   onDelete: () => void;
   onFavoriteToggle: (isFavorite: boolean) => void;
   onPinToggle: (isPinned: boolean) => void;
+  onItemUpdate: (item: ItemDetailResponse) => void;
 }) {
   const [explanation, setExplanation] = useState<string | null>(null);
   const [codeView, setCodeView] = useState<CodeEditorView>("code");
   const [isExplaining, startExplain] = useTransition();
+  const [optimizedPrompt, setOptimizedPrompt] = useState<string | null>(null);
+  const [promptView, setPromptView] = useState<MarkdownEditorView>("original");
+  const [isOptimizing, startOptimize] = useTransition();
+  const [isAcceptingOptimized, startAcceptOptimized] = useTransition();
   const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
   const typeName = item.type.name.toLowerCase();
   const showExplainableCodeEditor = CODE_EDITOR_TYPE_NAMES.has(typeName);
+  const showOptimizablePrompt = typeName === "prompt";
 
   async function handleCopy() {
     try {
@@ -222,6 +230,67 @@ function ItemDrawerContent({
 
       setExplanation(result.data.explanation);
       setCodeView("explain");
+    });
+  }
+
+  function handleOptimize() {
+    if (!item.content?.trim()) {
+      return;
+    }
+
+    startOptimize(async () => {
+      const result = await optimizePrompt({
+        title: item.title,
+        content: item.content ?? "",
+      });
+
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      if (!result.data.improved) {
+        toast.success("This prompt already looks well-structured");
+        return;
+      }
+
+      setOptimizedPrompt(result.data.prompt);
+      setPromptView("optimized");
+    });
+  }
+
+  function handleRejectOptimized() {
+    setOptimizedPrompt(null);
+    setPromptView("original");
+  }
+
+  function handleAcceptOptimized() {
+    if (!optimizedPrompt) {
+      return;
+    }
+
+    startAcceptOptimized(async () => {
+      const result = await updateItem(item.id, {
+        title: item.title,
+        description: item.description ?? "",
+        content: optimizedPrompt,
+        tags: item.tags,
+        collectionIds: item.collections.map((collection) => collection.id),
+      });
+
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      onItemUpdate({
+        ...result.data,
+        createdAt: result.data.createdAt.toISOString(),
+        updatedAt: result.data.updatedAt.toISOString(),
+      });
+      setOptimizedPrompt(null);
+      setPromptView("original");
+      toast.success("Prompt updated");
     });
   }
 
@@ -296,7 +365,21 @@ function ItemDrawerContent({
                   isExplaining={isExplaining}
                 />
               ) : MARKDOWN_EDITOR_TYPE_NAMES.has(typeName) ? (
-                <MarkdownEditor value={item.content} readOnly />
+                <MarkdownEditor
+                  value={item.content}
+                  readOnly
+                  enableOptimize={showOptimizablePrompt}
+                  isPro={isPro}
+                  optimizedValue={optimizedPrompt}
+                  activeView={promptView}
+                  onViewChange={setPromptView}
+                  onOptimize={handleOptimize}
+                  onUpgrade={() => setIsUpgradeOpen(true)}
+                  isOptimizing={isOptimizing}
+                  onAcceptOptimized={handleAcceptOptimized}
+                  onRejectOptimized={handleRejectOptimized}
+                  isAcceptingOptimized={isAcceptingOptimized}
+                />
               ) : (
                 <pre className="overflow-x-auto rounded-lg border border-border bg-muted/40 p-4 font-mono text-sm leading-relaxed whitespace-pre-wrap">
                   {item.content}
@@ -963,6 +1046,10 @@ function ItemDrawerPanel({
             onDelete={() => setIsDeleteOpen(true)}
             onFavoriteToggle={handleFavoriteToggle}
             onPinToggle={handlePinToggle}
+            onItemUpdate={(updatedItem) => {
+              setItem(updatedItem);
+              router.refresh();
+            }}
           />
         ) : null}
         {!isLoading && item && mode === "edit" && formState ? (

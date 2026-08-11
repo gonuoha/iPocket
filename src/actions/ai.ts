@@ -7,6 +7,7 @@ import { getGeminiClient, AI_MODEL } from "@/lib/ai/gemini";
 import {
   buildAutoTagPrompt,
   buildExplainPrompt,
+  buildOptimizePrompt,
   buildSummaryPrompt,
 } from "@/lib/ai/prompts";
 import { truncateForAi } from "@/lib/ai/truncate-content";
@@ -20,7 +21,11 @@ import {
   generateSummarySchema,
   modelAutoTagsResponseSchema,
   modelExplainCodeResponseSchema,
+  modelOptimizePromptResponseSchema,
   modelSummaryResponseSchema,
+  OPTIMIZE_PROMPT_JSON_SCHEMA,
+  optimizePromptResponseSchema,
+  optimizePromptSchema,
   SUMMARY_JSON_SCHEMA,
   summaryResponseSchema,
 } from "@/lib/validations/ai";
@@ -333,6 +338,98 @@ export async function explainCode(
     };
   } catch (error) {
     console.error("explainCode failed:", error);
+    return { success: false, error: "AI is temporarily unavailable" };
+  }
+}
+
+export async function optimizePrompt(
+  data: unknown,
+): Promise<ActionResult<{ prompt: string; improved: boolean }>> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const parsed = optimizePromptSchema.safeParse(data);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const isPro = await getUserIsPro(session.user.id);
+
+  if (!isPro) {
+    return {
+      success: false,
+      error: "AI features require a Pro subscription",
+    };
+  }
+
+  const rateLimit = await checkAiRateLimit(session.user.id);
+
+  if (!rateLimit.success) {
+    return {
+      success: false,
+      error: "You've reached your AI limit. Try again later.",
+    };
+  }
+
+  const truncatedContent = truncateForAi(parsed.data.content, 16_000);
+  const { systemInstruction, userContent } = buildOptimizePrompt({
+    title: parsed.data.title,
+    content: truncatedContent,
+  });
+
+  try {
+    const client = getGeminiClient();
+    const response = await client.models.generateContent({
+      model: AI_MODEL,
+      contents: userContent,
+      config: {
+        systemInstruction,
+        responseMimeType: "application/json",
+        responseJsonSchema: OPTIMIZE_PROMPT_JSON_SCHEMA,
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+        maxOutputTokens: 4_096,
+      },
+    });
+
+    const rawText = response.text;
+
+    if (!rawText) {
+      throw new Error("Empty response from Gemini");
+    }
+
+    const modelParsed = modelOptimizePromptResponseSchema.safeParse(
+      JSON.parse(rawText),
+    );
+
+    if (!modelParsed.success) {
+      throw new Error("Invalid JSON from Gemini");
+    }
+
+    const validated = optimizePromptResponseSchema.safeParse({
+      prompt: modelParsed.data.prompt,
+      improved: modelParsed.data.improved,
+    });
+
+    if (!validated.success) {
+      throw new Error("Invalid prompt from Gemini");
+    }
+
+    return {
+      success: true,
+      data: {
+        prompt: validated.data.prompt,
+        improved: validated.data.improved,
+      },
+    };
+  } catch (error) {
+    console.error("optimizePrompt failed:", error);
     return { success: false, error: "AI is temporarily unavailable" };
   }
 }

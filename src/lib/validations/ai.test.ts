@@ -8,7 +8,10 @@ import {
   generateSummarySchema,
   modelAutoTagsResponseSchema,
   modelExplainCodeResponseSchema,
+  modelOptimizePromptResponseSchema,
   modelSummaryResponseSchema,
+  optimizePromptResponseSchema,
+  optimizePromptSchema,
   summaryResponseSchema,
 } from "./ai";
 
@@ -182,6 +185,57 @@ describe("modelExplainCodeResponseSchema", () => {
   it("accepts longer explanations from model output", () => {
     const result = modelExplainCodeResponseSchema.safeParse({
       explanation: "A".repeat(4_000),
+    });
+
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("optimizePromptSchema", () => {
+  it("accepts valid input", () => {
+    const result = optimizePromptSchema.safeParse({
+      title: "Code review",
+      content: "Review this pull request for bugs.",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects empty content", () => {
+    const result = optimizePromptSchema.safeParse({
+      title: "Code review",
+      content: "",
+    });
+
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("optimizePromptResponseSchema", () => {
+  it("accepts optimized prompts up to 100000 characters", () => {
+    const result = optimizePromptResponseSchema.safeParse({
+      prompt: "A".repeat(100_000),
+      improved: true,
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects prompts longer than 100000 characters", () => {
+    const result = optimizePromptResponseSchema.safeParse({
+      prompt: "A".repeat(100_001),
+      improved: true,
+    });
+
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("modelOptimizePromptResponseSchema", () => {
+  it("accepts model output with improved flag", () => {
+    const result = modelOptimizePromptResponseSchema.safeParse({
+      prompt: "Optimized prompt text",
+      improved: false,
     });
 
     expect(result.success).toBe(true);

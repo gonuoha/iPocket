@@ -22,7 +22,7 @@ import { getGeminiClient } from "@/lib/ai/gemini";
 import { getUserIsPro } from "@/lib/db/user";
 import { checkAiRateLimit } from "@/lib/rate-limit";
 
-import { generateAutoTags, generateSummary, explainCode } from "./ai";
+import { generateAutoTags, generateSummary, explainCode, optimizePrompt } from "./ai";
 
 const mockAuth = vi.mocked(auth);
 const mockGetUserIsPro = vi.mocked(getUserIsPro);
@@ -436,6 +436,127 @@ describe("explainCode", () => {
     mockGenerateContent.mockResolvedValue({ text: "   " });
 
     const result = await explainCode(explainInput);
+
+    expect(result).toEqual({
+      success: false,
+      error: "AI is temporarily unavailable",
+    });
+  });
+});
+
+const optimizeInput = {
+  title: "Code review",
+  content: "Review this pull request for bugs and style issues.",
+};
+
+describe("optimizePrompt", () => {
+  it("returns unauthorized when there is no session", async () => {
+    mockAuth.mockResolvedValue(null);
+
+    const result = await optimizePrompt(optimizeInput);
+
+    expect(result).toEqual({ success: false, error: "Unauthorized" });
+    expect(mockGenerateContent).not.toHaveBeenCalled();
+  });
+
+  it("returns a validation error for invalid payload", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+
+    const result = await optimizePrompt({ ...optimizeInput, title: "" });
+
+    expect(result).toEqual({ success: false, error: "Title is required" });
+    expect(mockGenerateContent).not.toHaveBeenCalled();
+  });
+
+  it("returns pro subscription error for free users", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGetUserIsPro.mockResolvedValue(false);
+
+    const result = await optimizePrompt(optimizeInput);
+
+    expect(result).toEqual({
+      success: false,
+      error: "AI features require a Pro subscription",
+    });
+    expect(mockCheckAiRateLimit).not.toHaveBeenCalled();
+  });
+
+  it("returns rate limit error when limited", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockCheckAiRateLimit.mockResolvedValue({
+      success: false,
+      remaining: 0,
+      reset: Date.now() + 3600000,
+    });
+
+    const result = await optimizePrompt(optimizeInput);
+
+    expect(result).toEqual({
+      success: false,
+      error: "You've reached your AI limit. Try again later.",
+    });
+  });
+
+  it("returns optimized prompt for pro users with valid input", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGenerateContent.mockResolvedValue({
+      text: JSON.stringify({
+        prompt: "Review this pull request for bugs, security issues, and style.",
+        improved: true,
+      }),
+    });
+
+    const result = await optimizePrompt(optimizeInput);
+
+    expect(result).toEqual({
+      success: true,
+      data: {
+        prompt: "Review this pull request for bugs, security issues, and style.",
+        improved: true,
+      },
+    });
+    expect(mockGenerateContent).toHaveBeenCalledOnce();
+  });
+
+  it("returns unchanged prompt when model reports no improvement", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGenerateContent.mockResolvedValue({
+      text: JSON.stringify({
+        prompt: optimizeInput.content,
+        improved: false,
+      }),
+    });
+
+    const result = await optimizePrompt(optimizeInput);
+
+    expect(result).toEqual({
+      success: true,
+      data: {
+        prompt: optimizeInput.content,
+        improved: false,
+      },
+    });
+  });
+
+  it("returns service unavailable when Gemini throws", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGenerateContent.mockRejectedValue(new Error("API error"));
+
+    const result = await optimizePrompt(optimizeInput);
+
+    expect(result).toEqual({
+      success: false,
+      error: "AI is temporarily unavailable",
+    });
+  });
+
+  it("returns service unavailable for invalid model JSON", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGenerateContent.mockResolvedValue({
+      text: JSON.stringify({ prompt: "", improved: true }),
+    });
+
+    const result = await optimizePrompt(optimizeInput);
 
     expect(result).toEqual({
       success: false,
