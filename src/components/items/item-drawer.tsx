@@ -14,7 +14,7 @@ import {
 import { toast } from "sonner";
 
 import { deleteItem, updateItem } from "@/actions/items";
-import { generateAutoTags, generateSummary } from "@/actions/ai";
+import { explainCode, generateAutoTags, generateSummary } from "@/actions/ai";
 import {
   CollectionMultiSelect,
   type SelectableCollection,
@@ -25,6 +25,7 @@ import { SuggestTagsButton } from "@/components/ai/suggest-tags-button";
 import { SuggestedTags } from "@/components/ai/suggested-tags";
 import { GenerateSummaryButton } from "@/components/ai/generate-summary-button";
 import { SuggestedSummary } from "@/components/ai/suggested-summary";
+import { UpgradePrompt } from "@/components/shared/upgrade-prompt";
 import {
   buildSummaryContent,
   canGenerateSummary,
@@ -54,6 +55,7 @@ import {
 import {
   CODE_EDITOR_TYPE_NAMES,
   CodeEditor,
+  type CodeEditorView,
 } from "@/components/code-editor/code-editor";
 import { LanguageSelect } from "@/components/code-editor/language-select";
 import {
@@ -171,17 +173,26 @@ function ItemDrawerSkeleton() {
 
 function ItemDrawerContent({
   item,
+  isPro,
   onEdit,
   onDelete,
   onFavoriteToggle,
   onPinToggle,
 }: {
   item: ItemDetailResponse;
+  isPro: boolean;
   onEdit: () => void;
   onDelete: () => void;
   onFavoriteToggle: (isFavorite: boolean) => void;
   onPinToggle: (isPinned: boolean) => void;
 }) {
+  const [explanation, setExplanation] = useState<string | null>(null);
+  const [codeView, setCodeView] = useState<CodeEditorView>("code");
+  const [isExplaining, startExplain] = useTransition();
+  const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
+  const typeName = item.type.name.toLowerCase();
+  const showExplainableCodeEditor = CODE_EDITOR_TYPE_NAMES.has(typeName);
+
   async function handleCopy() {
     try {
       await navigator.clipboard.writeText(getItemCopyText(item));
@@ -191,8 +202,32 @@ function ItemDrawerContent({
     }
   }
 
+  function handleExplain() {
+    if (!item.content?.trim()) {
+      return;
+    }
+
+    startExplain(async () => {
+      const result = await explainCode({
+        title: item.title,
+        content: item.content ?? "",
+        language: item.language ?? undefined,
+        type: typeName as "snippet" | "command",
+      });
+
+      if (!result.success) {
+        toast.error(result.error);
+        return;
+      }
+
+      setExplanation(result.data.explanation);
+      setCodeView("explain");
+    });
+  }
+
   return (
-    <div className="flex min-h-0 flex-1 flex-col">
+    <>
+      <div className="flex min-h-0 flex-1 flex-col">
       <div className="flex flex-wrap items-center gap-2 border-b border-border py-2">
         <ItemFavoriteButton
           itemId={item.id}
@@ -246,13 +281,21 @@ function ItemDrawerContent({
           {item.content ? (
             <section className="space-y-2">
               <h3 className="text-sm font-medium">Content</h3>
-              {CODE_EDITOR_TYPE_NAMES.has(item.type.name.toLowerCase()) ? (
+              {showExplainableCodeEditor ? (
                 <CodeEditor
                   value={item.content}
                   language={item.language ?? undefined}
                   readOnly
+                  enableExplain
+                  isPro={isPro}
+                  explanation={explanation}
+                  activeView={codeView}
+                  onViewChange={setCodeView}
+                  onExplain={handleExplain}
+                  onUpgrade={() => setIsUpgradeOpen(true)}
+                  isExplaining={isExplaining}
                 />
-              ) : MARKDOWN_EDITOR_TYPE_NAMES.has(item.type.name.toLowerCase()) ? (
+              ) : MARKDOWN_EDITOR_TYPE_NAMES.has(typeName) ? (
                 <MarkdownEditor value={item.content} readOnly />
               ) : (
                 <pre className="overflow-x-auto rounded-lg border border-border bg-muted/40 p-4 font-mono text-sm leading-relaxed whitespace-pre-wrap">
@@ -367,7 +410,14 @@ function ItemDrawerContent({
           </section>
         </div>
       </ScrollArea>
-    </div>
+      </div>
+
+      <UpgradePrompt
+        open={isUpgradeOpen}
+        onOpenChange={setIsUpgradeOpen}
+        reason="general"
+      />
+    </>
   );
 }
 
@@ -908,6 +958,7 @@ function ItemDrawerPanel({
         {!isLoading && item && mode === "view" ? (
           <ItemDrawerContent
             item={item}
+            isPro={isPro}
             onEdit={handleEdit}
             onDelete={() => setIsDeleteOpen(true)}
             onFavoriteToggle={handleFavoriteToggle}

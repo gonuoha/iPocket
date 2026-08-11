@@ -4,15 +4,22 @@ import { ThinkingLevel } from "@google/genai";
 
 import { auth } from "@/auth";
 import { getGeminiClient, AI_MODEL } from "@/lib/ai/gemini";
-import { buildAutoTagPrompt, buildSummaryPrompt } from "@/lib/ai/prompts";
+import {
+  buildAutoTagPrompt,
+  buildExplainPrompt,
+  buildSummaryPrompt,
+} from "@/lib/ai/prompts";
 import { truncateForAi } from "@/lib/ai/truncate-content";
 import { getUserIsPro } from "@/lib/db/user";
 import { checkAiRateLimit } from "@/lib/rate-limit";
 import {
   AUTO_TAGS_JSON_SCHEMA,
+  explainCodeResponseSchema,
+  explainCodeSchema,
   generateAutoTagsSchema,
   generateSummarySchema,
   modelAutoTagsResponseSchema,
+  modelExplainCodeResponseSchema,
   modelSummaryResponseSchema,
   SUMMARY_JSON_SCHEMA,
   summaryResponseSchema,
@@ -54,6 +61,16 @@ function normalizeSummary(summary: string): string {
   }
 
   return `${trimmed.slice(0, 297).trimEnd()}…`;
+}
+
+function normalizeExplanation(explanation: string): string {
+  const trimmed = explanation.trim();
+
+  if (trimmed.length <= 2_500) {
+    return trimmed;
+  }
+
+  return `${trimmed.slice(0, 2_497).trimEnd()}…`;
 }
 
 export async function generateSummary(
@@ -227,6 +244,95 @@ export async function generateAutoTags(
     return { success: true, data: { tags: filtered } };
   } catch (error) {
     console.error("generateAutoTags failed:", error);
+    return { success: false, error: "AI is temporarily unavailable" };
+  }
+}
+
+export async function explainCode(
+  data: unknown,
+): Promise<ActionResult<{ explanation: string }>> {
+  const session = await auth();
+
+  if (!session?.user?.id) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const parsed = explainCodeSchema.safeParse(data);
+
+  if (!parsed.success) {
+    return {
+      success: false,
+      error: parsed.error.issues[0]?.message ?? "Invalid input",
+    };
+  }
+
+  const isPro = await getUserIsPro(session.user.id);
+
+  if (!isPro) {
+    return {
+      success: false,
+      error: "AI features require a Pro subscription",
+    };
+  }
+
+  const rateLimit = await checkAiRateLimit(session.user.id);
+
+  if (!rateLimit.success) {
+    return {
+      success: false,
+      error: "You've reached your AI limit. Try again later.",
+    };
+  }
+
+  const truncatedContent = truncateForAi(parsed.data.content, 16_000);
+  const { systemInstruction, userContent } = buildExplainPrompt({
+    title: parsed.data.title,
+    type: parsed.data.type,
+    content: truncatedContent,
+    language: parsed.data.language,
+  });
+
+  try {
+    const client = getGeminiClient();
+    const response = await client.models.generateContent({
+      model: AI_MODEL,
+      contents: userContent,
+      config: {
+        systemInstruction,
+        thinkingConfig: { thinkingLevel: ThinkingLevel.LOW },
+        maxOutputTokens: 2_048,
+      },
+    });
+
+    const rawText = response.text?.trim();
+
+    if (!rawText) {
+      throw new Error("Empty response from Gemini");
+    }
+
+    const modelParsed = modelExplainCodeResponseSchema.safeParse({
+      explanation: rawText,
+    });
+
+    if (!modelParsed.success) {
+      throw new Error("Invalid explanation from Gemini");
+    }
+
+    const normalized = normalizeExplanation(modelParsed.data.explanation);
+    const validated = explainCodeResponseSchema.safeParse({
+      explanation: normalized,
+    });
+
+    if (!validated.success) {
+      throw new Error("Invalid explanation from Gemini");
+    }
+
+    return {
+      success: true,
+      data: { explanation: validated.data.explanation },
+    };
+  } catch (error) {
+    console.error("explainCode failed:", error);
     return { success: false, error: "AI is temporarily unavailable" };
   }
 }

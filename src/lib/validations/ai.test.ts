@@ -2,9 +2,12 @@ import { describe, expect, it } from "vitest";
 
 import {
   autoTagsResponseSchema,
+  explainCodeResponseSchema,
+  explainCodeSchema,
   generateAutoTagsSchema,
   generateSummarySchema,
   modelAutoTagsResponseSchema,
+  modelExplainCodeResponseSchema,
   modelSummaryResponseSchema,
   summaryResponseSchema,
 } from "./ai";
@@ -128,6 +131,57 @@ describe("modelSummaryResponseSchema", () => {
   it("accepts longer summaries from model output", () => {
     const result = modelSummaryResponseSchema.safeParse({
       summary: "A".repeat(500),
+    });
+
+    expect(result.success).toBe(true);
+  });
+});
+
+describe("explainCodeSchema", () => {
+  it("accepts valid input", () => {
+    const result = explainCodeSchema.safeParse({
+      title: "Docker cleanup",
+      content: "docker system prune -af",
+      language: "bash",
+      type: "command",
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects unsupported item types", () => {
+    const result = explainCodeSchema.safeParse({
+      title: "Note",
+      content: "content",
+      type: "note",
+    });
+
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("explainCodeResponseSchema", () => {
+  it("accepts explanations up to 2500 characters", () => {
+    const result = explainCodeResponseSchema.safeParse({
+      explanation: "A".repeat(2_500),
+    });
+
+    expect(result.success).toBe(true);
+  });
+
+  it("rejects explanations longer than 2500 characters", () => {
+    const result = explainCodeResponseSchema.safeParse({
+      explanation: "A".repeat(2_501),
+    });
+
+    expect(result.success).toBe(false);
+  });
+});
+
+describe("modelExplainCodeResponseSchema", () => {
+  it("accepts longer explanations from model output", () => {
+    const result = modelExplainCodeResponseSchema.safeParse({
+      explanation: "A".repeat(4_000),
     });
 
     expect(result.success).toBe(true);

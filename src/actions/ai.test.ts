@@ -22,7 +22,7 @@ import { getGeminiClient } from "@/lib/ai/gemini";
 import { getUserIsPro } from "@/lib/db/user";
 import { checkAiRateLimit } from "@/lib/rate-limit";
 
-import { generateAutoTags, generateSummary } from "./ai";
+import { generateAutoTags, generateSummary, explainCode } from "./ai";
 
 const mockAuth = vi.mocked(auth);
 const mockGetUserIsPro = vi.mocked(getUserIsPro);
@@ -324,6 +324,118 @@ describe("generateSummary", () => {
     });
 
     const result = await generateSummary(summaryInput);
+
+    expect(result).toEqual({
+      success: false,
+      error: "AI is temporarily unavailable",
+    });
+  });
+});
+
+const explainInput = {
+  title: "React hooks",
+  content: "useEffect(() => { return () => cleanup(); }, []);",
+  language: "javascript",
+  type: "snippet" as const,
+};
+
+describe("explainCode", () => {
+  it("returns unauthorized when there is no session", async () => {
+    mockAuth.mockResolvedValue(null);
+
+    const result = await explainCode(explainInput);
+
+    expect(result).toEqual({ success: false, error: "Unauthorized" });
+    expect(mockGenerateContent).not.toHaveBeenCalled();
+  });
+
+  it("returns a validation error for invalid payload", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+
+    const result = await explainCode({ ...explainInput, title: "" });
+
+    expect(result).toEqual({ success: false, error: "Title is required" });
+    expect(mockGenerateContent).not.toHaveBeenCalled();
+  });
+
+  it("returns pro subscription error for free users", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGetUserIsPro.mockResolvedValue(false);
+
+    const result = await explainCode(explainInput);
+
+    expect(result).toEqual({
+      success: false,
+      error: "AI features require a Pro subscription",
+    });
+    expect(mockCheckAiRateLimit).not.toHaveBeenCalled();
+  });
+
+  it("returns rate limit error when limited", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockCheckAiRateLimit.mockResolvedValue({
+      success: false,
+      remaining: 0,
+      reset: Date.now() + 3600000,
+    });
+
+    const result = await explainCode(explainInput);
+
+    expect(result).toEqual({
+      success: false,
+      error: "You've reached your AI limit. Try again later.",
+    });
+  });
+
+  it("returns explanation for pro users with valid input", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGenerateContent.mockResolvedValue({
+      text: "This hook runs an effect and cleans up on unmount.",
+    });
+
+    const result = await explainCode(explainInput);
+
+    expect(result).toEqual({
+      success: true,
+      data: {
+        explanation: "This hook runs an effect and cleans up on unmount.",
+      },
+    });
+    expect(mockGenerateContent).toHaveBeenCalledOnce();
+  });
+
+  it("normalizes explanations longer than 2500 characters", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGenerateContent.mockResolvedValue({
+      text: "A".repeat(3_000),
+    });
+
+    const result = await explainCode(explainInput);
+
+    expect(result.success).toBe(true);
+    if (result.success) {
+      expect(result.data.explanation.length).toBeLessThanOrEqual(2_500);
+      expect(result.data.explanation.endsWith("…")).toBe(true);
+    }
+  });
+
+  it("returns service unavailable when Gemini throws", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGenerateContent.mockRejectedValue(new Error("API error"));
+
+    const result = await explainCode(explainInput);
+
+    expect(result).toEqual({
+      success: false,
+      error: "AI is temporarily unavailable",
+    });
+  });
+
+  it("returns service unavailable for empty model response", async () => {
+    mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
+    mockGenerateContent.mockResolvedValue({ text: "   " });
+
+    const result = await explainCode(explainInput);
 
     expect(result).toEqual({
       success: false,

@@ -70,3 +70,18 @@ export const SUMMARY_JSON_SCHEMA = {
   },
   required: ["summary"],
 } as const;
+
+export const explainCodeSchema = z.object({
+  title: z.string().trim().min(1, "Title is required").max(200),
+  content: z.string().trim().min(1, "Content is required").max(100_000),
+  language: z.string().trim().max(50).optional(),
+  type: z.enum(["snippet", "command"]),
+});
+
+export const explainCodeResponseSchema = z.object({
+  explanation: z.string().trim().min(1).max(2_500),
+});
+
+export const modelExplainCodeResponseSchema = z.object({
+  explanation: z.string().trim().min(1).max(4_000),
+});

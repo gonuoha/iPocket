@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { buildAutoTagPrompt, buildSummaryPrompt } from "./prompts";
+import { buildAutoTagPrompt, buildExplainPrompt, buildSummaryPrompt } from "./prompts";
 
 describe("buildAutoTagPrompt", () => {
   it("includes title, type, content, and existing tags in user content", () => {
@@ -44,5 +44,32 @@ describe("buildSummaryPrompt", () => {
     expect(result.userContent).toContain("Title: React hooks");
     expect(result.userContent).toContain("Type: snippet");
     expect(result.userContent).toContain("Content: useEffect cleanup");
+  });
+});
+
+describe("buildExplainPrompt", () => {
+  it("includes title, type, language, and content in user content", () => {
+    const result = buildExplainPrompt({
+      title: "React hooks",
+      type: "snippet",
+      content: "useEffect cleanup",
+      language: "javascript",
+    });
+
+    expect(result.systemInstruction).toContain("code explainer");
+    expect(result.userContent).toContain("Title: React hooks");
+    expect(result.userContent).toContain("Type: snippet");
+    expect(result.userContent).toContain("Language: javascript");
+    expect(result.userContent).toContain("Content:\nuseEffect cleanup");
+  });
+
+  it("uses unknown when language is missing", () => {
+    const result = buildExplainPrompt({
+      title: "Shell cleanup",
+      type: "command",
+      content: "rm -rf node_modules",
+    });
+
+    expect(result.userContent).toContain("Language: unknown");
   });
 });
