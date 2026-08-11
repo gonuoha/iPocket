@@ -1,8 +1,7 @@
 import { auth } from "@/auth";
-import type { ActionResult } from "@/types/actions";
 
 type SessionSuccess = { success: true; userId: string };
-type SessionFailure = ActionResult<never>;
+type SessionFailure = { success: false; error: string };
 
 export async function requireSession(): Promise<
   SessionSuccess | SessionFailure
