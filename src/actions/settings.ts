@@ -58,6 +58,8 @@ export async function updateUserPreferences(
 
     revalidatePath("/settings");
     revalidatePath("/dashboard");
+    revalidatePath("/items", "layout");
+    revalidatePath("/collections", "layout");
 
     return { success: true, data: updated };
   } catch {

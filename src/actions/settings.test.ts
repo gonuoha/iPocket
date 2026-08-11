@@ -36,6 +36,7 @@ const preferences: EditorPreferences = {
 
 const userPreferences: UserPreferences = {
   showOverview: false,
+  typeColorPosition: "left",
 };
 
 describe("updateEditorPreferences", () => {
@@ -117,6 +118,7 @@ describe("updateUserPreferences", () => {
 
     const result = await updateUserPreferences({
       showOverview: "no",
+      typeColorPosition: "left",
     });
 
     expect(result.success).toBe(false);
@@ -140,6 +142,8 @@ describe("updateUserPreferences", () => {
     );
     expect(mockRevalidatePath).toHaveBeenCalledWith("/settings");
     expect(mockRevalidatePath).toHaveBeenCalledWith("/dashboard");
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/items", "layout");
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/collections", "layout");
   });
 
   it("returns an error when the database update fails", async () => {

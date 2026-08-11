@@ -15,6 +15,7 @@ describe("parseUserPreferences", () => {
   it("returns a valid preferences object unchanged", () => {
     const preferences = {
       showOverview: false,
+      typeColorPosition: "top",
     } as const;
 
     expect(parseUserPreferences(preferences)).toEqual(preferences);
@@ -24,6 +25,7 @@ describe("parseUserPreferences", () => {
     expect(
       parseUserPreferences({
         showOverview: "yes",
+        typeColorPosition: "center",
       }),
     ).toEqual(DEFAULT_USER_PREFERENCES);
   });

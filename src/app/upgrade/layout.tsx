@@ -9,7 +9,7 @@ export default async function UpgradeLayout({
 }: {
   children: React.ReactNode;
 }) {
-  const { sidebarData, user, collections, searchData, editorPreferences, usage } =
+  const { sidebarData, user, collections, searchData, editorPreferences, userPreferences, usage } =
     await getDashboardLayoutData();
 
   return (
@@ -19,6 +19,7 @@ export default async function UpgradeLayout({
       collections={collections}
       searchData={searchData}
       editorPreferences={editorPreferences}
+      userPreferences={userPreferences}
       itemCount={usage.itemCount}
       collectionCount={usage.collectionCount}
     >

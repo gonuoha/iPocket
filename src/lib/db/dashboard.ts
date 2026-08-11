@@ -27,6 +27,7 @@ import { getSidebarData, type SidebarData } from "@/lib/db/sidebar";
 import { getUserPreferences, getEditorPreferences } from "@/lib/db/settings";
 import { getCurrentUser, type DashboardUser } from "@/lib/db/user";
 import type { EditorPreferences } from "@/lib/editor-preferences";
+import type { UserPreferences } from "@/lib/user-preferences";
 
 export type DashboardPageData = {
   collections: DashboardCollection[];
@@ -47,6 +48,7 @@ export type DashboardLayoutData = {
   collections: SelectableCollection[];
   searchData: DashboardSearchData;
   editorPreferences: EditorPreferences;
+  userPreferences: UserPreferences;
   usage: {
     itemCount: number;
     collectionCount: number;
@@ -78,13 +80,14 @@ export const getDashboardPageData = cache(
 export const getDashboardLayoutData = cache(
   async (): Promise<DashboardLayoutData> => {
     const user = await getCurrentUser();
-    const [sidebarData, collections, items, searchableCollections, editorPreferences, stats] =
+    const [sidebarData, collections, items, searchableCollections, editorPreferences, userPreferences, stats] =
       await Promise.all([
         getSidebarData(user),
         getSelectableCollections(user.id),
         getSearchableItems(user.id),
         getSearchableCollections(user.id),
         getEditorPreferences(user.id),
+        getUserPreferences(user.id),
         getUserItemStats(user.id),
       ]);
 
@@ -97,6 +100,7 @@ export const getDashboardLayoutData = cache(
         collections: searchableCollections,
       },
       editorPreferences,
+      userPreferences,
       usage: {
         itemCount: stats.itemCount,
         collectionCount: stats.collectionCount,

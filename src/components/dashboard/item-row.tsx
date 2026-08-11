@@ -5,9 +5,11 @@ import { Pin } from "lucide-react";
 
 import type { DashboardItem } from "@/lib/db/items";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
+import { getTypeColorBorderProps } from "@/lib/type-color-border";
 import { cn } from "@/lib/utils";
 
 import { ItemFavoriteButton } from "@/components/items/item-favorite-button";
+import { useTypeColorPosition } from "@/components/user-preferences/user-preferences-context";
 import { useItemDrawer } from "@/components/items/item-drawer-context";
 
 function formatDate(date: Date | string) {
@@ -23,19 +25,23 @@ type ItemRowProps = {
 
 export function ItemRow({ item }: ItemRowProps) {
   const { openItem } = useItemDrawer();
+  const typeColorPosition = useTypeColorPosition();
   const typeStyles = getItemTypeStyles(item.type.color);
+  const typeColorBorder = getTypeColorBorderProps(
+    item.type.color,
+    typeColorPosition,
+  );
 
   return (
     <div className="relative">
       <button
         type="button"
         onClick={() => openItem(item.id)}
-        className="flex w-full items-start gap-3 rounded-xl border border-border border-l-4 bg-card p-4 pr-12 text-left transition-colors hover:bg-muted/40"
-        style={
-          item.type.color?.startsWith("#")
-            ? { borderLeftColor: item.type.color }
-            : undefined
-        }
+        className={cn(
+          "flex w-full items-start gap-3 rounded-xl border border-border bg-card p-4 pr-12 text-left transition-colors hover:bg-muted/40",
+          typeColorBorder.className,
+        )}
+        style={typeColorBorder.style}
       >
         <div
           className={cn(

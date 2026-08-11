@@ -4,11 +4,13 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ItemDrawer } from "@/components/items/item-drawer";
 import { ItemDrawerProvider } from "@/components/items/item-drawer-context";
 import { EditorPreferencesProvider } from "@/components/code-editor/editor-preferences-context";
+import { UserPreferencesProvider } from "@/components/user-preferences/user-preferences-context";
 import { CommandPalette } from "@/components/search/command-palette";
 import { CommandPaletteProvider } from "@/components/search/command-palette-context";
 import type { DashboardSearchData } from "@/lib/db/dashboard";
 import type { SelectableCollection } from "@/lib/db/collections";
 import type { EditorPreferences } from "@/lib/editor-preferences";
+import type { UserPreferences } from "@/lib/user-preferences";
 import { cn } from "@/lib/utils";
 
 import { TopBar } from "./top-bar";
@@ -81,6 +83,7 @@ export function DashboardShell({
   collections,
   searchData,
   editorPreferences,
+  userPreferences,
   itemCount,
   collectionCount,
 }: {
@@ -90,25 +93,28 @@ export function DashboardShell({
   collections: SelectableCollection[];
   searchData: DashboardSearchData;
   editorPreferences: EditorPreferences;
+  userPreferences: UserPreferences;
   itemCount: number;
   collectionCount: number;
 }) {
   return (
     <SidebarProvider>
       <ItemDrawerProvider>
-        <EditorPreferencesProvider initialPreferences={editorPreferences}>
-          <CommandPaletteProvider searchData={searchData}>
-            <DashboardShellInner
-              sidebar={sidebar}
-              isPro={isPro}
-              collections={collections}
-              itemCount={itemCount}
-              collectionCount={collectionCount}
-            >
-              {children}
-            </DashboardShellInner>
-          </CommandPaletteProvider>
-        </EditorPreferencesProvider>
+        <UserPreferencesProvider initialPreferences={userPreferences}>
+          <EditorPreferencesProvider initialPreferences={editorPreferences}>
+            <CommandPaletteProvider searchData={searchData}>
+              <DashboardShellInner
+                sidebar={sidebar}
+                isPro={isPro}
+                collections={collections}
+                itemCount={itemCount}
+                collectionCount={collectionCount}
+              >
+                {children}
+              </DashboardShellInner>
+            </CommandPaletteProvider>
+          </EditorPreferencesProvider>
+        </UserPreferencesProvider>
       </ItemDrawerProvider>
     </SidebarProvider>
   );

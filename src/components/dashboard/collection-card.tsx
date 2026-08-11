@@ -1,8 +1,13 @@
+"use client";
+
 import Link from "next/link";
 
 import type { DashboardCollection } from "@/lib/db/collections";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
+import { getTypeColorBorderProps } from "@/lib/type-color-border";
 import { cn } from "@/lib/utils";
+
+import { useTypeColorPosition } from "@/components/user-preferences/user-preferences-context";
 
 import { CollectionCardMenu } from "./collection-card-menu";
 
@@ -11,14 +16,19 @@ type CollectionCardProps = {
 };
 
 export function CollectionCard({ collection }: CollectionCardProps) {
+  const typeColorPosition = useTypeColorPosition();
+  const typeColorBorder = getTypeColorBorderProps(
+    collection.dominantTypeColor,
+    typeColorPosition,
+  );
+
   return (
     <div
-      className="relative rounded-xl border border-border border-l-4 bg-card transition-colors hover:bg-muted/40"
-      style={
-        collection.dominantTypeColor
-          ? { borderLeftColor: collection.dominantTypeColor }
-          : undefined
-      }
+      className={cn(
+        "relative rounded-xl border border-border bg-card transition-colors hover:bg-muted/40",
+        typeColorBorder.className,
+      )}
+      style={typeColorBorder.style}
     >
       <div className="absolute top-2 right-2 z-10">
         <CollectionCardMenu

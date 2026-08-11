@@ -5,7 +5,10 @@ import { Pin } from "lucide-react";
 
 import type { DashboardItem } from "@/lib/db/items";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
+import { getTypeColorBorderProps } from "@/lib/type-color-border";
 import { cn } from "@/lib/utils";
+
+import { useTypeColorPosition } from "@/components/user-preferences/user-preferences-context";
 
 import { ItemCopyButton } from "./item-copy-button";
 import { ItemFavoriteButton } from "./item-favorite-button";
@@ -24,19 +27,23 @@ type ItemCardProps = {
 
 export function ItemCard({ item }: ItemCardProps) {
   const { openItem } = useItemDrawer();
+  const typeColorPosition = useTypeColorPosition();
   const typeStyles = getItemTypeStyles(item.type.color);
+  const typeColorBorder = getTypeColorBorderProps(
+    item.type.color,
+    typeColorPosition,
+  );
 
   return (
     <div className="relative h-full">
       <button
         type="button"
         onClick={() => openItem(item.id)}
-        className="flex h-full w-full flex-col rounded-xl border border-border border-l-4 bg-card p-4 pr-14 text-left transition-colors hover:bg-muted/40"
-        style={
-          item.type.color?.startsWith("#")
-            ? { borderLeftColor: item.type.color }
-            : undefined
-        }
+        className={cn(
+          "flex h-full w-full flex-col rounded-xl border border-border bg-card p-4 pr-14 text-left transition-colors hover:bg-muted/40",
+          typeColorBorder.className,
+        )}
+        style={typeColorBorder.style}
       >
         <div className="flex items-start gap-3">
           <div

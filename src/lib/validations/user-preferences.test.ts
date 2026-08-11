@@ -6,6 +6,7 @@ describe("userPreferencesSchema", () => {
   it("accepts valid preferences", () => {
     const result = userPreferencesSchema.safeParse({
       showOverview: true,
+      typeColorPosition: "right",
     });
 
     expect(result.success).toBe(true);
@@ -14,6 +15,16 @@ describe("userPreferencesSchema", () => {
   it("rejects invalid showOverview values", () => {
     const result = userPreferencesSchema.safeParse({
       showOverview: "yes",
+      typeColorPosition: "left",
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects invalid typeColorPosition values", () => {
+    const result = userPreferencesSchema.safeParse({
+      showOverview: true,
+      typeColorPosition: "center",
     });
 
     expect(result.success).toBe(false);

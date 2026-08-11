@@ -5,8 +5,20 @@ import { toast } from "sonner";
 
 import { updateUserPreferences } from "@/actions/settings";
 import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
-import type { UserPreferences } from "@/lib/user-preferences";
+import {
+  TYPE_COLOR_POSITION_LABELS,
+  TYPE_COLOR_POSITIONS,
+  type TypeColorPosition,
+  type UserPreferences,
+} from "@/lib/user-preferences";
 
 type UserPreferencesCardProps = {
   initialPreferences: UserPreferences;
@@ -49,7 +61,7 @@ export function UserPreferencesCard({
         {isSaving ? " Saving..." : ""}
       </p>
 
-      <div className="mt-6">
+      <div className="mt-6 space-y-6">
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-1">
             <Label className="text-sm font-medium">Overview section</Label>
@@ -61,6 +73,32 @@ export function UserPreferencesCard({
             checked={preferences.showOverview}
             onCheckedChange={(checked) => updateField("showOverview", checked)}
           />
+        </div>
+
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="space-y-1">
+            <Label className="text-sm font-medium">Type color position</Label>
+            <p className="text-sm text-muted-foreground">
+              Choose where the item type color appears on cards.
+            </p>
+          </div>
+          <Select
+            value={preferences.typeColorPosition}
+            onValueChange={(value) =>
+              updateField("typeColorPosition", value as TypeColorPosition)
+            }
+          >
+            <SelectTrigger className="w-full sm:w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {TYPE_COLOR_POSITIONS.map((position) => (
+                <SelectItem key={position} value={position}>
+                  {TYPE_COLOR_POSITION_LABELS[position]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </div>
