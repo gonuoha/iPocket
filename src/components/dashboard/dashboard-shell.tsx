@@ -60,7 +60,10 @@ function DashboardShellInner({
           </SheetContent>
         </Sheet>
 
-        <main className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 md:px-10 md:py-6 lg:px-24">
+        <main
+          id="main-content"
+          className="min-h-0 min-w-0 flex-1 overflow-y-auto p-4 md:px-10 md:py-6 lg:px-24"
+        >
           {children}
         </main>
       </div>

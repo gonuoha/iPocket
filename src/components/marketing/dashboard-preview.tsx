@@ -2,6 +2,7 @@ import {
   DASHBOARD_MOCK_CARDS,
   SYSTEM_ITEM_TYPE_COLORS,
 } from "@/lib/marketing/homepage-content";
+import { cn } from "@/lib/utils";
 
 const MOCK_NAV_ITEMS = [
   { label: "Dashboard", active: true },
@@ -11,9 +12,14 @@ const MOCK_NAV_ITEMS = [
   { label: "Collections", active: false },
 ] as const;
 
-export function DashboardPreview() {
+export function DashboardPreview({ className }: { className?: string }) {
   return (
-    <div className="min-h-[280px] rounded-2xl border border-border bg-secondary/50 p-4">
+    <div
+      className={cn(
+        "min-h-[280px] min-w-0 overflow-hidden rounded-2xl border border-border bg-secondary/50 p-4",
+        className,
+      )}
+    >
       <p className="mb-3 text-xs font-medium tracking-wider text-muted-foreground uppercase">
         ...with iPocket
       </p>
@@ -37,7 +43,7 @@ export function DashboardPreview() {
             ))}
           </nav>
         </aside>
-        <div className="flex-1 overflow-hidden p-2">
+        <div className="min-w-0 flex-1 overflow-hidden p-2">
           <div className="grid grid-cols-2 gap-1.5">
             {DASHBOARD_MOCK_CARDS.map((card) => (
               <div

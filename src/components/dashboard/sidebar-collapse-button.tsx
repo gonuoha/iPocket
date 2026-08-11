@@ -12,10 +12,10 @@ export function SidebarCollapseButton() {
   return (
     <Button
       variant="ghost"
-      size="icon-sm"
+      size="icon"
       onClick={toggleSidebar}
       aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-      className="hidden shrink-0 md:inline-flex"
+      className="hidden size-11 shrink-0 md:inline-flex md:size-8"
     >
       {collapsed ? (
         <ChevronsLeft className="rotate-180" />

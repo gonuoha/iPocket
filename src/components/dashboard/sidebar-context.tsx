@@ -15,15 +15,30 @@ type SidebarContextValue = {
 const SidebarContext = createContext<SidebarContextValue | null>(null);
 
 const COLLAPSED_MEDIA_QUERY = "(max-width: 1023px)";
+const SIDEBAR_COLLAPSED_STORAGE_KEY = "ipocket-sidebar-collapsed";
+const SIDEBAR_COLLAPSED_CHANGE_EVENT = "ipocket-sidebar-collapsed-change";
+
+function readStoredCollapsedPreference(): boolean | null {
+  const stored = localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY);
+  if (stored === "true") return true;
+  if (stored === "false") return false;
+  return null;
+}
 
 function subscribeToSidebarCollapsed(callback: () => void) {
   const mediaQuery = window.matchMedia(COLLAPSED_MEDIA_QUERY);
   mediaQuery.addEventListener("change", callback);
-  return () => mediaQuery.removeEventListener("change", callback);
+  window.addEventListener("storage", callback);
+  window.addEventListener(SIDEBAR_COLLAPSED_CHANGE_EVENT, callback);
+  return () => {
+    mediaQuery.removeEventListener("change", callback);
+    window.removeEventListener("storage", callback);
+    window.removeEventListener(SIDEBAR_COLLAPSED_CHANGE_EVENT, callback);
+  };
 }
 
 function getSidebarCollapsedSnapshot() {
-  return window.matchMedia(COLLAPSED_MEDIA_QUERY).matches;
+  return readStoredCollapsedPreference() ?? window.matchMedia(COLLAPSED_MEDIA_QUERY).matches;
 }
 
 function getSidebarCollapsedServerSnapshot() {
@@ -31,15 +46,13 @@ function getSidebarCollapsedServerSnapshot() {
 }
 
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
-  const viewportCollapsed = useSyncExternalStore(
+  const collapsed = useSyncExternalStore(
     subscribeToSidebarCollapsed,
     getSidebarCollapsedSnapshot,
     getSidebarCollapsedServerSnapshot,
   );
-  const [collapsedOverride, setCollapsedOverride] = useState<boolean | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const isMobile = useIsMobile();
-  const collapsed = collapsedOverride ?? viewportCollapsed;
 
   const toggleSidebar = () => {
     if (isMobile) {
@@ -47,7 +60,9 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
       return;
     }
 
-    setCollapsedOverride(!(collapsedOverride ?? viewportCollapsed));
+    const nextCollapsed = !collapsed;
+    localStorage.setItem(SIDEBAR_COLLAPSED_STORAGE_KEY, String(nextCollapsed));
+    window.dispatchEvent(new Event(SIDEBAR_COLLAPSED_CHANGE_EVENT));
   };
 
   return (

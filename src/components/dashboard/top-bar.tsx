@@ -3,13 +3,19 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FolderOpen, PanelLeft, Search, Star } from "lucide-react";
+import { FolderOpen, PanelLeft, Plus, Search, Star } from "lucide-react";
 
 import { CollectionCreateDialog } from "@/components/collections/collection-create-dialog";
 import { ItemCreateDialog } from "@/components/items/item-create-dialog";
 import { useCommandPalette } from "@/components/search/command-palette-context";
 import { UpgradePrompt } from "@/components/shared/upgrade-prompt";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Input } from "@/components/ui/input";
 import { useSearchShortcutLabel } from "@/hooks/use-search-shortcut-label";
 import type { SelectableCollection } from "@/lib/db/collections";
@@ -71,7 +77,7 @@ export function TopBar({
           size="icon"
           onClick={toggleSidebar}
           aria-label="Toggle sidebar"
-          className="shrink-0 md:hidden"
+          className="size-11 shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background md:hidden"
         >
           <PanelLeft />
         </Button>
@@ -110,7 +116,7 @@ export function TopBar({
         </kbd>
       </div>
 
-      <div className="flex shrink-0 items-center gap-2 justify-self-end">
+      <div className="flex shrink-0 items-center gap-3 justify-self-end">
         {!isPro ? (
           <Button
             variant="ghost"
@@ -125,7 +131,7 @@ export function TopBar({
         <Button
           variant="ghost"
           size="icon"
-          className="shrink-0"
+          className="size-11 shrink-0 md:size-8"
           nativeButton={false}
           render={<Link href="/favorites" aria-label="Favorites" />}
         >
@@ -135,15 +141,33 @@ export function TopBar({
             )}
           />
         </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className={cn(buttonVariants(), "min-h-11 sm:hidden")}
+            aria-label="Create"
+          >
+            <Plus />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem onClick={handleNewItemClick}>
+              New Item
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={handleNewCollectionClick}>
+              New Collection
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
         <Button
           variant="outline"
-          size="sm"
-          className="hidden sm:inline-flex"
+          className="hidden min-h-11 sm:inline-flex"
           onClick={handleNewCollectionClick}
         >
           New Collection
         </Button>
-        <Button size="sm" onClick={handleNewItemClick}>
+        <Button
+          className="hidden min-h-11 sm:inline-flex"
+          onClick={handleNewItemClick}
+        >
           New Item
         </Button>
       </div>

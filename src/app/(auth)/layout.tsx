@@ -9,7 +9,9 @@ export default function AuthLayout({
   return (
     <>
       <HomepageNavbar actions={<HomepageNavbarActions />} />
-      <main className="pt-16">{children}</main>
+      <main id="main-content" className="pt-16">
+        {children}
+      </main>
     </>
   );
 }

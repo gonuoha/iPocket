@@ -42,7 +42,22 @@ Covered in `homepage-ui-fixes-spec.md` — listed here for accessibility traceab
 - Fixed navbar must not obscure section headings when navigating via keyboard-activated anchor links.
 - Apply `scroll-padding-top` on `html` or `scroll-mt-*` on section targets.
 
-### 3. Maintain passing checks
+### 3. Stronger focus-visible rings (Minor)
+
+**Problem:** UI review (Aug 2026) found focus states present but weak — thin 1px outline, hard to see on dark sidebar and form backgrounds.
+
+**Fix:**
+
+- Apply consistent `focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background` on:
+  - `SidebarNavLink` / `SidebarLink`
+  - Dashboard top-bar icon buttons and search trigger
+  - Auth form inputs (verify `Input` component default)
+- Use `outline-none` only when replacing with a visible ring — never remove focus indicator entirely.
+- Respect `motion-reduce`: ring is sufficient; avoid animated focus transitions.
+
+**Files:** `sidebar-link.tsx`, `top-bar.tsx`, `src/components/ui/input.tsx`, `src/components/ui/button.tsx`
+
+### 4. Maintain passing checks
 
 Do not regress these review passes:
 
@@ -58,7 +73,8 @@ Do not regress these review passes:
 - [ ] Activating skip link moves focus to `<main>` content
 - [ ] Skip link is visible when focused, hidden otherwise
 - [ ] Homepage anchor navigation leaves target headings readable below navbar
-- [ ] Existing focus ring styles unchanged
+- [ ] Sidebar links and top-bar controls show a clearly visible 2px focus ring on keyboard Tab
+- [ ] Existing contrast and alt-text checks unchanged
 
 ---
 

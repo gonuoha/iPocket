@@ -5,8 +5,8 @@ import { DashboardPreview } from "@/components/marketing/dashboard-preview";
 
 export function HomepageHeroVisual() {
   return (
-    <div className="mx-auto grid max-w-4xl items-center gap-4 max-[900px]:gap-6 min-[901px]:grid-cols-[1fr_auto_1fr]">
-      <div className="min-h-[280px] rounded-2xl border border-border bg-secondary/50 p-4 max-sm:min-h-[240px]">
+    <div className="mx-auto grid w-full min-w-0 max-w-4xl items-center gap-4 max-[900px]:gap-6 min-[901px]:grid-cols-[1fr_auto_1fr]">
+      <div className="min-h-[280px] min-w-0 overflow-hidden rounded-2xl border border-border bg-secondary/50 p-4 max-sm:min-h-[240px]">
         <p className="mb-3 text-xs font-medium tracking-wider text-muted-foreground uppercase">
           Your knowledge today...
         </p>
@@ -20,7 +20,7 @@ export function HomepageHeroVisual() {
         <ArrowRight className="size-12" strokeWidth={2.5} />
       </div>
 
-      <DashboardPreview />
+      <DashboardPreview className="min-w-0" />
     </div>
   );
 }

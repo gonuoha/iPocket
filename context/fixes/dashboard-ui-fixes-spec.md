@@ -80,6 +80,21 @@ Fix dashboard layout and interaction issues found in the UI review: cramped tabl
 
 **Files:** `src/app/dashboard/page.tsx`, `src/components/dashboard/sidebar-content.tsx`
 
+### 6. Mobile top bar density (Minor)
+
+**Problem:** UI review (Aug 2026) — on 375px, favorites star and "New Item" compete for space. "New Item" measures ~79×28px and is easy to miss.
+
+**Fix (pick one or combine):**
+
+- Bump "New Item" to `min-h-11` per touch-targets spec
+- Below `sm`: shorten label to icon + "New" or icon-only `Plus` with `aria-label="New item"`
+- Ensure favorites star uses 44px hit area (`size="icon"` with `min-h-11 min-w-11`)
+- Add horizontal gap between star and create button so they don't feel like one control
+
+**File:** `src/components/dashboard/top-bar.tsx`
+
+**Related:** `context/fixes/sidebar-active-nav-spec.md` for sidebar nav context on item pages.
+
 ---
 
 ## Acceptance criteria
@@ -90,10 +105,12 @@ Fix dashboard layout and interaction issues found in the UI review: cramped tabl
 - [ ] Mobile users can create both items and collections without hunting
 - [ ] Sidebar nav rows and collapse button meet touch-target minimum
 - [ ] No horizontal overflow at 375px, 768px, 1280px (already passing — must not regress)
+- [ ] Mobile top bar: "New Item" and favorites control meet 44px touch target and do not overlap
 
 ---
 
 ## References
 
 - `context/fixes/touch-targets-spec.md`
-- Screenshots: `dashboard-tablet-v2.png`, `dashboard-mobile-v2.png`, `dashboard-desktop-v2.png`
+- `context/fixes/sidebar-active-nav-spec.md`
+- Screenshots: `dashboard-tablet-v2.png`, `dashboard-mobile-v2.png`, `dashboard-desktop-v2.png`, `.ui-review/output/screenshots/items-snippet-mobile.png`

@@ -10,9 +10,9 @@ import {
 
 export function HomepageAiSection() {
   return (
-    <section id="ai" className="px-6 py-20">
-      <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-2">
-        <FadeInOnScroll>
+    <section id="ai" className="overflow-x-clip px-6 py-20">
+      <div className="mx-auto grid min-w-0 max-w-6xl items-center gap-12 lg:grid-cols-2">
+        <FadeInOnScroll className="min-w-0">
           <Badge
             className="mb-4 border-0 text-white"
             style={{
@@ -41,8 +41,8 @@ export function HomepageAiSection() {
           </ul>
         </FadeInOnScroll>
 
-        <FadeInOnScroll>
-          <div className="overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
+        <FadeInOnScroll className="min-w-0">
+          <div className="max-w-full overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
             <div className="flex items-center gap-1.5 border-b border-border bg-secondary/50 px-4 py-3">
               <span className="size-2 rounded-full bg-red-500" />
               <span className="size-2 rounded-full bg-yellow-500" />

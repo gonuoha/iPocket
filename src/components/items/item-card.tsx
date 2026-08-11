@@ -31,7 +31,7 @@ export function ItemCard({ item }: ItemCardProps) {
       <button
         type="button"
         onClick={() => openItem(item.id)}
-        className="flex h-full w-full flex-col rounded-xl border border-border border-l-4 bg-card p-4 pr-12 text-left transition-colors hover:bg-muted/40"
+        className="flex h-full w-full flex-col rounded-xl border border-border border-l-4 bg-card p-4 pr-14 text-left transition-colors hover:bg-muted/40"
         style={
           item.type.color?.startsWith("#")
             ? { borderLeftColor: item.type.color }
@@ -52,26 +52,37 @@ export function ItemCard({ item }: ItemCardProps) {
           </div>
           <div className="min-w-0 flex-1">
             <div className="flex items-start justify-between gap-2">
-              <div className="min-w-0">
-                <div className="flex items-center gap-2">
-                  <h3 className="truncate font-medium">{item.title}</h3>
-                  {item.isPinned ? (
-                    <Pin className="size-3.5 shrink-0 text-muted-foreground" />
-                  ) : null}
-                </div>
-              </div>
+              <h3 className="line-clamp-2 break-words font-medium">{item.title}</h3>
               <time
                 dateTime={item.updatedAt.toISOString()}
-                className="shrink-0 text-xs text-muted-foreground"
+                className="hidden shrink-0 text-xs text-muted-foreground sm:block"
               >
                 {formatDate(item.updatedAt)}
               </time>
             </div>
             {item.description ? (
-              <p className="mt-2 line-clamp-3 text-sm text-muted-foreground">
+              <p className="mt-2 line-clamp-2 text-sm text-muted-foreground sm:line-clamp-3">
                 {item.description}
               </p>
             ) : null}
+            <div
+              className={cn(
+                "mt-2 flex items-center gap-1.5 text-xs text-muted-foreground",
+                !item.isPinned && "sm:hidden",
+              )}
+            >
+              {item.isPinned ? (
+                <>
+                  <Pin className="size-3 shrink-0" aria-label="Pinned" />
+                  <span className="sm:hidden" aria-hidden="true">
+                    ·
+                  </span>
+                </>
+              ) : null}
+              <time dateTime={item.updatedAt.toISOString()} className="sm:hidden">
+                {formatDate(item.updatedAt)}
+              </time>
+            </div>
           </div>
         </div>
         {item.tags.length > 0 ? (
@@ -87,13 +98,14 @@ export function ItemCard({ item }: ItemCardProps) {
           </div>
         ) : null}
       </button>
-      <ItemFavoriteButton
-        key={`${item.id}-${item.isFavorite}`}
-        itemId={item.id}
-        isFavorite={item.isFavorite}
-        className="absolute top-3 right-3"
-      />
-      <ItemCopyButton itemId={item.id} className="absolute right-3 bottom-3" />
+      <div className="absolute top-3 right-3 flex flex-col gap-1 sm:bottom-3 sm:justify-between">
+        <ItemFavoriteButton
+          key={`${item.id}-${item.isFavorite}`}
+          itemId={item.id}
+          isFavorite={item.isFavorite}
+        />
+        <ItemCopyButton itemId={item.id} />
+      </div>
     </div>
   );
 }

@@ -17,7 +17,7 @@ export default async function HomePage() {
   return (
     <>
       <HomepageNavbar actions={<HomepageNavbarActions />} />
-      <main>
+      <main id="main-content">
         <HomepageHero />
         <HomepageFeatures />
         <HomepageSocialProof />

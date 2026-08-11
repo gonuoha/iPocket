@@ -35,7 +35,7 @@ export default async function DashboardPage() {
             <h2 className="text-lg font-semibold">Collections</h2>
             <Link
               href="/collections"
-              className="text-sm text-muted-foreground transition-colors hover:text-foreground"
+              className="inline-flex min-h-11 items-center px-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
               View all
             </Link>

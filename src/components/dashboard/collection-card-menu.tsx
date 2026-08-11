@@ -55,7 +55,7 @@ export function CollectionCardMenu({ collection }: CollectionCardMenuProps) {
       <DropdownMenu>
         <DropdownMenuTrigger
           className={cn(
-            "inline-flex size-8 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors",
+            "inline-flex size-11 items-center justify-center rounded-md text-muted-foreground outline-none transition-colors md:size-8",
             "hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring",
           )}
           onClick={(event) => event.stopPropagation()}

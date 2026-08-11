@@ -1,4 +1,4 @@
-import { Star } from "lucide-react";
+import { LayoutDashboard, Star } from "lucide-react";
 
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -7,7 +7,7 @@ import { getItemTypeIcon, getItemTypeLabel, getItemTypeStyles } from "@/lib/item
 import { cn } from "@/lib/utils";
 
 import { SidebarCollapseButton } from "./sidebar-collapse-button";
-import { SidebarLink, SidebarNavLink } from "./sidebar-link";
+import { SidebarNavLink } from "./sidebar-link";
 import { SidebarSection } from "./sidebar-section";
 import { SidebarUserMenu } from "./sidebar-user-menu";
 
@@ -30,6 +30,11 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
     sidebarData;
 
   const navItems = [
+    {
+      href: "/dashboard",
+      label: "Dashboard",
+      icon: LayoutDashboard,
+    },
     {
       href: "/favorites",
       label: "Favorites",
@@ -61,7 +66,7 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
                 >
                   <Icon className="size-4 shrink-0" />
                   <span className="sidebar-text group-data-[collapsed]:hidden flex-1 truncate">{item.label}</span>
-                  {item.count !== null ? (
+                  {"count" in item && item.count != null ? (
                     <span className="sidebar-text group-data-[collapsed]:hidden text-xs text-muted-foreground">
                       {item.count}
                     </span>
@@ -83,10 +88,16 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
                     : `/items/${getTypeSlug(type.name)}`;
 
                 return (
-                  <SidebarLink
+                  <SidebarNavLink
                     key={type.id}
                     href={href}
-                    className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                    match={isProType && !user.isPro ? "exact" : "prefix"}
+                    title={getItemTypeLabel(type.name, { plural: true })}
+                    activeIndicatorStyle={
+                      type.color?.startsWith("#")
+                        ? { borderLeftColor: type.color }
+                        : undefined
+                    }
                   >
                     <Icon
                       className={cn("size-3.5 shrink-0", styles.textClassName)}
@@ -108,7 +119,7 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
                     <span className="text-xs text-muted-foreground">
                       {type.itemCount}
                     </span>
-                  </SidebarLink>
+                  </SidebarNavLink>
                 );
               })}
             </nav>
@@ -123,17 +134,17 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
                   </p>
                   <nav className="space-y-0.5">
                     {favoriteCollections.map((collection) => (
-                      <SidebarLink
+                      <SidebarNavLink
                         key={collection.id}
                         href={`/collections/${collection.id}`}
-                        className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        title={collection.name}
                       >
                         <Star className="size-4 shrink-0 fill-yellow-400 text-yellow-400" />
                         <span className="flex-1 truncate">{collection.name}</span>
                         <span className="text-xs text-muted-foreground">
                           {collection.itemCount}
                         </span>
-                      </SidebarLink>
+                      </SidebarNavLink>
                     ))}
                   </nav>
                 </div>
@@ -146,10 +157,10 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
                   </p>
                   <nav className="space-y-0.5">
                     {recentCollections.map((collection) => (
-                      <SidebarLink
+                      <SidebarNavLink
                         key={collection.id}
                         href={`/collections/${collection.id}`}
-                        className="flex items-center gap-2 rounded-lg px-2 py-1.5 text-sm transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                        title={collection.name}
                       >
                         <span
                           className="size-2.5 shrink-0 rounded-full bg-muted-foreground"
@@ -163,18 +174,18 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
                         <span className="text-xs text-muted-foreground">
                           {collection.itemCount}
                         </span>
-                      </SidebarLink>
+                      </SidebarNavLink>
                     ))}
                   </nav>
                 </div>
               ) : null}
 
-              <SidebarLink
+              <SidebarNavLink
                 href="/collections"
-                className="block px-2 py-1.5 text-xs text-muted-foreground transition-colors hover:text-sidebar-accent-foreground"
+                className="px-2 text-xs text-muted-foreground"
               >
                 View all collections
-              </SidebarLink>
+              </SidebarNavLink>
             </div>
           </SidebarSection>
         </div>

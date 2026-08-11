@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { SkipToContent } from "@/components/layout/skip-to-content";
 import { Toaster } from "@/components/ui/sonner";
 import "./globals.css";
 
@@ -28,7 +29,8 @@ export default function RootLayout({
       lang="en"
       className={`dark ${geistSans.variable} ${geistMono.variable} h-svh antialiased`}
     >
-      <body className="flex min-h-svh flex-col">
+      <body className="relative flex min-h-svh flex-col">
+        <SkipToContent />
         {children}
         <Toaster />
       </body>
