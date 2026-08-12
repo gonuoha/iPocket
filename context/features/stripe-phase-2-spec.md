@@ -19,7 +19,7 @@ Depends on Phase 1 (`@context/features/stripe-phase-1-spec.md`).
 - Phase 1 complete (Stripe client, checkout/portal routes, JWT `isPro` sync, usage-limits module)
 - [Stripe CLI](https://stripe.com/docs/stripe-cli) installed
 - Stripe Dashboard configured:
-  - **iPocket Pro** product with $8/mo and $72/yr prices
+  - **Memex Pro** product with $8/mo and $72/yr prices
   - Customer Portal enabled (cancel, switch plans, update payment method)
   - Webhook endpoint for production (local dev uses CLI forwarding)
 

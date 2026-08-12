@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "iPocket",
-  description: "iPocket application",
+  title: "Memex",
+  description: "Memex application",
 };
 
 export default function RootLayout({

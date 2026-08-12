@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 import { PrismaClient } from "../src/generated/prisma/client";
 
 const DEMO_USER_ID = "user-demo";
-const DEMO_EMAIL = "demo@ipocket.io";
+const DEMO_EMAIL = "demo@memex.io";
 
 const systemItemTypes = [
   { id: "type-snippet", name: "snippet", icon: "Code", color: "#3b82f6" },
@@ -184,9 +184,9 @@ Constraints:
   db:
     image: postgres:16
     environment:
-      POSTGRES_USER: ipocket
-      POSTGRES_PASSWORD: ipocket
-      POSTGRES_DB: ipocket
+      POSTGRES_USER: memex
+      POSTGRES_PASSWORD: memex
+      POSTGRES_DB: memex
     ports:
       - "5432:5432"
     volumes:
@@ -197,7 +197,7 @@ Constraints:
     ports:
       - "3000:3000"
     environment:
-      DATABASE_URL: postgresql://ipocket:ipocket@db:5432/ipocket
+      DATABASE_URL: postgresql://memex:memex@db:5432/memex
     depends_on:
       - db
 
@@ -211,7 +211,7 @@ volumes:
     contentType: "text",
     typeId: "type-command",
     collectionId: "coll-devops",
-    content: `git pull origin main && npm ci && npm run build && npx prisma migrate deploy && pm2 restart ipocket`,
+    content: `git pull origin main && npm ci && npm run build && npx prisma migrate deploy && pm2 restart memex`,
   },
   {
     id: "item-docker-docs",

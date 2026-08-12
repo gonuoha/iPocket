@@ -17,7 +17,7 @@ export function MarketingLogo({ className }: MarketingLogoProps) {
       )}
     >
       <FolderOpen className="size-6 text-primary" aria-hidden="true" />
-      iPocket
+      Memex
     </Link>
   );
 }

@@ -34,7 +34,7 @@ export function BillingCard({
     const checkout = searchParams.get("checkout");
 
     if (checkout === "success") {
-      toast.success("Welcome to iPocket Pro! Your subscription is now active.");
+      toast.success("Welcome to Memex Pro! Your subscription is now active.");
     } else if (checkout === "cancelled") {
       toast.info("Checkout cancelled. You can upgrade anytime from settings.");
     }

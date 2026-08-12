@@ -36,7 +36,7 @@ const MESSAGES: Record<UpgradeReason, { title: string; description: string }> = 
   general: {
     title: "Upgrade to Pro",
     description:
-      "Get unlimited items and collections, file uploads, AI features, and more with iPocket Pro.",
+      "Get unlimited items and collections, file uploads, AI features, and more with Memex Pro.",
   },
 };
 

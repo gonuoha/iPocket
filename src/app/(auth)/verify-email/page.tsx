@@ -37,7 +37,7 @@ export default async function VerifyEmailPage({ searchParams }: VerifyEmailPageP
         description="Your account is ready to use"
       >
         <p className="text-sm text-muted-foreground">
-          Thanks for confirming your email address. You can now sign in to iPocket.
+          Thanks for confirming your email address. You can now sign in to Memex.
         </p>
         <Link href="/sign-in?verified=1" className={cn(buttonVariants(), "mt-4 w-full")}>
           Sign in

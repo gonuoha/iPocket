@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { MarketingScroll } from "@/components/marketing/marketing-scroll";
 
 export const metadata: Metadata = {
-  title: "iPocket — Stop Losing Your Developer Knowledge",
+  title: "Memex — Stop Losing Your Developer Knowledge",
   description:
     "One searchable hub for code snippets, AI prompts, commands, notes, files, images, and links.",
 };

@@ -2,7 +2,7 @@
 
 ## Overview
 
-Phase 1 lays the Stripe foundation for iPocket Pro ($8/mo, $72/yr). No webhooks, feature gating, or billing UI yet — those ship in Phase 2.
+Phase 1 lays the Stripe foundation for Memex Pro ($8/mo, $72/yr). No webhooks, feature gating, or billing UI yet — those ship in Phase 2.
 
 This phase adds the Stripe SDK, server-side client helpers, checkout/portal API routes, JWT `isPro` session sync, and a usage-limits module with unit tests.
 
@@ -23,7 +23,7 @@ This phase adds the Stripe SDK, server-side client helpers, checkout/portal API 
   - `STRIPE_WEBHOOK_SECRET` (used in Phase 2)
   - `STRIPE_PRICE_ID_MONTHLY`
   - `STRIPE_PRICE_ID_YEARLY`
-- Stripe Dashboard: create **iPocket Pro** product with monthly ($8) and yearly ($72) prices before testing checkout
+- Stripe Dashboard: create **Memex Pro** product with monthly ($8) and yearly ($72) prices before testing checkout
 
 ## Requirements
 

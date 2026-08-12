@@ -17,7 +17,7 @@ export function AuthCard({ title, description, children, footer }: AuthCardProps
             <div className="flex size-9 items-center justify-center rounded-lg bg-primary text-primary-foreground">
               <FolderOpen className="size-4" />
             </div>
-            <span>iPocket</span>
+            <span>Memex</span>
           </Link>
           <div className="space-y-1 pt-2">
             <h1 className="text-2xl font-semibold tracking-tight">{title}</h1>

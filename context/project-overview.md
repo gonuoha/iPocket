@@ -1,10 +1,10 @@
-## iPocket Project Specifications
+## Memex Project Specifications
 
 🚀 Centralized Developer Knowledge Hub
 
 ---
 
-## iPocket Project Specifications
+## Memex Project Specifications
 
 🚀 **Centralized Developer Knowledge Hub** for code snippets, AI prompts, docs, commands & more.
 
@@ -25,7 +25,7 @@ Developers keep their essentials scattered:
 
 This creates **context switching, lost knowledge** and **inconsistent workflows**.
 
-➡️ **iPocket provides ONE searchable, AI‑enhanced hub for all dev knowledge & resources.**
+➡️ **Memex provides ONE searchable, AI‑enhanced hub for all dev knowledge & resources.**
 
 ---
 
@@ -350,4 +350,4 @@ git switch -c lesson-01-setup
 
 ---
 
-🏗️ **iPocket — Store Smarter. Build Faster.**
+🏗️ **Memex — Store Smarter. Build Faster.**

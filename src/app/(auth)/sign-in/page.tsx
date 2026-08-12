@@ -7,7 +7,7 @@ export default function SignInPage() {
   return (
     <AuthCard
       title="Welcome back"
-      description="Sign in to your iPocket account"
+      description="Sign in to your Memex account"
     >
       <Suspense fallback={<p className="text-sm text-muted-foreground">Loading...</p>}>
         <SignInForm />

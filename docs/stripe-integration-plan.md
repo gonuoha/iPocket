@@ -1,8 +1,8 @@
-# Stripe Integration Plan — iPocket Pro
+# Stripe Integration Plan — Memex Pro
 
 > Research date: 2026-08-08  
 > Pricing: **$8/mo** monthly, **$72/yr** annual  
-> Product name in codebase: **iPocket Pro** (research prompt referenced "DevStash Pro")
+> Product name in codebase: **Memex Pro** (research prompt referenced "DevStash Pro")
 
 ---
 
@@ -698,7 +698,7 @@ Add "Upgrade to Pro" menu item when `!user.isPro`.
 1. **Create Stripe account** (or use existing test account)
 
 2. **Create product**
-   - Name: `iPocket Pro`
+   - Name: `Memex Pro`
    - Description: `Unlimited items, collections, file uploads, AI features, and export`
 
 3. **Create prices**

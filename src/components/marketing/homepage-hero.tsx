@@ -23,7 +23,7 @@ export function HomepageHero() {
           </h1>
           <p className="mt-4 text-lg text-muted-foreground">
             Snippets in VS Code, prompts in Notion, commands in Slack, links in
-            bookmarks — scattered everywhere. iPocket brings it all into one
+            bookmarks — scattered everywhere. Memex brings it all into one
             searchable hub.
           </p>
           <div className="mt-6 flex flex-wrap justify-center gap-3">

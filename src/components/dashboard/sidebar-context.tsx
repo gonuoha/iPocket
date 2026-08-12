@@ -15,8 +15,8 @@ type SidebarContextValue = {
 const SidebarContext = createContext<SidebarContextValue | null>(null);
 
 const COLLAPSED_MEDIA_QUERY = "(max-width: 1023px)";
-const SIDEBAR_COLLAPSED_STORAGE_KEY = "ipocket-sidebar-collapsed";
-const SIDEBAR_COLLAPSED_CHANGE_EVENT = "ipocket-sidebar-collapsed-change";
+const SIDEBAR_COLLAPSED_STORAGE_KEY = "memex-sidebar-collapsed";
+const SIDEBAR_COLLAPSED_CHANGE_EVENT = "memex-sidebar-collapsed-change";
 
 function readStoredCollapsedPreference(): boolean | null {
   const stored = localStorage.getItem(SIDEBAR_COLLAPSED_STORAGE_KEY);

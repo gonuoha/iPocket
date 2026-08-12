@@ -8,7 +8,7 @@
 
 ## 1. Executive Summary
 
-iPocket should integrate AI as a **Pro-only** server-side capability using Google's official **`@google/genai`** SDK and the **`gemini-3.5-flash-lite`** model. This model is optimized for high-throughput, low-cost tasks (classification, extraction, summarization, lightweight agent steps) at **$0.30/1M input tokens** and **$2.50/1M output tokens**, with a **1M-token context window** and **65K max output tokens**.
+Memex should integrate AI as a **Pro-only** server-side capability using Google's official **`@google/genai`** SDK and the **`gemini-3.5-flash-lite`** model. This model is optimized for high-throughput, low-cost tasks (classification, extraction, summarization, lightweight agent steps) at **$0.30/1M input tokens** and **$2.50/1M output tokens**, with a **1M-token context window** and **65K max output tokens**.
 
 Recommended split:
 
@@ -37,7 +37,7 @@ Use **structured outputs** (Zod → JSON Schema) for auto-tagging. Use **system 
 | Thinking levels | `minimal` (default), `low`, `medium`, `high` |
 | Pricing (API) | $0.30/1M input, $2.50/1M output |
 
-**Thinking level guidance for iPocket:**
+**Thinking level guidance for Memex:**
 
 - **Auto-tagging, summary**: `minimal` — fast, cheapest, sufficient for short structured/text outputs.
 - **Code explanation, prompt optimization**: `low` or `medium` — better multi-step reasoning without full agent overhead.
@@ -648,4 +648,4 @@ Do **not** call Gemini in unit tests. Use injected `GeminiClient` interface for 
 - [@google/genai SDK docs](https://googleapis.github.io/js-genai/release_docs/)
 - [Structured outputs](https://ai.google.dev/gemini-api/docs/generate-content/structured-output)
 - [Gemini 3.5 Flash-Lite developer guide](https://dev.to/googleai/gemini-36-flash-35-flash-lite-developer-guide-268i)
-- iPocket: `src/actions/*.ts`, `src/lib/subscription-limits.ts`, `src/lib/rate-limit.ts`, `src/components/shared/upgrade-prompt.tsx`
+- Memex: `src/actions/*.ts`, `src/lib/subscription-limits.ts`, `src/lib/rate-limit.ts`, `src/components/shared/upgrade-prompt.tsx`

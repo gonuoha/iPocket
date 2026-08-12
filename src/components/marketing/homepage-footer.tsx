@@ -65,7 +65,7 @@ export function HomepageFooter() {
 
         <div className="border-t border-border pt-6">
           <p className="text-sm text-muted-foreground">
-            &copy; {year} iPocket. All rights reserved.
+            &copy; {year} Memex. All rights reserved.
           </p>
         </div>
       </div>

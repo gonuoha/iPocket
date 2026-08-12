@@ -86,7 +86,7 @@ export function TopBar({
           className="flex min-w-0 items-center gap-2 font-semibold"
         >
           <FolderOpen className="size-6 shrink-0 text-primary" aria-hidden="true" />
-          <span className="truncate">iPocket</span>
+          <span className="truncate">Memex</span>
         </Link>
       </div>
 

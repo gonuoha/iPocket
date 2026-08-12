@@ -14,20 +14,20 @@ describe("getAppUrl", () => {
   });
 
   it("prefers APP_URL when set", async () => {
-    process.env.APP_URL = "https://ipocket.app/";
-    process.env.VERCEL_URL = "ipocket-git-main-user.vercel.app";
+    process.env.APP_URL = "https://memex.app/";
+    process.env.VERCEL_URL = "memex-git-main-user.vercel.app";
 
     const { getAppUrl } = await import("./app-url");
 
-    expect(getAppUrl()).toBe("https://ipocket.app");
+    expect(getAppUrl()).toBe("https://memex.app");
   });
 
   it("uses VERCEL_URL when APP_URL is not set", async () => {
-    process.env.VERCEL_URL = "ipocket-git-feature-user.vercel.app";
+    process.env.VERCEL_URL = "memex-git-feature-user.vercel.app";
 
     const { getAppUrl } = await import("./app-url");
 
-    expect(getAppUrl()).toBe("https://ipocket-git-feature-user.vercel.app");
+    expect(getAppUrl()).toBe("https://memex-git-feature-user.vercel.app");
   });
 
   it("falls back to localhost when no env vars are set", async () => {

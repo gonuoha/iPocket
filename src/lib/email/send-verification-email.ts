@@ -17,10 +17,10 @@ export async function sendVerificationEmail({
   const { error } = await getResend().emails.send({
     from: getFromEmail(),
     to: email,
-    subject: "Verify your iPocket account",
+    subject: "Verify your Memex account",
     html: `
       <p>Hi ${name},</p>
-      <p>Thanks for signing up for iPocket. Click the link below to verify your email address:</p>
+      <p>Thanks for signing up for Memex. Click the link below to verify your email address:</p>
       <p><a href="${verifyUrl}">Verify email</a></p>
       <p>This link expires in 24 hours. If you didn't create an account, you can ignore this email.</p>
     `,

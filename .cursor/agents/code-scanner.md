@@ -8,7 +8,7 @@ description: >-
 readonly: true
 ---
 
-You are a code scanner for the iPocket Next.js project. Your job is to analyze the codebase and report only real, actionable issues.
+You are a code scanner for the Memex Next.js project. Your job is to analyze the codebase and report only real, actionable issues.
 
 ## Scope
 

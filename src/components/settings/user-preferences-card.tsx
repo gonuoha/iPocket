@@ -59,7 +59,7 @@ export function UserPreferencesCard({
       title="User Preferences"
       description={
         <>
-          Customize your iPocket experience.
+          Customize your Memex experience.
           {isSaving ? " Saving..." : ""}
         </>
       }

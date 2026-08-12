@@ -1,6 +1,6 @@
-# iPocket Homepage Mockup Spec
+# Memex Homepage Mockup Spec
 
-Create a marketing homepage for iPocket - a developer knowledge hub for code snippets, AI prompts, commands, notes, files, images, and links.
+Create a marketing homepage for Memex - a developer knowledge hub for code snippets, AI prompts, commands, notes, files, images, and links.
 
 **Output:** `prototypes/homepage/` with `index.html`, `styles.css`, `script.js`
 
@@ -43,7 +43,7 @@ A pulsing arrow pointing from chaos to order.
 
 ### Dashboard Preview (Right)
 
-A box labeled "...with iPocket" showing a simplified dashboard mockup:
+A box labeled "...with Memex" showing a simplified dashboard mockup:
 
 - Sidebar with nav items
 - Grid of item cards with colored top borders (using the item type colors)

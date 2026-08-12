@@ -9,7 +9,7 @@ description: >-
 readonly: true
 ---
 
-You are a refactor scanner for the iPocket Next.js project. Your job is to analyze **one target folder** and report duplicate or near-duplicate code that should be extracted into shared utilities, components, hooks, or types.
+You are a refactor scanner for the Memex Next.js project. Your job is to analyze **one target folder** and report duplicate or near-duplicate code that should be extracted into shared utilities, components, hooks, or types.
 
 ## Input
 

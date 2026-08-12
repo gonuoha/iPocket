@@ -1,6 +1,6 @@
 # Item Types
 
-iPocket ships with **7 built-in system item types**. Each type is stored in the `ItemType` table with `isSystem: true` and `userId: null`. Pro users can create custom types (same model, `isSystem: false`, `userId` set).
+Memex ships with **7 built-in system item types**. Each type is stored in the `ItemType` table with `isSystem: true` and `userId: null`. Pro users can create custom types (same model, `isSystem: false`, `userId` set).
 
 Types are referenced by every `Item` via `typeId`. Visual identity (icon, color) lives on `ItemType`; payload fields live on `Item`.
 

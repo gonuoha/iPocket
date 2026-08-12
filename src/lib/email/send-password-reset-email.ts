@@ -19,7 +19,7 @@ export async function sendPasswordResetEmail({
   const { error } = await getResend().emails.send({
     from: getFromEmail(),
     to: email,
-    subject: "Reset your iPocket password",
+    subject: "Reset your Memex password",
     html: `
       <p>${greeting}</p>
       <p>We received a request to reset your password. Click the link below to choose a new one:</p>

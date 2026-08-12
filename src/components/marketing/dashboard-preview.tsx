@@ -21,12 +21,12 @@ export function DashboardPreview({ className }: { className?: string }) {
       )}
     >
       <p className="mb-3 text-xs font-medium tracking-wider text-muted-foreground uppercase">
-        ...with iPocket
+        ...with Memex
       </p>
       <div className="flex h-[220px] overflow-hidden rounded-lg border border-border bg-card">
         <aside className="w-[28%] min-w-20 border-r border-border bg-background p-3">
           <div className="mb-3 text-[0.65rem] font-semibold text-primary">
-            iPocket
+            Memex
           </div>
           <nav className="flex flex-col gap-1">
             {MOCK_NAV_ITEMS.map((item) => (
