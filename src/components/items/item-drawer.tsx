@@ -25,6 +25,7 @@ import { ConfirmDeleteDialog } from "@/components/shared/confirm-delete-dialog";
 import { UpgradePrompt } from "@/components/shared/upgrade-prompt";
 import { useAiItemSuggestions } from "@/hooks/use-ai-item-suggestions";
 import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { useResizableDrawerWidth } from "@/hooks/use-resizable-drawer-width";
 import { formatLongDate } from "@/lib/format-date";
 import { FILE_TYPE_NAMES } from "@/lib/item-form-constants";
 import { Badge } from "@/components/ui/badge";
@@ -858,6 +859,8 @@ export function ItemDrawer({
   isPro: boolean;
 }) {
   const { selectedItemId, closeItem } = useItemDrawer();
+  const { width, isMobile, isResizing, startResize, minWidth } =
+    useResizableDrawerWidth();
 
   return (
     <Sheet
@@ -870,8 +873,32 @@ export function ItemDrawer({
     >
       <SheetContent
         side="right"
-        className="flex h-svh max-w-none flex-col gap-0 p-0 data-[side=right]:w-[min(54rem,92vw)] data-[side=right]:sm:max-w-none"
+        className={cn(
+          "flex h-svh max-w-none flex-col gap-0 p-0",
+          "data-[side=right]:inset-0 data-[side=right]:w-full data-[side=right]:max-w-full",
+          "md:data-[side=right]:inset-y-0 md:data-[side=right]:right-0 md:data-[side=right]:left-auto md:data-[side=right]:w-auto md:data-[side=right]:max-w-[92vw]",
+          isResizing && "md:transition-none",
+        )}
+        style={
+          isMobile
+            ? undefined
+            : {
+                width,
+                minWidth,
+              }
+        }
       >
+        {!isMobile ? (
+          <div
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize drawer"
+            aria-valuemin={minWidth}
+            aria-valuenow={width}
+            className="absolute inset-y-0 left-0 z-10 hidden w-3 -translate-x-1/2 cursor-col-resize touch-none md:block before:absolute before:inset-y-0 before:left-1/2 before:w-px before:-translate-x-1/2 before:bg-border hover:before:bg-primary/40 active:before:bg-primary/60"
+            onPointerDown={startResize}
+          />
+        ) : null}
         {selectedItemId ? (
           <ItemDrawerPanel
             key={selectedItemId}
