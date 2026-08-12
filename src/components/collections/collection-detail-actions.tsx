@@ -3,8 +3,7 @@
 import { useState } from "react";
 import { Pencil, Trash2 } from "lucide-react";
 
-import { CollectionDeleteDialog } from "@/components/collections/collection-delete-dialog";
-import { CollectionEditDialog } from "@/components/collections/collection-edit-dialog";
+import { CollectionDialogs } from "@/components/collections/collection-dialogs";
 import { CollectionFavoriteButton } from "@/components/collections/collection-favorite-button";
 import { Button } from "@/components/ui/button";
 
@@ -51,22 +50,12 @@ export function CollectionDetailActions({
         </Button>
       </div>
 
-      {isEditOpen ? (
-        <CollectionEditDialog
-          key={collection.id}
-          collectionId={collection.id}
-          initialName={collection.name}
-          initialDescription={collection.description}
-          open
-          onOpenChange={setIsEditOpen}
-        />
-      ) : null}
-
-      <CollectionDeleteDialog
-        collectionId={collection.id}
-        collectionName={collection.name}
-        open={isDeleteOpen}
-        onOpenChange={setIsDeleteOpen}
+      <CollectionDialogs
+        collection={collection}
+        isEditOpen={isEditOpen}
+        onEditOpenChange={setIsEditOpen}
+        isDeleteOpen={isDeleteOpen}
+        onDeleteOpenChange={setIsDeleteOpen}
         redirectTo="/collections"
       />
     </>

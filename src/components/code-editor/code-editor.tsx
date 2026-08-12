@@ -2,13 +2,13 @@
 
 import dynamic from "next/dynamic";
 import { Check, Copy } from "lucide-react";
-import { useMemo, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { toast } from "sonner";
+import { useMemo } from "react";
 
 import { ExplainCodeButton } from "@/components/ai/explain-code-button";
+import { EditorTabButton } from "@/components/code-editor/editor-tab-button";
+import { MarkdownContent } from "@/components/shared/markdown-content";
 import { Button } from "@/components/ui/button";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { formatCodeLanguageLabel, getCodeEditorHeight } from "@/lib/monaco-language";
 import { cn } from "@/lib/utils";
 
@@ -45,23 +45,6 @@ export type CodeEditorProps = {
   isExplaining?: boolean;
 };
 
-function MarkdownExplanation({ content }: { content: string }) {
-  return (
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      components={{
-        a: ({ href, children }) => (
-          <a href={href} target="_blank" rel="noreferrer">
-            {children}
-          </a>
-        ),
-      }}
-    >
-      {content}
-    </ReactMarkdown>
-  );
-}
-
 export function CodeEditor({
   id,
   value,
@@ -78,22 +61,14 @@ export function CodeEditor({
   onUpgrade,
   isExplaining = false,
 }: CodeEditorProps) {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
   const height = useMemo(() => getCodeEditorHeight(value), [value]);
   const showExplainTabs = enableExplain && (Boolean(explanation) || isExplaining);
   const currentView = showExplainTabs ? activeView : "code";
 
-  async function handleCopy() {
+  function handleCopy() {
     const copyValue = currentView === "explain" && explanation ? explanation : value;
-
-    try {
-      await navigator.clipboard.writeText(copyValue);
-      setCopied(true);
-      toast.success("Copied to clipboard");
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast.error("Failed to copy");
-    }
+    void copy(copyValue);
   }
 
   return (
@@ -112,30 +87,18 @@ export function CodeEditor({
           </div>
           {showExplainTabs ? (
             <div className="flex items-center gap-1">
-              <button
-                type="button"
-                className={cn(
-                  "rounded px-2.5 py-1 text-xs font-medium transition-colors",
-                  currentView === "code"
-                    ? "bg-white/10 text-zinc-100"
-                    : "text-zinc-400 hover:text-zinc-200",
-                )}
+              <EditorTabButton
+                active={currentView === "code"}
                 onClick={() => onViewChange?.("code")}
               >
                 Code
-              </button>
-              <button
-                type="button"
-                className={cn(
-                  "rounded px-2.5 py-1 text-xs font-medium transition-colors",
-                  currentView === "explain"
-                    ? "bg-white/10 text-zinc-100"
-                    : "text-zinc-400 hover:text-zinc-200",
-                )}
+              </EditorTabButton>
+              <EditorTabButton
+                active={currentView === "explain"}
                 onClick={() => onViewChange?.("explain")}
               >
                 Explain
-              </button>
+              </EditorTabButton>
             </div>
           ) : null}
         </div>
@@ -180,7 +143,7 @@ export function CodeEditor({
           style={{ height }}
         >
           {explanation ? (
-            <MarkdownExplanation content={explanation} />
+            <MarkdownContent content={explanation} />
           ) : (
             <p className="text-sm text-zinc-500">Generating explanation...</p>
           )}

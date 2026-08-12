@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState } from "react";
 
+import { AuthErrorMessage, AuthInfoMessage } from "@/components/auth/auth-message";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -61,10 +62,10 @@ export function ForgotPasswordForm() {
   if (isComplete) {
     return (
       <div className="space-y-4">
-        <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+        <AuthInfoMessage>
           If an account with that email exists, we&apos;ve sent password reset instructions to{" "}
           <span className="font-medium text-foreground">{email}</span>.
-        </p>
+        </AuthInfoMessage>
         <p className="text-center text-sm text-muted-foreground">
           <Link href="/sign-in" className="text-foreground underline-offset-4 hover:underline">
             Back to sign in
@@ -76,11 +77,7 @@ export function ForgotPasswordForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error ? (
-        <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
+      {error ? <AuthErrorMessage>{error}</AuthErrorMessage> : null}
 
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>

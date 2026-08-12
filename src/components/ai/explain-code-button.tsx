@@ -1,5 +1,6 @@
-import { Crown, Loader2, Sparkles } from "lucide-react";
+import { Loader2, Sparkles } from "lucide-react";
 
+import { AiProUpgradeButton } from "@/components/ai/ai-pro-upgrade-button";
 import { Button } from "@/components/ui/button";
 
 type ExplainCodeButtonProps = {
@@ -18,19 +19,7 @@ export function ExplainCodeButton({
   isLoading = false,
 }: ExplainCodeButtonProps) {
   if (!isPro) {
-    return (
-      <Button
-        type="button"
-        variant="ghost"
-        size="icon-xs"
-        className="size-7 text-zinc-400 hover:bg-white/10 hover:text-zinc-100"
-        onClick={onUpgrade}
-        aria-label="AI features require Pro subscription"
-        title="AI features require Pro subscription"
-      >
-        <Crown />
-      </Button>
-    );
+    return <AiProUpgradeButton onUpgrade={onUpgrade} />;
   }
 
   return (

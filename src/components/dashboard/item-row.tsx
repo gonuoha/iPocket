@@ -4,6 +4,7 @@ import { createElement } from "react";
 import { Pin } from "lucide-react";
 
 import type { DashboardItem } from "@/lib/db/items";
+import { formatShortDate } from "@/lib/format-date";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
 import { getTypeColorBorderProps } from "@/lib/type-color-border";
 import { cn } from "@/lib/utils";
@@ -11,13 +12,6 @@ import { cn } from "@/lib/utils";
 import { ItemFavoriteButton } from "@/components/items/item-favorite-button";
 import { useTypeColorPosition } from "@/components/user-preferences/user-preferences-context";
 import { useItemDrawer } from "@/components/items/item-drawer-context";
-
-function formatDate(date: Date | string) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-  }).format(new Date(date));
-}
 
 type ItemRowProps = {
   item: DashboardItem;
@@ -73,7 +67,7 @@ export function ItemRow({ item }: ItemRowProps) {
               dateTime={item.updatedAt.toISOString()}
               className="shrink-0 text-xs text-muted-foreground"
             >
-              {formatDate(item.updatedAt)}
+              {formatShortDate(item.updatedAt)}
             </time>
           </div>
           {item.tags.length > 0 ? (

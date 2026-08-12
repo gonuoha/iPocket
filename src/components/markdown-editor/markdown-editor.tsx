@@ -2,12 +2,12 @@
 
 import { Check, Copy } from "lucide-react";
 import { useMemo, useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import { toast } from "sonner";
 
 import { OptimizePromptButton } from "@/components/ai/optimize-prompt-button";
+import { EditorTabButton } from "@/components/code-editor/editor-tab-button";
+import { MarkdownContent } from "@/components/shared/markdown-content";
 import { Button } from "@/components/ui/button";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { cn } from "@/lib/utils";
 
 export const MARKDOWN_EDITOR_TYPE_NAMES = new Set(["note", "prompt"]);
@@ -49,23 +49,6 @@ function getEditorHeight(value: string): number {
   );
 }
 
-function MarkdownPreview({ content }: { content: string }) {
-  return (
-    <ReactMarkdown
-      remarkPlugins={[remarkGfm]}
-      components={{
-        a: ({ href, children }) => (
-          <a href={href} target="_blank" rel="noreferrer">
-            {children}
-          </a>
-        ),
-      }}
-    >
-      {content}
-    </ReactMarkdown>
-  );
-}
-
 export function MarkdownEditor({
   id,
   value,
@@ -85,7 +68,7 @@ export function MarkdownEditor({
   isAcceptingOptimized = false,
 }: MarkdownEditorProps) {
   const [activeTab, setActiveTab] = useState<MarkdownTab>("write");
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
   const showWriteTab = !readOnly;
   const showOptimizeTabs =
     enableOptimize && (Boolean(optimizedValue) || isOptimizing);
@@ -96,15 +79,8 @@ export function MarkdownEditor({
   const currentTab =
     readOnly && currentView === "optimized" ? "preview" : readOnly ? "preview" : activeTab;
 
-  async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(displayValue);
-      setCopied(true);
-      toast.success("Copied to clipboard");
-      window.setTimeout(() => setCopied(false), 2000);
-    } catch {
-      toast.error("Failed to copy");
-    }
+  function handleCopy() {
+    void copy(displayValue);
   }
 
   return (
@@ -118,57 +94,33 @@ export function MarkdownEditor({
         <div className="flex items-center gap-1">
           {showOptimizeTabs ? (
             <div className="flex items-center gap-1">
-              <button
-                type="button"
-                className={cn(
-                  "rounded px-2.5 py-1 text-xs font-medium transition-colors",
-                  currentView === "original"
-                    ? "bg-white/10 text-zinc-100"
-                    : "text-zinc-400 hover:text-zinc-200",
-                )}
+              <EditorTabButton
+                active={currentView === "original"}
                 onClick={() => onViewChange?.("original")}
               >
                 Original
-              </button>
-              <button
-                type="button"
-                className={cn(
-                  "rounded px-2.5 py-1 text-xs font-medium transition-colors",
-                  currentView === "optimized"
-                    ? "bg-white/10 text-zinc-100"
-                    : "text-zinc-400 hover:text-zinc-200",
-                )}
+              </EditorTabButton>
+              <EditorTabButton
+                active={currentView === "optimized"}
                 onClick={() => onViewChange?.("optimized")}
               >
                 Optimized
-              </button>
+              </EditorTabButton>
             </div>
           ) : showWriteTab ? (
             <>
-              <button
-                type="button"
-                className={cn(
-                  "rounded px-2.5 py-1 text-xs font-medium transition-colors",
-                  currentTab === "write"
-                    ? "bg-white/10 text-zinc-100"
-                    : "text-zinc-400 hover:text-zinc-200",
-                )}
+              <EditorTabButton
+                active={currentTab === "write"}
                 onClick={() => setActiveTab("write")}
               >
                 Write
-              </button>
-              <button
-                type="button"
-                className={cn(
-                  "rounded px-2.5 py-1 text-xs font-medium transition-colors",
-                  currentTab === "preview"
-                    ? "bg-white/10 text-zinc-100"
-                    : "text-zinc-400 hover:text-zinc-200",
-                )}
+              </EditorTabButton>
+              <EditorTabButton
+                active={currentTab === "preview"}
                 onClick={() => setActiveTab("preview")}
               >
                 Preview
-              </button>
+              </EditorTabButton>
             </>
           ) : (
             <span className="px-2.5 py-1 text-xs font-medium text-zinc-300">
@@ -218,7 +170,7 @@ export function MarkdownEditor({
             isOptimizing && currentView === "optimized" ? (
               <p className="text-sm text-zinc-500">Optimizing prompt...</p>
             ) : (
-              <MarkdownPreview content={displayValue} />
+              <MarkdownContent content={displayValue} />
             )
           ) : (
             <p className="text-sm text-zinc-500">Nothing to preview</p>

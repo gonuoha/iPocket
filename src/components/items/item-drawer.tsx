@@ -14,36 +14,21 @@ import {
 import { toast } from "sonner";
 
 import { deleteItem, updateItem } from "@/actions/items";
-import { explainCode, generateAutoTags, generateSummary, optimizePrompt } from "@/actions/ai";
+import { explainCode, optimizePrompt } from "@/actions/ai";
 import {
-  CollectionMultiSelect,
   type SelectableCollection,
 } from "@/components/collections/collection-multi-select";
 import { ItemFavoriteButton } from "@/components/items/item-favorite-button";
+import { ItemFormFields } from "@/components/items/item-form-fields";
 import { ItemPinButton } from "@/components/items/item-pin-button";
-import { SuggestTagsButton } from "@/components/ai/suggest-tags-button";
-import { SuggestedTags } from "@/components/ai/suggested-tags";
-import { GenerateSummaryButton } from "@/components/ai/generate-summary-button";
-import { SuggestedSummary } from "@/components/ai/suggested-summary";
+import { ConfirmDeleteDialog } from "@/components/shared/confirm-delete-dialog";
 import { UpgradePrompt } from "@/components/shared/upgrade-prompt";
-import {
-  buildSummaryContent,
-  canGenerateSummary,
-} from "@/lib/ai/build-summary-content";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { useAiItemSuggestions } from "@/hooks/use-ai-item-suggestions";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
+import { formatLongDate } from "@/lib/format-date";
+import { FILE_TYPE_NAMES } from "@/lib/item-form-constants";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import {
   Sheet,
@@ -57,26 +42,18 @@ import {
   CodeEditor,
   type CodeEditorView,
 } from "@/components/code-editor/code-editor";
-import { LanguageSelect } from "@/components/code-editor/language-select";
 import {
   MARKDOWN_EDITOR_TYPE_NAMES,
   MarkdownEditor,
   type MarkdownEditorView,
 } from "@/components/markdown-editor/markdown-editor";
-import { Textarea } from "@/components/ui/textarea";
 import type { ItemDetail } from "@/lib/db/items";
 import { getItemCopyText } from "@/lib/item-copy";
 import { formatFileSize } from "@/lib/file-upload";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
-import { appendTagToTagsString, parseTagsString } from "@/lib/parse-tags";
-import type { z } from "zod";
-
-import { generateAutoTagsSchema } from "@/lib/validations/ai";
 import { cn } from "@/lib/utils";
 
 import { useItemDrawer } from "./item-drawer-context";
-
-type AutoTagItemType = z.infer<typeof generateAutoTagsSchema>["type"];
 
 type ItemDetailResponse = Omit<ItemDetail, "createdAt" | "updatedAt"> & {
   createdAt: string;
@@ -93,10 +70,7 @@ type EditFormState = {
   collectionIds: string[];
 };
 
-const CONTENT_TYPE_NAMES = new Set(["snippet", "prompt", "command", "note"]);
-const LANGUAGE_TYPE_NAMES = new Set(["snippet", "command"]);
-const URL_TYPE_NAMES = new Set(["link"]);
-const DOWNLOADABLE_TYPE_NAMES = new Set(["file", "image"]);
+const DOWNLOADABLE_TYPE_NAMES = FILE_TYPE_NAMES;
 
 function isDownloadableItem(item: ItemDetailResponse) {
   return (
@@ -130,14 +104,6 @@ function ItemDownloadLink({
       Download
     </a>
   );
-}
-
-function formatLongDate(date: string) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(date));
 }
 
 function toFormState(item: ItemDetailResponse): EditFormState {
@@ -197,17 +163,13 @@ function ItemDrawerContent({
   const [isOptimizing, startOptimize] = useTransition();
   const [isAcceptingOptimized, startAcceptOptimized] = useTransition();
   const [isUpgradeOpen, setIsUpgradeOpen] = useState(false);
+  const { copy } = useCopyToClipboard();
   const typeName = item.type.name.toLowerCase();
   const showExplainableCodeEditor = CODE_EDITOR_TYPE_NAMES.has(typeName);
   const showOptimizablePrompt = typeName === "prompt";
 
   async function handleCopy() {
-    try {
-      await navigator.clipboard.writeText(getItemCopyText(item));
-      toast.success("Copied to clipboard");
-    } catch {
-      toast.error("Failed to copy");
-    }
+    await copy(getItemCopyText(item));
   }
 
   function handleExplain() {
@@ -509,52 +471,23 @@ function ItemDrawerEditor({
   formState,
   collections,
   isPro,
-  suggestedTags,
-  isSuggesting,
-  canSuggestTags,
-  suggestedSummary,
-  isSummarizing,
-  canGenerateSummaryEnabled,
+  aiSuggestions,
   onChange,
   onCancel,
   onSave,
-  onSuggestTags,
-  onAcceptSuggestedTag,
-  onRejectSuggestedTag,
-  onDismissSuggestedTags,
-  onGenerateSummary,
-  onAcceptSuggestedSummary,
-  onRejectSuggestedSummary,
   isSaving,
 }: {
   item: ItemDetailResponse;
   formState: EditFormState;
   collections: SelectableCollection[];
   isPro: boolean;
-  suggestedTags: string[];
-  isSuggesting: boolean;
-  canSuggestTags: boolean;
-  suggestedSummary: string | null;
-  isSummarizing: boolean;
-  canGenerateSummaryEnabled: boolean;
+  aiSuggestions: ReturnType<typeof useAiItemSuggestions>;
   onChange: (patch: Partial<EditFormState>) => void;
   onCancel: () => void;
   onSave: () => void;
-  onSuggestTags: () => void;
-  onAcceptSuggestedTag: (tag: string) => void;
-  onRejectSuggestedTag: (tag: string) => void;
-  onDismissSuggestedTags: () => void;
-  onGenerateSummary: () => void;
-  onAcceptSuggestedSummary: () => void;
-  onRejectSuggestedSummary: () => void;
   isSaving: boolean;
 }) {
   const typeName = item.type.name.toLowerCase();
-  const showContent = CONTENT_TYPE_NAMES.has(typeName);
-  const showLanguage = LANGUAGE_TYPE_NAMES.has(typeName);
-  const showUrl = URL_TYPE_NAMES.has(typeName);
-  const useCodeEditor = CODE_EDITOR_TYPE_NAMES.has(typeName);
-  const useMarkdownEditor = MARKDOWN_EDITOR_TYPE_NAMES.has(typeName);
   const canSave = formState.title.trim().length > 0 && !isSaving;
 
   return (
@@ -576,120 +509,28 @@ function ItemDrawerEditor({
 
       <ScrollArea className="min-h-0 flex-1 pr-4">
         <div className="space-y-6 py-6">
-          <div className="space-y-2">
-            <Label htmlFor="item-edit-title">Title</Label>
-            <Input
-              id="item-edit-title"
-              value={formState.title}
-              onChange={(event) => onChange({ title: event.target.value })}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between gap-2">
-              <Label htmlFor="item-edit-description">Description</Label>
-              <GenerateSummaryButton
-                isPro={isPro}
-                disabled={!canGenerateSummaryEnabled}
-                onGenerate={onGenerateSummary}
-                isLoading={isSummarizing}
-              />
-            </div>
-            <Textarea
-              id="item-edit-description"
-              value={formState.description}
-              onChange={(event) =>
-                onChange({ description: event.target.value })
-              }
-              rows={3}
-            />
-            <SuggestedSummary
-              summary={suggestedSummary}
-              onAccept={onAcceptSuggestedSummary}
-              onReject={onRejectSuggestedSummary}
-            />
-          </div>
-
-          {showLanguage ? (
-            <LanguageSelect
-              id="item-edit-language"
-              value={formState.language}
-              onChange={(language) => onChange({ language })}
-              disabled={isSaving}
-            />
-          ) : null}
-
-          {showContent ? (
-            <div className="space-y-2">
-              <Label htmlFor="item-edit-content">Content</Label>
-              {useCodeEditor ? (
-                <CodeEditor
-                  id="item-edit-content"
-                  value={formState.content}
-                  language={formState.language}
-                  onChange={(content) => onChange({ content })}
-                />
-              ) : useMarkdownEditor ? (
-                <MarkdownEditor
-                  id="item-edit-content"
-                  value={formState.content}
-                  onChange={(content) => onChange({ content })}
-                />
-              ) : (
-                <Textarea
-                  id="item-edit-content"
-                  value={formState.content}
-                  onChange={(event) =>
-                    onChange({ content: event.target.value })
-                  }
-                  className="min-h-40 font-mono text-sm"
-                />
-              )}
-            </div>
-          ) : null}
-          {showUrl ? (
-            <div className="space-y-2">
-              <Label htmlFor="item-edit-url">URL</Label>
-              <Input
-                id="item-edit-url"
-                value={formState.url}
-                onChange={(event) => onChange({ url: event.target.value })}
-              />
-            </div>
-          ) : null}
-
-          <div className="space-y-2">
-            <Label htmlFor="item-edit-tags">Tags</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="item-edit-tags"
-                value={formState.tags}
-                onChange={(event) => onChange({ tags: event.target.value })}
-                placeholder="Comma-separated tags"
-                className="min-w-0 flex-1"
-              />
-              <SuggestTagsButton
-                isPro={isPro}
-                disabled={!canSuggestTags}
-                onSuggest={onSuggestTags}
-                isLoading={isSuggesting}
-              />
-            </div>
-            <SuggestedTags
-              tags={suggestedTags}
-              onAccept={onAcceptSuggestedTag}
-              onReject={onRejectSuggestedTag}
-              onDismiss={onDismissSuggestedTags}
-            />
-          </div>
-
-          <CollectionMultiSelect
-            id="item-edit-collections"
+          <ItemFormFields
+            idPrefix="item-edit"
+            typeName={typeName}
+            formState={formState}
+            onChange={onChange}
             collections={collections}
-            value={formState.collectionIds}
-            onChange={(collectionIds) => onChange({ collectionIds })}
+            isPro={isPro}
             disabled={isSaving}
+            contentTextareaClassName="min-h-40"
+            suggestedTags={aiSuggestions.suggestedTags}
+            isSuggesting={aiSuggestions.isSuggesting}
+            canSuggestTags={aiSuggestions.canSuggestTags}
+            suggestedSummary={aiSuggestions.suggestedSummary}
+            isSummarizing={aiSuggestions.isSummarizing}
+            canGenerateSummary={aiSuggestions.canGenerateSummaryEnabled}
+            onSuggestTags={aiSuggestions.handleSuggestTags}
+            onAcceptSuggestedTag={aiSuggestions.handleAcceptSuggestedTag}
+            onRejectSuggestedTag={aiSuggestions.handleRejectSuggestedTag}
+            onDismissSuggestedTags={aiSuggestions.dismissSuggestedTags}
+            onGenerateSummary={aiSuggestions.handleGenerateSummary}
+            onAcceptSuggestedSummary={aiSuggestions.handleAcceptSuggestedSummary}
+            onRejectSuggestedSummary={aiSuggestions.handleRejectSuggestedSummary}
           />
 
           <section className="space-y-2">
@@ -733,12 +574,58 @@ function ItemDrawerPanel({
   const [mode, setMode] = useState<"view" | "edit">("view");
   const [formState, setFormState] = useState<EditFormState | null>(null);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
-  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
-  const [suggestedSummary, setSuggestedSummary] = useState<string | null>(null);
   const [isSaving, startSaving] = useTransition();
-  const [isSuggesting, startSuggesting] = useTransition();
-  const [isSummarizing, startSummarizing] = useTransition();
   const [isDeleting, startDeleting] = useTransition();
+
+  const editTypeName = item?.type.name.toLowerCase() ?? "";
+  const activeFormState = formState ?? {
+    title: "",
+    description: "",
+    content: "",
+    url: "",
+    language: "",
+    tags: "",
+    collectionIds: [],
+  };
+
+  function getSuggestContent(state: EditFormState, typeName: string): string {
+    if (typeName === "link") {
+      return state.content.trim() || state.url.trim();
+    }
+
+    return state.content.trim();
+  }
+
+  function getSummaryContentInput(
+    state: EditFormState,
+    typeName: string,
+    fileName?: string | null,
+  ) {
+    return {
+      type: typeName,
+      content: state.content,
+      url: state.url,
+      fileName,
+      language: state.language,
+    };
+  }
+
+  const suggestContent =
+    formState && item ? getSuggestContent(formState, editTypeName) : "";
+  const summaryContentInput =
+    formState && item
+      ? getSummaryContentInput(formState, editTypeName, item.fileName)
+      : { type: editTypeName };
+
+  const aiSuggestions = useAiItemSuggestions({
+    title: activeFormState.title,
+    tags: activeFormState.tags,
+    type: editTypeName,
+    suggestContent,
+    summaryContentInput,
+    onTagsChange: (tags) => handleFormChange({ tags }),
+    onDescriptionChange: (description) => handleFormChange({ description }),
+  });
 
   useEffect(() => {
     const controller = new AbortController();
@@ -784,124 +671,19 @@ function ItemDrawerPanel({
       return;
     }
 
-    setSuggestedTags([]);
-    setSuggestedSummary(null);
+    aiSuggestions.resetSuggestions();
     setFormState(toFormState(item));
     setMode("edit");
   }
 
   function handleCancel() {
-    setSuggestedTags([]);
-    setSuggestedSummary(null);
+    aiSuggestions.resetSuggestions();
     setFormState(null);
     setMode("view");
   }
 
   function handleFormChange(patch: Partial<EditFormState>) {
     setFormState((previous) => (previous ? { ...previous, ...patch } : previous));
-  }
-
-  function getSuggestContent(state: EditFormState, typeName: string): string {
-    if (typeName === "link") {
-      return state.content.trim() || state.url.trim();
-    }
-
-    return state.content.trim();
-  }
-
-  function getSummaryContentInput(
-    state: EditFormState,
-    typeName: string,
-    fileName?: string | null,
-  ) {
-    return {
-      type: typeName,
-      content: state.content,
-      url: state.url,
-      fileName,
-      language: state.language,
-    };
-  }
-
-  function handleGenerateSummary() {
-    if (!item || !formState) {
-      return;
-    }
-
-    const typeName = item.type.name.toLowerCase();
-    const summaryContentInput = getSummaryContentInput(
-      formState,
-      typeName,
-      item.fileName,
-    );
-
-    startSummarizing(async () => {
-      const result = await generateSummary({
-        title: formState.title.trim(),
-        content: buildSummaryContent(summaryContentInput),
-        type: typeName as AutoTagItemType,
-      });
-
-      if (!result.success) {
-        toast.error(result.error);
-        return;
-      }
-
-      setSuggestedSummary(result.data.summary);
-    });
-  }
-
-  function handleAcceptSuggestedSummary() {
-    if (!formState || !suggestedSummary) {
-      return;
-    }
-
-    handleFormChange({ description: suggestedSummary });
-    setSuggestedSummary(null);
-  }
-
-  function handleRejectSuggestedSummary() {
-    setSuggestedSummary(null);
-  }
-
-  function handleSuggestTags() {
-    if (!item || !formState) {
-      return;
-    }
-
-    const typeName = item.type.name.toLowerCase();
-    const content = getSuggestContent(formState, typeName);
-
-    startSuggesting(async () => {
-      const result = await generateAutoTags({
-        title: formState.title.trim(),
-        content,
-        type: typeName as AutoTagItemType,
-        existingTags: parseTagsString(formState.tags),
-      });
-
-      if (!result.success) {
-        toast.error(result.error);
-        return;
-      }
-
-      setSuggestedTags(result.data.tags);
-    });
-  }
-
-  function handleAcceptSuggestedTag(tag: string) {
-    if (!formState) {
-      return;
-    }
-
-    handleFormChange({
-      tags: appendTagToTagsString(formState.tags, tag),
-    });
-    setSuggestedTags((previous) => previous.filter((value) => value !== tag));
-  }
-
-  function handleRejectSuggestedTag(tag: string) {
-    setSuggestedTags((previous) => previous.filter((value) => value !== tag));
   }
 
   function handleDeleteConfirm() {
@@ -975,22 +757,6 @@ function ItemDrawerPanel({
   }
 
   const typeStyles = item ? getItemTypeStyles(item.type.color) : null;
-  const editTypeName = item?.type.name.toLowerCase() ?? "";
-  const suggestContent =
-    formState && item
-      ? getSuggestContent(formState, editTypeName)
-      : "";
-  const canSuggestTags =
-    formState !== null &&
-    formState.title.trim().length > 0 &&
-    suggestContent.length > 0;
-  const summaryContentInput =
-    formState && item
-      ? getSummaryContentInput(formState, editTypeName, item.fileName)
-      : { type: editTypeName };
-  const canGenerateSummaryEnabled =
-    formState !== null &&
-    canGenerateSummary(formState.title, summaryContentInput);
 
   return (
     <>
@@ -1058,48 +824,28 @@ function ItemDrawerPanel({
             formState={formState}
             collections={collections}
             isPro={isPro}
-            suggestedTags={suggestedTags}
-            isSuggesting={isSuggesting}
-            canSuggestTags={canSuggestTags}
-            suggestedSummary={suggestedSummary}
-            isSummarizing={isSummarizing}
-            canGenerateSummaryEnabled={canGenerateSummaryEnabled}
+            aiSuggestions={aiSuggestions}
             onChange={handleFormChange}
             onCancel={handleCancel}
             onSave={handleSave}
-            onSuggestTags={handleSuggestTags}
-            onAcceptSuggestedTag={handleAcceptSuggestedTag}
-            onRejectSuggestedTag={handleRejectSuggestedTag}
-            onDismissSuggestedTags={() => setSuggestedTags([])}
-            onGenerateSummary={handleGenerateSummary}
-            onAcceptSuggestedSummary={handleAcceptSuggestedSummary}
-            onRejectSuggestedSummary={handleRejectSuggestedSummary}
             isSaving={isSaving}
           />
         ) : null}
       </div>
 
-      <AlertDialog open={isDeleteOpen} onOpenChange={setIsDeleteOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete item?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete &ldquo;{item?.title}&rdquo;. This action
-              cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={handleDeleteConfirm}
-              disabled={isDeleting}
-            >
-              {isDeleting ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <ConfirmDeleteDialog
+        open={isDeleteOpen}
+        onOpenChange={setIsDeleteOpen}
+        title="Delete item?"
+        description={
+          <>
+            This will permanently delete &ldquo;{item?.title}&rdquo;. This action
+            cannot be undone.
+          </>
+        }
+        isDeleting={isDeleting}
+        onConfirm={handleDeleteConfirm}
+      />
     </>
   );
 }

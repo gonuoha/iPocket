@@ -8,6 +8,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { AuthErrorMessage, AuthInfoMessage } from "@/components/auth/auth-message";
+import { OAuthDivider } from "@/components/auth/oauth-divider";
 
 export function SignInForm() {
   const searchParams = useSearchParams();
@@ -133,33 +135,25 @@ export function SignInForm() {
   return (
     <div className="space-y-4">
       {verified ? (
-        <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
-          Email verified. Sign in to continue.
-        </p>
+        <AuthInfoMessage>Email verified. Sign in to continue.</AuthInfoMessage>
       ) : null}
 
       {registered ? (
-        <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
-          Account created. Sign in to continue.
-        </p>
+        <AuthInfoMessage>Account created. Sign in to continue.</AuthInfoMessage>
       ) : null}
 
       {passwordReset ? (
-        <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+        <AuthInfoMessage>
           Password reset successfully. Sign in with your new password.
-        </p>
+        </AuthInfoMessage>
       ) : null}
 
       {urlError || error ? (
-        <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error ?? urlError}
-        </p>
+        <AuthErrorMessage>{error ?? urlError}</AuthErrorMessage>
       ) : null}
 
       {resendMessage ? (
-        <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
-          {resendMessage}
-        </p>
+        <AuthInfoMessage>{resendMessage}</AuthInfoMessage>
       ) : null}
 
       {showResendVerification ? (
@@ -213,14 +207,7 @@ export function SignInForm() {
         </Button>
       </form>
 
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-        </div>
-      </div>
+      <OAuthDivider />
 
       <Button
         type="button"

@@ -1,5 +1,6 @@
 import { Code2, Folder } from "lucide-react";
 
+import { PageSection } from "@/components/layout/page-container";
 import { getItemTypeIcon, getItemTypeLabel, getItemTypeStyles } from "@/lib/item-type-styles";
 import type { ProfileItemTypeCount } from "@/lib/db/profile";
 import {
@@ -56,10 +57,8 @@ export function UsageStatisticsCard({
     : `Collections (${collectionCount} / ${FREE_COLLECTION_LIMIT})`;
 
   return (
-    <div className="rounded-xl border border-border bg-card p-4">
-      <h2 className="text-lg font-semibold">Usage Statistics</h2>
-
-      <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+    <PageSection title="Usage Statistics" className="p-4">
+      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
         <StatCard
           icon={Code2}
           iconClassName="text-blue-500"
@@ -103,6 +102,6 @@ export function UsageStatisticsCard({
           })}
         </div>
       </div>
-    </div>
+    </PageSection>
   );
 }

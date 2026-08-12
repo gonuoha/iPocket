@@ -49,18 +49,24 @@ export function PageContent({ children, className }: PageContentProps) {
 }
 
 type PageSectionProps = {
-  title?: string;
+  title?: React.ReactNode;
+  description?: React.ReactNode;
   children: React.ReactNode;
   action?: React.ReactNode;
   className?: string;
+  contentClassName?: string;
 };
 
 export function PageSection({
   title,
+  description,
   children,
   action,
   className,
+  contentClassName,
 }: PageSectionProps) {
+  const hasHeader = title || description || action;
+
   return (
     <section
       className={cn(
@@ -68,13 +74,22 @@ export function PageSection({
         className,
       )}
     >
-      {title || action ? (
-        <div className="flex items-center justify-between gap-3">
-          {title ? <h2 className="text-lg font-semibold">{title}</h2> : <span />}
-          {action}
+      {hasHeader ? (
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            {title ? <h2 className="text-lg font-semibold">{title}</h2> : null}
+            {description ? (
+              <p className="mt-1 text-sm text-muted-foreground">{description}</p>
+            ) : null}
+          </div>
+          {action ? <div className="shrink-0">{action}</div> : null}
         </div>
       ) : null}
-      <div className={title || action ? "mt-4" : undefined}>{children}</div>
+      <div
+        className={cn(hasHeader ? "mt-4" : undefined, contentClassName)}
+      >
+        {children}
+      </div>
     </section>
   );
 }

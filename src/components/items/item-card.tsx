@@ -4,6 +4,7 @@ import { createElement } from "react";
 import { Pin } from "lucide-react";
 
 import type { DashboardItem } from "@/lib/db/items";
+import { formatShortDate } from "@/lib/format-date";
 import { getItemTypeIcon, getItemTypeStyles } from "@/lib/item-type-styles";
 import { getTypeColorBorderProps } from "@/lib/type-color-border";
 import { cn } from "@/lib/utils";
@@ -13,13 +14,6 @@ import { useTypeColorPosition } from "@/components/user-preferences/user-prefere
 import { ItemCopyButton } from "./item-copy-button";
 import { ItemFavoriteButton } from "./item-favorite-button";
 import { useItemDrawer } from "./item-drawer-context";
-
-function formatDate(date: Date | string) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-  }).format(new Date(date));
-}
 
 type ItemCardProps = {
   item: DashboardItem;
@@ -64,7 +58,7 @@ export function ItemCard({ item }: ItemCardProps) {
                 dateTime={item.updatedAt.toISOString()}
                 className="hidden shrink-0 text-xs text-muted-foreground sm:block"
               >
-                {formatDate(item.updatedAt)}
+                {formatShortDate(item.updatedAt)}
               </time>
             </div>
             {item.description ? (
@@ -87,7 +81,7 @@ export function ItemCard({ item }: ItemCardProps) {
                 </>
               ) : null}
               <time dateTime={item.updatedAt.toISOString()} className="sm:hidden">
-                {formatDate(item.updatedAt)}
+                {formatShortDate(item.updatedAt)}
               </time>
             </div>
           </div>

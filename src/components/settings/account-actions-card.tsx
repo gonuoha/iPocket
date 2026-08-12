@@ -3,6 +3,7 @@
 import { KeyRound, Mail } from "lucide-react";
 import { useState } from "react";
 
+import { PageSection } from "@/components/layout/page-container";
 import { ChangePasswordForm } from "@/components/profile/change-password-form";
 import { DeleteAccountButton } from "@/components/profile/delete-account-button";
 import { SendPasswordResetButton } from "@/components/settings/send-password-reset-button";
@@ -23,13 +24,11 @@ export function AccountActionsCard({ email, hasPassword }: AccountActionsCardPro
   const [changePasswordOpen, setChangePasswordOpen] = useState(false);
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
-      <h2 className="text-lg font-semibold">Account Actions</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Manage your password and account security.
-      </p>
-
-      <div className="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+    <PageSection
+      title="Account Actions"
+      description="Manage your password and account security."
+    >
+      <div className="flex flex-col gap-3 sm:flex-row sm:flex-wrap">
         {hasPassword ? (
           <>
             <Button
@@ -72,6 +71,6 @@ export function AccountActionsCard({ email, hasPassword }: AccountActionsCardPro
         </p>
         <DeleteAccountButton className="mt-3 sm:w-auto" />
       </div>
-    </div>
+    </PageSection>
   );
 }

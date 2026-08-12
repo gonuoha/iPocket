@@ -7,18 +7,11 @@ import { buttonVariants } from "@/components/ui/button";
 import type { FileListItem } from "@/lib/db/items";
 import { formatFileSize } from "@/lib/file-upload";
 import { getFileIconByExtension } from "@/lib/file-icons";
+import { formatShortDateWithYear } from "@/lib/format-date";
 import { cn } from "@/lib/utils";
 
 import { ItemFavoriteButton } from "./item-favorite-button";
 import { useItemDrawer } from "./item-drawer-context";
-
-function formatUploadDate(date: Date | string) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(date));
-}
 
 type FileListRowProps = {
   item: FileListItem;
@@ -56,7 +49,7 @@ export function FileListRow({ item }: FileListRowProps) {
           <div className="mt-1 flex flex-col gap-1 text-sm text-muted-foreground sm:hidden">
             {item.fileSize ? <span>{formatFileSize(item.fileSize)}</span> : null}
             <time dateTime={item.createdAt.toISOString()}>
-              {formatUploadDate(item.createdAt)}
+              {formatShortDateWithYear(item.createdAt)}
             </time>
           </div>
         </div>
@@ -73,7 +66,7 @@ export function FileListRow({ item }: FileListRowProps) {
             dateTime={item.createdAt.toISOString()}
             className="w-28 text-right"
           >
-            {formatUploadDate(item.createdAt)}
+            {formatShortDateWithYear(item.createdAt)}
           </time>
         </div>
         <ItemFavoriteButton

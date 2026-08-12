@@ -4,7 +4,8 @@ import { useState, useTransition } from "react";
 import { toast } from "sonner";
 
 import { updateUserPreferences } from "@/actions/settings";
-import { Label } from "@/components/ui/label";
+import { PageSection } from "@/components/layout/page-container";
+import { PreferenceField } from "@/components/shared/preference-field";
 import {
   Select,
   SelectContent,
@@ -54,34 +55,30 @@ export function UserPreferencesCard({
   };
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
-      <h2 className="text-lg font-semibold">User Preferences</h2>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Customize your iPocket experience.
-        {isSaving ? " Saving..." : ""}
-      </p>
-
-      <div className="mt-6 space-y-6">
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <Label className="text-sm font-medium">Overview section</Label>
-            <p className="text-sm text-muted-foreground">
-              Show item type stats at the top of the dashboard.
-            </p>
-          </div>
+    <PageSection
+      title="User Preferences"
+      description={
+        <>
+          Customize your iPocket experience.
+          {isSaving ? " Saving..." : ""}
+        </>
+      }
+      contentClassName="space-y-6"
+    >
+        <PreferenceField
+          label="Overview section"
+          description="Show item type stats at the top of the dashboard."
+        >
           <Switch
             checked={preferences.showOverview}
             onCheckedChange={(checked) => updateField("showOverview", checked)}
           />
-        </div>
+        </PreferenceField>
 
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <div className="space-y-1">
-            <Label className="text-sm font-medium">Type color position</Label>
-            <p className="text-sm text-muted-foreground">
-              Choose where the item type color appears on cards.
-            </p>
-          </div>
+        <PreferenceField
+          label="Type color position"
+          description="Choose where the item type color appears on cards."
+        >
           <Select
             value={preferences.typeColorPosition}
             onValueChange={(value) =>
@@ -99,8 +96,7 @@ export function UserPreferencesCard({
               ))}
             </SelectContent>
           </Select>
-        </div>
-      </div>
-    </div>
+        </PreferenceField>
+    </PageSection>
   );
 }

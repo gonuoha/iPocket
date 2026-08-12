@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { AuthErrorMessage } from "@/components/auth/auth-message";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -65,11 +66,7 @@ export function ResetPasswordForm({ token }: ResetPasswordFormProps) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
-      {error ? (
-        <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
+      {error ? <AuthErrorMessage>{error}</AuthErrorMessage> : null}
 
       <div className="space-y-2">
         <Label htmlFor="password">New password</Label>

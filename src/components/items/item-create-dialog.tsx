@@ -4,10 +4,8 @@ import { createElement, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
-import { generateAutoTags, generateSummary } from "@/actions/ai";
 import { createItem } from "@/actions/items";
 import {
-  CollectionMultiSelect,
   type SelectableCollection,
 } from "@/components/collections/collection-multi-select";
 import { Button } from "@/components/ui/button";
@@ -19,7 +17,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
   Select,
@@ -29,35 +26,19 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  CODE_EDITOR_TYPE_NAMES,
-  CodeEditor,
-} from "@/components/code-editor/code-editor";
-import { LanguageSelect } from "@/components/code-editor/language-select";
-import {
   FileUpload,
   type UploadedFile,
 } from "@/components/items/file-upload";
-import {
-  MARKDOWN_EDITOR_TYPE_NAMES,
-  MarkdownEditor,
-} from "@/components/markdown-editor/markdown-editor";
-import { Textarea } from "@/components/ui/textarea";
+import { ItemFormFields } from "@/components/items/item-form-fields";
 import { getItemTypeIcon, getItemTypeLabel } from "@/lib/item-type-styles";
+import { FILE_TYPE_NAMES } from "@/lib/item-form-constants";
 import { isAtItemLimit } from "@/lib/subscription-limits";
 import {
   resolveDefaultCreateType,
   type CreatableItemType,
 } from "@/lib/validations/items";
 import { UpgradePrompt } from "@/components/shared/upgrade-prompt";
-import { SuggestTagsButton } from "@/components/ai/suggest-tags-button";
-import { SuggestedTags } from "@/components/ai/suggested-tags";
-import { GenerateSummaryButton } from "@/components/ai/generate-summary-button";
-import { SuggestedSummary } from "@/components/ai/suggested-summary";
-import {
-  buildSummaryContent,
-  canGenerateSummary,
-} from "@/lib/ai/build-summary-content";
-import { appendTagToTagsString, parseTagsString } from "@/lib/parse-tags";
+import { useAiItemSuggestions } from "@/hooks/use-ai-item-suggestions";
 
 const CREATABLE_ITEM_TYPES: {
   type: CreatableItemType;
@@ -71,11 +52,6 @@ const CREATABLE_ITEM_TYPES: {
   { type: "image", icon: "Image" },
   { type: "file", icon: "File" },
 ];
-
-const CONTENT_TYPE_NAMES = new Set(["snippet", "prompt", "command", "note"]);
-const LANGUAGE_TYPE_NAMES = new Set(["snippet", "command"]);
-const URL_TYPE_NAMES = new Set(["link"]);
-const FILE_TYPE_NAMES = new Set(["file", "image"]);
 
 type CreateFormState = {
   type: CreatableItemType;
@@ -120,31 +96,20 @@ export function ItemCreateDialog({
 }: ItemCreateDialogProps) {
   const router = useRouter();
   const [formState, setFormState] = useState<CreateFormState>(initialFormState);
-  const [suggestedTags, setSuggestedTags] = useState<string[]>([]);
-  const [suggestedSummary, setSuggestedSummary] = useState<string | null>(null);
   const [isCreating, startCreating] = useTransition();
-  const [isSuggesting, startSuggesting] = useTransition();
-  const [isSummarizing, startSummarizing] = useTransition();
   const [upgradeOpen, setUpgradeOpen] = useState(false);
 
-  const showContent = CONTENT_TYPE_NAMES.has(formState.type);
-  const showLanguage = LANGUAGE_TYPE_NAMES.has(formState.type);
-  const showUrl = URL_TYPE_NAMES.has(formState.type);
   const showFileUpload = FILE_TYPE_NAMES.has(formState.type);
-  const useCodeEditor = CODE_EDITOR_TYPE_NAMES.has(formState.type);
-  const useMarkdownEditor = MARKDOWN_EDITOR_TYPE_NAMES.has(formState.type);
   const canCreate =
     formState.title.trim().length > 0 &&
-    (!showUrl || formState.url.trim().length > 0) &&
-    (!showFileUpload || formState.uploadedFile !== null) &&
+    (!FILE_TYPE_NAMES.has(formState.type) || formState.uploadedFile !== null) &&
+    (formState.type !== "link" || formState.url.trim().length > 0) &&
     !isCreating;
 
   const suggestContent =
     formState.type === "link"
       ? formState.content.trim() || formState.url.trim()
       : formState.content.trim();
-  const canSuggestTags =
-    formState.title.trim().length > 0 && suggestContent.length > 0;
   const summaryContentInput = {
     type: formState.type,
     content: formState.content,
@@ -152,10 +117,16 @@ export function ItemCreateDialog({
     fileName: formState.uploadedFile?.fileName,
     language: formState.language,
   };
-  const canGenerateSummaryEnabled = canGenerateSummary(
-    formState.title,
+
+  const aiSuggestions = useAiItemSuggestions({
+    title: formState.title,
+    tags: formState.tags,
+    type: formState.type,
+    suggestContent,
     summaryContentInput,
-  );
+    onTagsChange: (tags) => handleFormChange({ tags }),
+    onDescriptionChange: (description) => handleFormChange({ description }),
+  });
 
   function handleOpenChange(nextOpen: boolean) {
     if (nextOpen) {
@@ -163,12 +134,10 @@ export function ItemCreateDialog({
         ...initialFormState,
         type: resolveDefaultCreateType(defaultType, isPro),
       });
-      setSuggestedTags([]);
-      setSuggestedSummary(null);
+      aiSuggestions.resetSuggestions();
     } else {
       setFormState(initialFormState);
-      setSuggestedTags([]);
-      setSuggestedSummary(null);
+      aiSuggestions.resetSuggestions();
     }
 
     onOpenChange(nextOpen);
@@ -184,65 +153,7 @@ export function ItemCreateDialog({
       type,
       uploadedFile: null,
     }));
-    setSuggestedTags([]);
-    setSuggestedSummary(null);
-  }
-
-  function handleGenerateSummary() {
-    startSummarizing(async () => {
-      const result = await generateSummary({
-        title: formState.title.trim(),
-        content: buildSummaryContent(summaryContentInput),
-        type: formState.type,
-      });
-
-      if (!result.success) {
-        toast.error(result.error);
-        return;
-      }
-
-      setSuggestedSummary(result.data.summary);
-    });
-  }
-
-  function handleAcceptSuggestedSummary() {
-    if (!suggestedSummary) {
-      return;
-    }
-
-    handleFormChange({ description: suggestedSummary });
-    setSuggestedSummary(null);
-  }
-
-  function handleRejectSuggestedSummary() {
-    setSuggestedSummary(null);
-  }
-
-  function handleSuggestTags() {
-    startSuggesting(async () => {
-      const result = await generateAutoTags({
-        title: formState.title.trim(),
-        content: suggestContent,
-        type: formState.type,
-        existingTags: parseTagsString(formState.tags),
-      });
-
-      if (!result.success) {
-        toast.error(result.error);
-        return;
-      }
-
-      setSuggestedTags(result.data.tags);
-    });
-  }
-
-  function handleAcceptSuggestedTag(tag: string) {
-    handleFormChange({ tags: appendTagToTagsString(formState.tags, tag) });
-    setSuggestedTags((previous) => previous.filter((value) => value !== tag));
-  }
-
-  function handleRejectSuggestedTag(tag: string) {
-    setSuggestedTags((previous) => previous.filter((value) => value !== tag));
+    aiSuggestions.resetSuggestions();
   }
 
   function handleCreate() {
@@ -327,41 +238,6 @@ export function ItemCreateDialog({
             </Select>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="item-create-title">Title</Label>
-            <Input
-              id="item-create-title"
-              value={formState.title}
-              onChange={(event) => handleFormChange({ title: event.target.value })}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center justify-between gap-2">
-              <Label htmlFor="item-create-description">Description</Label>
-              <GenerateSummaryButton
-                isPro={isPro}
-                disabled={!canGenerateSummaryEnabled}
-                onGenerate={handleGenerateSummary}
-                isLoading={isSummarizing}
-              />
-            </div>
-            <Textarea
-              id="item-create-description"
-              value={formState.description}
-              onChange={(event) =>
-                handleFormChange({ description: event.target.value })
-              }
-              rows={3}
-            />
-            <SuggestedSummary
-              summary={suggestedSummary}
-              onAccept={handleAcceptSuggestedSummary}
-              onReject={handleRejectSuggestedSummary}
-            />
-          </div>
-
           {showFileUpload ? (
             <div className="space-y-2">
               <Label>{formState.type === "image" ? "Image" : "File"}</Label>
@@ -374,88 +250,27 @@ export function ItemCreateDialog({
             </div>
           ) : null}
 
-          {showLanguage ? (
-            <LanguageSelect
-              id="item-create-language"
-              value={formState.language}
-              onChange={(language) => handleFormChange({ language })}
-              disabled={isCreating}
-            />
-          ) : null}
-
-          {showContent ? (
-            <div className="space-y-2">
-              <Label htmlFor="item-create-content">Content</Label>
-              {useCodeEditor ? (
-                <CodeEditor
-                  id="item-create-content"
-                  value={formState.content}
-                  language={formState.language}
-                  onChange={(content) => handleFormChange({ content })}
-                />
-              ) : useMarkdownEditor ? (
-                <MarkdownEditor
-                  id="item-create-content"
-                  value={formState.content}
-                  onChange={(content) => handleFormChange({ content })}
-                />
-              ) : (
-                <Textarea
-                  id="item-create-content"
-                  value={formState.content}
-                  onChange={(event) =>
-                    handleFormChange({ content: event.target.value })
-                  }
-                  className="min-h-32 font-mono text-sm"
-                />
-              )}
-            </div>
-          ) : null}
-
-          {showUrl ? (
-            <div className="space-y-2">
-              <Label htmlFor="item-create-url">URL</Label>
-              <Input
-                id="item-create-url"
-                type="url"
-                value={formState.url}
-                onChange={(event) => handleFormChange({ url: event.target.value })}
-                required
-              />
-            </div>
-          ) : null}
-
-          <div className="space-y-2">
-            <Label htmlFor="item-create-tags">Tags</Label>
-            <div className="flex items-center gap-2">
-              <Input
-                id="item-create-tags"
-                value={formState.tags}
-                onChange={(event) => handleFormChange({ tags: event.target.value })}
-                placeholder="Comma-separated tags"
-                className="min-w-0 flex-1"
-              />
-              <SuggestTagsButton
-                isPro={isPro}
-                disabled={!canSuggestTags}
-                onSuggest={handleSuggestTags}
-                isLoading={isSuggesting}
-              />
-            </div>
-            <SuggestedTags
-              tags={suggestedTags}
-              onAccept={handleAcceptSuggestedTag}
-              onReject={handleRejectSuggestedTag}
-              onDismiss={() => setSuggestedTags([])}
-            />
-          </div>
-
-          <CollectionMultiSelect
-            id="item-create-collections"
+          <ItemFormFields
+            idPrefix="item-create"
+            typeName={formState.type}
+            formState={formState}
+            onChange={handleFormChange}
             collections={collections}
-            value={formState.collectionIds}
-            onChange={(collectionIds) => handleFormChange({ collectionIds })}
+            isPro={isPro}
             disabled={isCreating}
+            suggestedTags={aiSuggestions.suggestedTags}
+            isSuggesting={aiSuggestions.isSuggesting}
+            canSuggestTags={aiSuggestions.canSuggestTags}
+            suggestedSummary={aiSuggestions.suggestedSummary}
+            isSummarizing={aiSuggestions.isSummarizing}
+            canGenerateSummary={aiSuggestions.canGenerateSummaryEnabled}
+            onSuggestTags={aiSuggestions.handleSuggestTags}
+            onAcceptSuggestedTag={aiSuggestions.handleAcceptSuggestedTag}
+            onRejectSuggestedTag={aiSuggestions.handleRejectSuggestedTag}
+            onDismissSuggestedTags={aiSuggestions.dismissSuggestedTags}
+            onGenerateSummary={aiSuggestions.handleGenerateSummary}
+            onAcceptSuggestedSummary={aiSuggestions.handleAcceptSuggestedSummary}
+            onRejectSuggestedSummary={aiSuggestions.handleRejectSuggestedSummary}
           />
         </div>
 

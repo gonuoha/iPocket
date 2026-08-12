@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
+import { PageSection } from "@/components/layout/page-container";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -67,21 +68,24 @@ export function BillingCard({
   }
 
   return (
-    <div className="rounded-xl border border-border bg-card p-6">
-      <div className="flex items-center gap-2">
-        <h2 className="text-lg font-semibold">Billing</h2>
-        <Badge variant={isPro ? "default" : "outline"}>
-          {isPro ? "Pro" : "Free"}
-        </Badge>
-      </div>
-
+    <PageSection
+      title={
+        <span className="flex items-center gap-2">
+          Billing
+          <Badge variant={isPro ? "default" : "outline"}>
+            {isPro ? "Pro" : "Free"}
+          </Badge>
+        </span>
+      }
+      description={
+        isPro
+          ? "Manage your subscription, payment method, and billing details."
+          : "Upgrade to Pro for unlimited items, collections, file uploads, and more."
+      }
+    >
       {!isPro ? (
         <>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Upgrade to Pro for unlimited items, collections, file uploads, and more.
-          </p>
-
-          <div className="mt-4 grid grid-cols-1 gap-2 sm:grid-cols-2">
+          <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
             <div className="rounded-lg border border-border bg-background p-3">
               <p className="text-sm text-muted-foreground">Items</p>
               <p className="text-2xl font-semibold tabular-nums">
@@ -114,21 +118,15 @@ export function BillingCard({
           </Button>
         </>
       ) : (
-        <>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage your subscription, payment method, and billing details.
-          </p>
-          <Button
-            type="button"
-            variant="outline"
-            className="mt-4"
-            onClick={handleManageSubscription}
-            disabled={isLoading || !stripeCustomerId}
-          >
-            {isLoading ? "Opening..." : "Manage subscription"}
-          </Button>
-        </>
+        <Button
+          type="button"
+          variant="outline"
+          onClick={handleManageSubscription}
+          disabled={isLoading || !stripeCustomerId}
+        >
+          {isLoading ? "Opening..." : "Manage subscription"}
+        </Button>
       )}
-    </div>
+    </PageSection>
   );
 }

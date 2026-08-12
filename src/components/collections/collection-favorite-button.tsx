@@ -1,12 +1,9 @@
 "use client";
 
 import { Star } from "lucide-react";
-import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
-import { toast } from "sonner";
 
-import { toggleCollectionFavorite } from "@/actions/collections";
 import { Button } from "@/components/ui/button";
+import { useCollectionFavorite } from "@/hooks/use-collection-favorite";
 import { cn } from "@/lib/utils";
 
 type CollectionFavoriteButtonProps = {
@@ -22,29 +19,15 @@ export function CollectionFavoriteButton({
   className,
   onToggle,
 }: CollectionFavoriteButtonProps) {
-  const router = useRouter();
-  const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
-  const [isPending, startTransition] = useTransition();
+  const { isFavorite, isPending, toggleFavorite } = useCollectionFavorite(
+    collectionId,
+    initialIsFavorite,
+    onToggle,
+  );
 
   function handleClick(event: React.MouseEvent) {
     event.stopPropagation();
-
-    const nextIsFavorite = !isFavorite;
-    setIsFavorite(nextIsFavorite);
-
-    startTransition(async () => {
-      const result = await toggleCollectionFavorite(collectionId);
-
-      if (!result.success) {
-        setIsFavorite(!nextIsFavorite);
-        toast.error(result.error);
-        return;
-      }
-
-      setIsFavorite(result.data.isFavorite);
-      onToggle?.(result.data.isFavorite);
-      router.refresh();
-    });
+    toggleFavorite();
   }
 
   return (

@@ -17,6 +17,7 @@ import {
 import { useItemDrawer } from "@/components/items/item-drawer-context";
 import type { FavoriteCollection } from "@/lib/db/collections";
 import type { DashboardItem } from "@/lib/db/items";
+import { formatShortDateWithYear } from "@/lib/format-date";
 import {
   type FavoriteCollectionSortField,
   FAVORITE_COLLECTION_SORT_OPTIONS,
@@ -48,14 +49,6 @@ const COLLECTION_SORT_LABELS: Record<FavoriteCollectionSortField, string> = {
   "name-asc": "Name A-Z",
   "name-desc": "Name Z-A",
 };
-
-function formatFavoriteDate(date: Date | string) {
-  return new Intl.DateTimeFormat("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(date));
-}
 
 type FavoriteItemRowProps = {
   item: DashboardItem;
@@ -90,7 +83,7 @@ function FavoriteItemRow({ item }: FavoriteItemRowProps) {
         dateTime={item.updatedAt.toISOString()}
         className="shrink-0 text-xs text-muted-foreground tabular-nums"
       >
-        {formatFavoriteDate(item.updatedAt)}
+        {formatShortDateWithYear(item.updatedAt)}
       </time>
     </button>
   );
@@ -117,7 +110,7 @@ function FavoriteCollectionRow({ collection }: FavoriteCollectionRowProps) {
         dateTime={collection.updatedAt.toISOString()}
         className="shrink-0 text-xs text-muted-foreground tabular-nums"
       >
-        {formatFavoriteDate(collection.updatedAt)}
+        {formatShortDateWithYear(collection.updatedAt)}
       </time>
     </Link>
   );

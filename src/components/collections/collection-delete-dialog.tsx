@@ -5,16 +5,7 @@ import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 import { deleteCollection } from "@/actions/collections";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { ConfirmDeleteDialog } from "@/components/shared/confirm-delete-dialog";
 
 type CollectionDeleteDialogProps = {
   collectionId: string;
@@ -55,27 +46,19 @@ export function CollectionDeleteDialog({
   }
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Delete collection?</AlertDialogTitle>
-          <AlertDialogDescription>
-            This will permanently delete &ldquo;{collectionName}&rdquo;. Items in
-            this collection will not be deleted, but they will no longer be
-            associated with it.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            onClick={handleDeleteConfirm}
-            disabled={isDeleting}
-          >
-            {isDeleting ? "Deleting..." : "Delete"}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <ConfirmDeleteDialog
+      open={open}
+      onOpenChange={onOpenChange}
+      title="Delete collection?"
+      description={
+        <>
+          This will permanently delete &ldquo;{collectionName}&rdquo;. Items in
+          this collection will not be deleted, but they will no longer be
+          associated with it.
+        </>
+      }
+      isDeleting={isDeleting}
+      onConfirm={handleDeleteConfirm}
+    />
   );
 }

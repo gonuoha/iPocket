@@ -15,9 +15,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
+import { CollectionFormFields } from "@/components/collections/collection-form-fields";
 import { isAtCollectionLimit } from "@/lib/subscription-limits";
 
 type CreateFormState = {
@@ -101,27 +99,12 @@ export function CollectionCreateDialog({
           </DialogHeader>
 
           <div className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="collection-create-name">Name</Label>
-              <Input
-                id="collection-create-name"
-                value={formState.name}
-                onChange={(event) => handleFormChange({ name: event.target.value })}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="collection-create-description">Description</Label>
-              <Textarea
-                id="collection-create-description"
-                value={formState.description}
-                onChange={(event) =>
-                  handleFormChange({ description: event.target.value })
-                }
-                rows={3}
-              />
-            </div>
+            <CollectionFormFields
+              idPrefix="collection-create"
+              name={formState.name}
+              description={formState.description}
+              onChange={handleFormChange}
+            />
           </div>
 
           <DialogFooter>

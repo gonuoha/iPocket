@@ -1,12 +1,12 @@
 "use client";
 
 import { Check, Copy } from "lucide-react";
-import { useState } from "react";
 import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import type { ItemDetail } from "@/lib/db/items";
 import { getItemCopyText } from "@/lib/item-copy";
+import { useCopyToClipboard } from "@/hooks/use-copy-to-clipboard";
 import { cn } from "@/lib/utils";
 
 type ItemCopyButtonProps = {
@@ -15,7 +15,7 @@ type ItemCopyButtonProps = {
 };
 
 export function ItemCopyButton({ itemId, className }: ItemCopyButtonProps) {
-  const [copied, setCopied] = useState(false);
+  const { copied, copy } = useCopyToClipboard();
 
   async function handleCopy(event: React.MouseEvent) {
     event.stopPropagation();
@@ -29,10 +29,7 @@ export function ItemCopyButton({ itemId, className }: ItemCopyButtonProps) {
       }
 
       const item = (await response.json()) as ItemDetail;
-      await navigator.clipboard.writeText(getItemCopyText(item));
-      setCopied(true);
-      toast.success("Copied to clipboard");
-      window.setTimeout(() => setCopied(false), 2000);
+      await copy(getItemCopyText(item));
     } catch {
       toast.error("Failed to copy");
     }

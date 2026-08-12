@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { signIn } from "next-auth/react";
 import { useState } from "react";
 
+import { AuthErrorMessage, AuthInfoMessage } from "@/components/auth/auth-message";
+import { OAuthDivider } from "@/components/auth/oauth-divider";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -89,10 +91,10 @@ export function RegisterForm() {
   if (isComplete) {
     return (
       <div className="space-y-4">
-        <p className="rounded-lg border border-border bg-muted/50 px-3 py-2 text-sm text-muted-foreground">
+        <AuthInfoMessage>
           We sent a verification link to <span className="font-medium text-foreground">{email}</span>.
           Click the link in your email to activate your account.
-        </p>
+        </AuthInfoMessage>
         <p className="text-center text-sm text-muted-foreground">
           Already verified?{" "}
           <Link href="/sign-in" className="text-foreground underline-offset-4 hover:underline">
@@ -105,11 +107,7 @@ export function RegisterForm() {
 
   return (
     <div className="space-y-4">
-      {error ? (
-        <p className="rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm text-destructive">
-          {error}
-        </p>
-      ) : null}
+      {error ? <AuthErrorMessage>{error}</AuthErrorMessage> : null}
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-2">
@@ -165,14 +163,7 @@ export function RegisterForm() {
         </Button>
       </form>
 
-      <div className="relative">
-        <div className="absolute inset-0 flex items-center">
-          <span className="w-full border-t border-border" />
-        </div>
-        <div className="relative flex justify-center text-xs uppercase">
-          <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
-        </div>
-      </div>
+      <OAuthDivider />
 
       <Button
         type="button"
