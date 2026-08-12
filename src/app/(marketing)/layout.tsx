@@ -16,7 +16,7 @@ export default function MarketingLayout({
   return (
     <>
       <MarketingScroll />
-      {children}
+      <div className="min-w-0 max-w-full">{children}</div>
     </>
   );
 }

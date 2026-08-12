@@ -8,16 +8,16 @@ export function HomepageFooter() {
 
   return (
     <footer className="border-t border-border px-6 pt-12 pb-6">
-      <div className="mx-auto max-w-6xl">
-        <div className="mb-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-[2fr_1fr_1fr_1fr]">
-          <div>
+      <div className="mx-auto min-w-0 max-w-6xl">
+        <div className="mb-8 grid min-w-0 gap-8 sm:grid-cols-2 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)_minmax(0,1fr)_minmax(0,1fr)]">
+          <div className="min-w-0">
             <MarketingLogo />
             <p className="mt-3 max-w-64 text-sm text-muted-foreground">
               One hub for all your developer knowledge.
             </p>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <h4 className="mb-3 text-sm font-semibold">Product</h4>
             <div className="flex flex-col gap-1">
               {FOOTER_LINKS.product.map((link) => (
@@ -32,7 +32,7 @@ export function HomepageFooter() {
             </div>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <h4 className="mb-3 text-sm font-semibold">Company</h4>
             <div className="flex flex-col gap-1">
               {FOOTER_LINKS.company.map((link) => (
@@ -47,7 +47,7 @@ export function HomepageFooter() {
             </div>
           </div>
 
-          <div>
+          <div className="min-w-0">
             <h4 className="mb-3 text-sm font-semibold">Legal</h4>
             <div className="flex flex-col gap-1">
               {FOOTER_LINKS.legal.map((link) => (

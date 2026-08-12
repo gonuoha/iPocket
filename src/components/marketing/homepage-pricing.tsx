@@ -57,7 +57,7 @@ export function HomepagePricing({ isLoggedIn, isPro }: HomepagePricingProps) {
 
   return (
     <section id="pricing" className="scroll-mt-20 px-6 py-20">
-      <div className="mx-auto max-w-6xl">
+      <div className="mx-auto min-w-0 max-w-6xl">
         <FadeInOnScroll className="mx-auto mb-12 max-w-xl text-center">
           <h2 className="text-3xl font-bold tracking-tight sm:text-4xl">
             Simple, transparent pricing
@@ -67,11 +67,11 @@ export function HomepagePricing({ isLoggedIn, isPro }: HomepagePricingProps) {
           </p>
         </FadeInOnScroll>
 
-        <FadeInOnScroll className="mb-8">
+        <FadeInOnScroll className="mb-8 flex w-full max-w-full justify-center">
           <BillingPeriodToggle period={period} onPeriodChange={setPeriod} />
         </FadeInOnScroll>
 
-        <div className="mx-auto grid max-w-3xl gap-6 sm:grid-cols-2">
+        <div className="mx-auto grid min-w-0 max-w-3xl grid-cols-1 gap-6 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
           <FadeInOnScroll>
             <PricingPlanCard
               name={free.name}

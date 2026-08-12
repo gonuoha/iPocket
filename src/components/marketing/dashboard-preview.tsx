@@ -23,8 +23,8 @@ export function DashboardPreview({ className }: { className?: string }) {
       <p className="mb-3 text-xs font-medium tracking-wider text-muted-foreground uppercase">
         ...with Memex
       </p>
-      <div className="flex h-[220px] overflow-hidden rounded-lg border border-border bg-card">
-        <aside className="w-[28%] min-w-20 border-r border-border bg-background p-3">
+      <div className="flex h-[220px] min-w-0 max-w-full overflow-hidden rounded-lg border border-border bg-card">
+        <aside className="w-[28%] min-w-0 shrink-0 border-r border-border bg-background p-3 sm:min-w-16">
           <div className="mb-3 text-[0.65rem] font-semibold text-primary">
             Memex
           </div>
@@ -34,8 +34,8 @@ export function DashboardPreview({ className }: { className?: string }) {
                 key={item.label}
                 className={
                   item.active
-                    ? "rounded bg-secondary px-2 py-1 text-[0.6rem] text-foreground"
-                    : "px-2 py-1 text-[0.6rem] text-muted-foreground"
+                    ? "truncate rounded bg-secondary px-2 py-1 text-[0.6rem] text-foreground"
+                    : "truncate px-2 py-1 text-[0.6rem] text-muted-foreground"
                 }
               >
                 {item.label}
@@ -44,11 +44,11 @@ export function DashboardPreview({ className }: { className?: string }) {
           </nav>
         </aside>
         <div className="min-w-0 flex-1 overflow-hidden p-2">
-          <div className="grid grid-cols-2 gap-1.5">
+          <div className="grid min-w-0 grid-cols-2 gap-1.5">
             {DASHBOARD_MOCK_CARDS.map((card) => (
               <div
                 key={card.title}
-                className="rounded-md bg-secondary px-2 py-1.5 text-[0.55rem]"
+                className="min-w-0 truncate rounded-md bg-secondary px-2 py-1.5 text-[0.55rem]"
                 style={{
                   borderTop: `2px solid ${SYSTEM_ITEM_TYPE_COLORS[card.type]}`,
                 }}

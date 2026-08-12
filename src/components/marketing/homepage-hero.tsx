@@ -7,7 +7,7 @@ import { cn } from "@/lib/utils";
 
 export function HomepageHero() {
   return (
-    <section className="overflow-x-clip px-6 pt-28 pb-16">
+    <section className="px-6 pt-28 pb-16">
       <div className="mx-auto min-w-0 max-w-6xl">
         <div className="mx-auto mb-12 max-w-2xl motion-safe:animate-[homepage-fade-in_0.8s_ease-out_forwards] text-center">
           <h1 className="text-4xl leading-tight font-bold tracking-tight sm:text-5xl lg:text-[3.25rem]">
@@ -45,7 +45,7 @@ export function HomepageHero() {
           </div>
         </div>
 
-        <div className="motion-safe:animate-[homepage-fade-in_0.8s_ease-out_forwards]">
+        <div className="min-w-0 max-w-full motion-safe:animate-[homepage-fade-in_0.8s_ease-out_forwards]">
           <HomepageHeroVisual />
         </div>
       </div>

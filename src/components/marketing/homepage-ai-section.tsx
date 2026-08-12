@@ -10,9 +10,9 @@ import {
 
 export function HomepageAiSection() {
   return (
-    <section id="ai" className="overflow-x-clip px-6 py-20">
-      <div className="mx-auto grid min-w-0 max-w-6xl items-center gap-12 lg:grid-cols-2">
-        <FadeInOnScroll className="min-w-0">
+    <section id="ai" className="px-6 py-20">
+      <div className="mx-auto grid min-w-0 max-w-6xl items-center gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+        <FadeInOnScroll className="min-w-0 max-w-full">
           <Badge
             className="mb-4 border-0 text-white"
             style={{
@@ -41,16 +41,16 @@ export function HomepageAiSection() {
           </ul>
         </FadeInOnScroll>
 
-        <FadeInOnScroll className="min-w-0">
-          <div className="max-w-full overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
+        <FadeInOnScroll className="min-w-0 max-w-full">
+          <div className="min-w-0 max-w-full overflow-hidden rounded-2xl border border-border bg-card shadow-lg">
             <div className="flex items-center gap-1.5 border-b border-border bg-secondary/50 px-4 py-3">
               <span className="size-2 rounded-full bg-red-500" />
               <span className="size-2 rounded-full bg-yellow-500" />
               <span className="size-2 rounded-full bg-green-500" />
               <span className="ml-2 text-xs text-muted-foreground">typescript</span>
             </div>
-            <pre className="overflow-x-auto p-4 font-mono text-[0.8125rem] leading-relaxed">
-              <code>
+            <pre className="max-w-full overflow-x-auto p-4 font-mono text-[0.8125rem] leading-relaxed">
+              <code className="block max-w-full">
                 <span className="text-[#c678dd]">async function</span>{" "}
                 <span className="text-[#61afef]">fetchUser</span>(
                 <span className="text-[#e5c07b]">id</span>:{" "}

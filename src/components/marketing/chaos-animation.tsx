@@ -284,7 +284,7 @@ export function ChaosAnimation() {
   return (
     <div
       ref={containerRef}
-      className="relative h-[220px] overflow-hidden rounded-lg bg-card sm:h-[220px]"
+      className="relative h-[220px] w-full max-w-full overflow-hidden rounded-lg bg-card sm:h-[220px]"
       aria-hidden="true"
     >
       {CHAOS_ICONS.map((icon, index) => (
