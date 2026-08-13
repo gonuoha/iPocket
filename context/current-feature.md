@@ -1,52 +1,16 @@
-# Current Feature: Theme System — Slate Horizon
+# Current Feature
 
 ## Status
 
-In Progress
+Not Started
 
 ## Goals
 
-- Replace neutral grayscale palette with **Slate Horizon** theme: cool blue-tinted surfaces, sky-blue primary accents, harmonized item-type colors
-- Update `:root` (light) and `.dark` token blocks in `src/app/globals.css` with oklch values from spec
-- Add extended semantic tokens (prose, scrollbar, overlay, gradients, favorite) and register in `@theme inline`
-- Refactor `.markdown-preview`, `.code-editor`, and `.markdown-editor` CSS to use theme tokens instead of hardcoded oklch
-- Update marketing components: hero/AI section gradients (`text-gradient-hero`), CTA gradient, replace pink tail with blue → violet
-- Replace dialog/alert-dialog `bg-black/10` overlays with `bg-overlay` token
-- Switch favorite star icons from `text-yellow-*` to `text-favorite`
-- Update `SYSTEM_ITEM_TYPE_COLORS` in `homepage-content.ts` and item type colors in `prisma/seed.ts`
-- Grep and fix remaining hardcoded theme colors (`oklch(`, `pink-500`, `bg-black`, `text-yellow-4`)
-- Keep dark mode as default on `<html>`; light mode tokens ready but no user-facing toggle
-- Pass accessibility contrast checks (body text ≥ 4.5:1, primary buttons, focus rings, item type colors ≥ 3:1)
-- Lint, tests, and build pass; visual check against `.ui-review/output/screenshots/`
+<!-- What success looks like for the active feature -->
 
 ## Notes
 
-**Spec:** `context/features/theme-system-spec.md`
-
-**Personality:** Quiet research workspace — cool, trustworthy, slightly academic. Distinct from generic startup purple or GitHub green themes.
-
-**Key token changes (dark mode — shipped default):**
-- Background: deep blue-slate `oklch(0.145 0.018 245)` (not neutral gray)
-- Primary: sky blue `oklch(0.72 0.13 225)` with dark slate foreground on buttons
-- Cards/sidebar: blue-tinted slate steps; hierarchy through surface, not shadow
-
-**Item type colors (constants + seed only — no production DB migration):**
-
-| Type | New color |
-| --- | --- |
-| snippet | `#4DA3E8` |
-| prompt | `#9B8AFB` |
-| command | `#E8944A` |
-| note | `#D4B84A` |
-| file | `#7B8A9A` |
-| image | `#D46BA8` |
-| link | `#3DB88A` |
-
-**Primary files:** `src/app/globals.css`, marketing components (`homepage-hero.tsx`, `homepage-ai-section.tsx`, `homepage-cta.tsx`), `dialog.tsx`, `alert-dialog.tsx`, `homepage-content.ts`, `prisma/seed.ts`
-
-**Out of scope:** Theme picker / `next-themes`, persisting appearance in DB, Monaco theme list changes, production `ItemType.color` migration, layout/typography redesign. Alternative themes (Obsidian, Paper, Terminal, Ink & Amber) are documented only.
-
-**References:** `context/coding-standards.md`, `context/features/homepage-spec.md`, `.ui-review/output/screenshots/`
+<!-- Additional context, constraints, or details from spec -->
 
 ## History
 
@@ -113,3 +77,4 @@ In Progress
 - 2026-08-11: Completed **AI Explain Code** — `explainCode` server action with Pro gating, auth, Zod validation, and AI rate limits; Explain button with Code/Explain tabs in item drawer read view for snippets and commands; markdown explanation rendered inline in the code editor; Crown icon and upgrade prompt for free users; unit tests for action, validations, and prompts
 - 2026-08-11: Completed **Prompt Optimization** — `optimizePrompt` server action with Pro gating, auth, Zod validation, and AI rate limits; Optimize button with Original/Optimized tabs in item drawer read view for prompt items; accept/reject before saving via `updateItem`; toast when prompt is already well-structured; Crown icon and upgrade prompt for free users; unit tests for action, validations, and prompts
 - 2026-08-12: Completed **Server Actions DRY Refactor** — extracted shared `ActionResult`, `requireSession`, `parseActionInput`, `requireAiAccess`, `handleAiActionError`, and `isUniqueConstraintError` helpers; adopted subscription limit utilities in create actions; consolidated action test fixtures, auth mocks, and parameterized AI guard tests; unit tests for all new helpers
+- 2026-08-13: Completed **Add Light and Dark-blue Themes** - added more themes. Defaults to system (light / dark)
