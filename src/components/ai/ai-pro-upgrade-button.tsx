@@ -12,7 +12,7 @@ export function AiProUpgradeButton({ onUpgrade }: AiProUpgradeButtonProps) {
       type="button"
       variant="ghost"
       size="icon-xs"
-      className="size-7 text-zinc-400 hover:bg-white/10 hover:text-zinc-100"
+      className="size-7"
       onClick={onUpgrade}
       aria-label="AI features require Pro subscription"
       title="AI features require Pro subscription"

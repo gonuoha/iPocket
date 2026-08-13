@@ -1,4 +1,9 @@
-export const EDITOR_THEMES = ["vs-dark", "monokai", "github-dark"] as const;
+export const EDITOR_THEMES = [
+  "app",
+  "vs-dark",
+  "monokai",
+  "github-dark",
+] as const;
 
 export type EditorTheme = (typeof EDITOR_THEMES)[number];
 
@@ -23,10 +28,11 @@ export const DEFAULT_EDITOR_PREFERENCES: EditorPreferences = {
   tabSize: 4,
   wordWrap: true,
   minimap: false,
-  theme: "vs-dark",
+  theme: "app",
 };
 
 export const EDITOR_THEME_LABELS: Record<EditorTheme, string> = {
+  app: "Match app theme",
   "vs-dark": "VS Dark",
   monokai: "Monokai",
   "github-dark": "GitHub Dark",

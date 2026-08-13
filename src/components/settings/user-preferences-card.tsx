@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { updateUserPreferences } from "@/actions/settings";
 import { PageSection } from "@/components/layout/page-container";
 import { PreferenceField } from "@/components/shared/preference-field";
+import { useAppearance } from "@/components/theme/appearance-provider";
 import {
   Select,
   SelectContent,
@@ -15,8 +16,11 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import {
+  APPEARANCE_LABELS,
+  APPEARANCES,
   TYPE_COLOR_POSITION_LABELS,
   TYPE_COLOR_POSITIONS,
+  type Appearance,
   type TypeColorPosition,
   type UserPreferences,
 } from "@/lib/user-preferences";
@@ -31,6 +35,7 @@ export function UserPreferencesCard({
   const [preferences, setPreferences] =
     useState<UserPreferences>(initialPreferences);
   const [isSaving, startSaving] = useTransition();
+  const { setAppearance } = useAppearance();
 
   const updateField = <K extends keyof UserPreferences>(
     key: K,
@@ -50,6 +55,7 @@ export function UserPreferencesCard({
       }
 
       setPreferences(result.data);
+      setAppearance(result.data.appearance);
       toast.success("User preferences saved");
     });
   };
@@ -65,6 +71,29 @@ export function UserPreferencesCard({
       }
       contentClassName="space-y-6"
     >
+        <PreferenceField
+          label="Theme"
+          description="Choose a color theme or match your system setting."
+        >
+          <Select
+            value={preferences.appearance}
+            onValueChange={(value) =>
+              updateField("appearance", value as Appearance)
+            }
+          >
+            <SelectTrigger className="w-full sm:w-48">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {APPEARANCES.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {APPEARANCE_LABELS[option]}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </PreferenceField>
+
         <PreferenceField
           label="Overview section"
           description="Show item type stats at the top of the dashboard."

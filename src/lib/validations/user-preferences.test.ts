@@ -7,6 +7,7 @@ describe("userPreferencesSchema", () => {
     const result = userPreferencesSchema.safeParse({
       showOverview: true,
       typeColorPosition: "right",
+      appearance: "dark-blue",
     });
 
     expect(result.success).toBe(true);
@@ -16,6 +17,7 @@ describe("userPreferencesSchema", () => {
     const result = userPreferencesSchema.safeParse({
       showOverview: "yes",
       typeColorPosition: "left",
+      appearance: "dark",
     });
 
     expect(result.success).toBe(false);
@@ -25,6 +27,17 @@ describe("userPreferencesSchema", () => {
     const result = userPreferencesSchema.safeParse({
       showOverview: true,
       typeColorPosition: "center",
+      appearance: "dark",
+    });
+
+    expect(result.success).toBe(false);
+  });
+
+  it("rejects invalid appearance values", () => {
+    const result = userPreferencesSchema.safeParse({
+      showOverview: true,
+      typeColorPosition: "left",
+      appearance: "obsidian",
     });
 
     expect(result.success).toBe(false);

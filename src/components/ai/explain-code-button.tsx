@@ -31,7 +31,7 @@ export function ExplainCodeButton({
       disabled={disabled || isLoading}
       aria-busy={isLoading}
       aria-label="Explain code"
-      className="h-7 px-2 text-zinc-400 hover:bg-white/10 hover:text-zinc-100"
+      className="h-7 px-2"
     >
       {isLoading ? (
         <Loader2 className="animate-spin" />

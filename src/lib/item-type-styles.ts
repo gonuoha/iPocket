@@ -10,6 +10,8 @@ import {
   type LucideIcon,
 } from "lucide-react";
 
+import { adaptTypeColor, typeColorTint } from "@/lib/item-type-color";
+
 const itemTypeIcons: Record<string, LucideIcon> = {
   Code,
   Sparkles,
@@ -91,7 +93,7 @@ export function getItemTypeStyles(color: string | null): ItemTypeStyle {
   }
 
   return {
-    textStyle: { color },
-    bgStyle: { backgroundColor: `${color}1a` },
+    textStyle: { color: adaptTypeColor(color) },
+    bgStyle: { backgroundColor: typeColorTint(color, "10%") },
   };
 }

@@ -9,13 +9,13 @@ import {
 } from "lucide-react";
 
 export const SYSTEM_ITEM_TYPE_COLORS = {
-  snippet: "#3b82f6",
-  prompt: "#8b5cf6",
-  command: "#f97316",
-  note: "#fde047",
-  file: "#6b7280",
-  image: "#ec4899",
-  link: "#10b981",
+  snippet: "#4DA3E8",
+  prompt: "#9B8AFB",
+  command: "#E8944A",
+  note: "#D4B84A",
+  file: "#7B8A9A",
+  image: "#D46BA8",
+  link: "#3DB88A",
 } as const;
 
 export type HomepageItemType = keyof typeof SYSTEM_ITEM_TYPE_COLORS;

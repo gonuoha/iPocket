@@ -139,7 +139,7 @@ export function SidebarContent({ sidebarData }: SidebarContentProps) {
                         href={`/collections/${collection.id}`}
                         title={collection.name}
                       >
-                        <Star className="size-4 shrink-0 fill-yellow-400 text-yellow-400" />
+                        <Star className="size-4 shrink-0 fill-favorite text-favorite" />
                         <span className="flex-1 truncate">{collection.name}</span>
                         <span className="text-xs text-muted-foreground">
                           {collection.itemCount}

@@ -24,6 +24,11 @@ describe("parseEditorPreferences", () => {
     expect(parseEditorPreferences(preferences)).toEqual(preferences);
   });
 
+  it("defaults to the app-matched theme", () => {
+    expect(DEFAULT_EDITOR_PREFERENCES.theme).toBe("app");
+    expect(parseEditorPreferences({ theme: "app" }).theme).toBe("app");
+  });
+
   it("merges partial objects with defaults", () => {
     expect(
       parseEditorPreferences({

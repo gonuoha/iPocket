@@ -54,7 +54,7 @@ export function CollectionCardMenu({ collection }: CollectionCardMenuProps) {
           >
             <Star
               className={cn(
-                isFavorite && "fill-yellow-400 text-yellow-400",
+                isFavorite && "fill-favorite text-favorite",
               )}
             />
             {isFavorite ? "Unfavorite" : "Favorite"}

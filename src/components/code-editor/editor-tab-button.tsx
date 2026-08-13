@@ -13,8 +13,8 @@ export function EditorTabButton({ active, onClick, children }: EditorTabButtonPr
       className={cn(
         "rounded px-2.5 py-1 text-xs font-medium transition-colors",
         active
-          ? "bg-white/10 text-zinc-100"
-          : "text-zinc-400 hover:text-zinc-200",
+          ? "bg-accent text-accent-foreground"
+          : "text-muted-foreground hover:text-foreground",
       )}
       onClick={onClick}
     >

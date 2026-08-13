@@ -16,14 +16,27 @@ export const TYPE_COLOR_POSITION_LABELS: Record<TypeColorPosition, string> = {
   none: "None",
 };
 
+export const APPEARANCES = ["light", "dark", "dark-blue", "system"] as const;
+
+export type Appearance = (typeof APPEARANCES)[number];
+
+export const APPEARANCE_LABELS: Record<Appearance, string> = {
+  light: "Light",
+  dark: "Dark",
+  "dark-blue": "Dark Blue",
+  system: "System",
+};
+
 export type UserPreferences = {
   showOverview: boolean;
   typeColorPosition: TypeColorPosition;
+  appearance: Appearance;
 };
 
 export const DEFAULT_USER_PREFERENCES: UserPreferences = {
   showOverview: true,
   typeColorPosition: "left",
+  appearance: "dark",
 };
 
 function isTypeColorPosition(value: unknown): value is TypeColorPosition {
@@ -31,6 +44,10 @@ function isTypeColorPosition(value: unknown): value is TypeColorPosition {
     typeof value === "string" &&
     TYPE_COLOR_POSITIONS.includes(value as TypeColorPosition)
   );
+}
+
+export function isAppearance(value: unknown): value is Appearance {
+  return typeof value === "string" && APPEARANCES.includes(value as Appearance);
 }
 
 export function parseUserPreferences(raw: unknown): UserPreferences {
@@ -48,5 +65,8 @@ export function parseUserPreferences(raw: unknown): UserPreferences {
     typeColorPosition: isTypeColorPosition(value.typeColorPosition)
       ? value.typeColorPosition
       : DEFAULT_USER_PREFERENCES.typeColorPosition,
+    appearance: isAppearance(value.appearance)
+      ? value.appearance
+      : DEFAULT_USER_PREFERENCES.appearance,
   };
 }

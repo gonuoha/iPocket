@@ -17,7 +17,7 @@ const MonacoEditorPane = dynamic(
   {
     ssr: false,
     loading: () => (
-      <div className="flex h-[120px] items-center justify-center bg-[#1e1e1e] text-xs text-muted-foreground">
+      <div className="flex h-[120px] items-center justify-center bg-prose-pre-bg text-xs text-muted-foreground">
         Loading editor...
       </div>
     ),
@@ -74,11 +74,11 @@ export function CodeEditor({
   return (
     <div
       className={cn(
-        "code-editor overflow-hidden rounded-lg border border-border bg-[#1e1e1e]",
+        "code-editor overflow-hidden rounded-lg border border-border bg-prose-pre-bg",
         className,
       )}
     >
-      <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-[#252526] px-3 py-2">
+      <div className="flex items-center justify-between gap-3 border-b border-border bg-muted px-3 py-2">
         <div className="flex min-w-0 items-center gap-2">
           <div className="flex items-center gap-1.5" aria-hidden="true">
             <span className="size-3 rounded-full bg-[#ff5f57]" />
@@ -104,7 +104,7 @@ export function CodeEditor({
         </div>
         <div className="flex items-center gap-2">
           {currentView === "code" ? (
-            <span className="text-xs font-medium text-zinc-400">
+            <span className="text-xs font-medium text-muted-foreground">
               {formatCodeLanguageLabel(language)}
             </span>
           ) : null}
@@ -121,7 +121,7 @@ export function CodeEditor({
             type="button"
             variant="ghost"
             size="icon-xs"
-            className="size-7 text-zinc-400 hover:bg-white/10 hover:text-zinc-100"
+            className="size-7"
             onClick={handleCopy}
             aria-label={currentView === "explain" ? "Copy explanation" : "Copy code"}
           >
@@ -145,7 +145,7 @@ export function CodeEditor({
           {explanation ? (
             <MarkdownContent content={explanation} />
           ) : (
-            <p className="text-sm text-zinc-500">Generating explanation...</p>
+            <p className="text-sm text-muted-foreground">Generating explanation...</p>
           )}
         </div>
       )}

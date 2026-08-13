@@ -137,7 +137,7 @@ export function TopBar({
         >
           <Star
             className={cn(
-              pathname === "/favorites" && "fill-yellow-400 text-yellow-400",
+              pathname === "/favorites" && "fill-favorite text-favorite",
             )}
           />
         </Button>

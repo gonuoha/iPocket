@@ -1,9 +1,14 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 import { parseActionInput } from "@/lib/actions/parse-action-input";
 import { requireSession } from "@/lib/actions/require-session";
+import {
+  APPEARANCE_COOKIE_MAX_AGE,
+  APPEARANCE_COOKIE_NAME,
+} from "@/lib/appearance";
 import {
   updateEditorPreferences as updateEditorPreferencesInDb,
   updateUserPreferences as updateUserPreferencesInDb,
@@ -56,10 +61,18 @@ export async function updateUserPreferences(
   try {
     const updated = await updateUserPreferencesInDb(userId, parsed.data);
 
+    const cookieStore = await cookies();
+    cookieStore.set(APPEARANCE_COOKIE_NAME, parsed.data.appearance, {
+      path: "/",
+      maxAge: APPEARANCE_COOKIE_MAX_AGE,
+      sameSite: "lax",
+    });
+
     revalidatePath("/settings");
     revalidatePath("/dashboard");
     revalidatePath("/items", "layout");
     revalidatePath("/collections", "layout");
+    revalidatePath("/", "layout");
 
     return { success: true, data: updated };
   } catch {

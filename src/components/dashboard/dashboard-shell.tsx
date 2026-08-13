@@ -4,6 +4,7 @@ import { Sheet, SheetContent } from "@/components/ui/sheet";
 import { ItemDrawer } from "@/components/items/item-drawer";
 import { ItemDrawerProvider } from "@/components/items/item-drawer-context";
 import { EditorPreferencesProvider } from "@/components/code-editor/editor-preferences-context";
+import { AppearanceSync } from "@/components/theme/appearance-sync";
 import { UserPreferencesProvider } from "@/components/user-preferences/user-preferences-context";
 import { CommandPalette } from "@/components/search/command-palette";
 import { CommandPaletteProvider } from "@/components/search/command-palette-context";
@@ -100,6 +101,7 @@ export function DashboardShell({
   return (
     <SidebarProvider>
       <ItemDrawerProvider>
+        <AppearanceSync appearance={userPreferences.appearance} />
         <UserPreferencesProvider initialPreferences={userPreferences}>
           <EditorPreferencesProvider initialPreferences={editorPreferences}>
             <CommandPaletteProvider searchData={searchData}>

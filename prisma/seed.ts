@@ -8,13 +8,13 @@ const DEMO_USER_ID = "user-demo";
 const DEMO_EMAIL = "demo@memex.io";
 
 const systemItemTypes = [
-  { id: "type-snippet", name: "snippet", icon: "Code", color: "#3b82f6" },
-  { id: "type-prompt", name: "prompt", icon: "Sparkles", color: "#8b5cf6" },
-  { id: "type-command", name: "command", icon: "Terminal", color: "#f97316" },
-  { id: "type-note", name: "note", icon: "StickyNote", color: "#fde047" },
-  { id: "type-file", name: "file", icon: "File", color: "#6b7280" },
-  { id: "type-image", name: "image", icon: "Image", color: "#ec4899" },
-  { id: "type-link", name: "link", icon: "Link", color: "#10b981" },
+  { id: "type-snippet", name: "snippet", icon: "Code", color: "#4DA3E8" },
+  { id: "type-prompt", name: "prompt", icon: "Sparkles", color: "#9B8AFB" },
+  { id: "type-command", name: "command", icon: "Terminal", color: "#E8944A" },
+  { id: "type-note", name: "note", icon: "StickyNote", color: "#D4B84A" },
+  { id: "type-file", name: "file", icon: "File", color: "#7B8A9A" },
+  { id: "type-image", name: "image", icon: "Image", color: "#D46BA8" },
+  { id: "type-link", name: "link", icon: "Link", color: "#3DB88A" },
 ] as const;
 
 const collections = [

@@ -4,14 +4,18 @@ import type { Monaco } from "@monaco-editor/react";
 import type { editor } from "monaco-editor";
 import { useEffect, useMemo, useRef, useState } from "react";
 
+import { useAppearance } from "@/components/theme/appearance-provider";
 import { useEditorPreferences } from "@/components/code-editor/editor-preferences-context";
 import type { EditorPreferences } from "@/lib/editor-preferences";
 import {
   getCodeEditorHeight,
   toMonacoLanguage,
 } from "@/lib/monaco-language";
+import {
+  resolveMonacoThemeId,
+  syncMonacoThemesWithApp,
+} from "@/lib/monaco-app-theme";
 import { preloadMonaco } from "@/lib/monaco-preload";
-import { registerMonacoThemes } from "@/lib/monaco-themes";
 
 type MonacoEditorPaneProps = {
   id?: string;
@@ -60,12 +64,14 @@ export function MonacoEditorPane({
   onChange,
 }: MonacoEditorPaneProps) {
   const { preferences } = useEditorPreferences();
+  const { resolvedTheme } = useAppearance();
   const containerRef = useRef<HTMLDivElement>(null);
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<Monaco | null>(null);
   const onChangeRef = useRef(onChange);
   const isApplyingExternalValueRef = useRef(false);
   const [isEditorReady, setIsEditorReady] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const height = useMemo(() => getCodeEditorHeight(value), [value]);
   const monacoLanguage = toMonacoLanguage(language);
   const latestEditorStateRef = useRef({
@@ -73,6 +79,7 @@ export function MonacoEditorPane({
     monacoLanguage,
     preferences,
     readOnly,
+    resolvedTheme,
   });
 
   useEffect(() => {
@@ -85,8 +92,9 @@ export function MonacoEditorPane({
       monacoLanguage,
       preferences,
       readOnly,
+      resolvedTheme,
     };
-  }, [monacoLanguage, preferences, readOnly, value]);
+  }, [monacoLanguage, preferences, readOnly, resolvedTheme, value]);
 
   useEffect(() => {
     let disposed = false;
@@ -102,34 +110,52 @@ export function MonacoEditorPane({
           return;
         }
 
-        monacoRef.current = monaco;
-        registerMonacoThemes(monaco);
+        try {
+          monacoRef.current = monaco;
 
-        const latestEditorState = latestEditorStateRef.current;
-        const instance = monaco.editor.create(containerRef.current, {
-          ...buildEditorOptions(
-            latestEditorState.preferences,
-            latestEditorState.readOnly,
-          ),
-          value: latestEditorState.value,
-          language: latestEditorState.monacoLanguage,
-          theme: latestEditorState.preferences.theme,
-        });
+          const latestEditorState = latestEditorStateRef.current;
+          syncMonacoThemesWithApp(monaco, latestEditorState.resolvedTheme);
 
-        editorRef.current = instance;
+          const monacoThemeId = resolveMonacoThemeId(
+            latestEditorState.preferences.theme,
+            latestEditorState.resolvedTheme,
+          );
+          const instance = monaco.editor.create(containerRef.current, {
+            ...buildEditorOptions(
+              latestEditorState.preferences,
+              latestEditorState.readOnly,
+            ),
+            value: latestEditorState.value,
+            language: latestEditorState.monacoLanguage,
+            theme: monacoThemeId,
+          });
 
-        instance.onDidChangeModelContent(() => {
-          if (isApplyingExternalValueRef.current) {
-            return;
+          editorRef.current = instance;
+
+          instance.onDidChangeModelContent(() => {
+            if (isApplyingExternalValueRef.current) {
+              return;
+            }
+
+            onChangeRef.current?.(instance.getValue());
+          });
+
+          setLoadError(null);
+          setIsEditorReady(true);
+        } catch (error) {
+          if (!disposed) {
+            setLoadError(
+              error instanceof Error ? error.message : "Failed to load editor",
+            );
+            setIsEditorReady(false);
           }
-
-          onChangeRef.current?.(instance.getValue());
-        });
-
-        setIsEditorReady(true);
+        }
       })
-      .catch(() => {
+      .catch((error: unknown) => {
         if (!disposed) {
+          setLoadError(
+            error instanceof Error ? error.message : "Failed to load editor",
+          );
           setIsEditorReady(false);
         }
       });
@@ -198,9 +224,11 @@ export function MonacoEditorPane({
       return;
     }
 
-    registerMonacoThemes(monaco);
-    monaco.editor.setTheme(preferences.theme);
-  }, [preferences.theme]);
+    syncMonacoThemesWithApp(monaco, resolvedTheme);
+    monaco.editor.setTheme(
+      resolveMonacoThemeId(preferences.theme, resolvedTheme),
+    );
+  }, [preferences.theme, resolvedTheme]);
 
   useEffect(() => {
     editorRef.current?.updateOptions({
@@ -232,8 +260,8 @@ export function MonacoEditorPane({
   return (
     <div className="relative" style={{ height }}>
       {!isEditorReady ? (
-        <div className="absolute inset-0 flex items-center justify-center bg-[#1e1e1e] text-xs text-muted-foreground">
-          Loading editor...
+        <div className="absolute inset-0 z-10 flex items-center justify-center bg-prose-pre-bg px-4 text-center text-xs text-muted-foreground">
+          {loadError ?? "Loading editor..."}
         </div>
       ) : null}
       <div ref={containerRef} id={id} className="h-full w-full" />

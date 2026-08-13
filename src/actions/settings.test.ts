@@ -1,7 +1,9 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { cookies } from "next/headers";
 
 import type { EditorPreferences } from "@/lib/editor-preferences";
 import type { UserPreferences } from "@/lib/user-preferences";
+import { APPEARANCE_COOKIE_NAME } from "@/lib/appearance";
 
 import { mockAuth, mockUnauthenticated } from "./__tests__/mock-auth";
 
@@ -25,6 +27,7 @@ import { updateEditorPreferences, updateUserPreferences } from "./settings";
 const mockUpdateEditorPreferencesInDb = vi.mocked(updateEditorPreferencesInDb);
 const mockUpdateUserPreferencesInDb = vi.mocked(updateUserPreferencesInDb);
 const mockRevalidatePath = vi.mocked(revalidatePath);
+const mockCookies = vi.mocked(cookies);
 
 const preferences: EditorPreferences = {
   fontSize: 14,
@@ -37,6 +40,7 @@ const preferences: EditorPreferences = {
 const userPreferences: UserPreferences = {
   showOverview: false,
   typeColorPosition: "left",
+  appearance: "light",
 };
 
 describe("updateEditorPreferences", () => {
@@ -132,6 +136,12 @@ describe("updateUserPreferences", () => {
   it("saves preferences and revalidates settings and dashboard", async () => {
     mockAuth.mockResolvedValue({ user: { id: "user-1" } } as never);
     mockUpdateUserPreferencesInDb.mockResolvedValue(userPreferences);
+    const mockSet = vi.fn();
+    mockCookies.mockReturnValue({
+      get: vi.fn(),
+      set: mockSet,
+      delete: vi.fn(),
+    } as never);
 
     const result = await updateUserPreferences(userPreferences);
 
@@ -140,10 +150,19 @@ describe("updateUserPreferences", () => {
       "user-1",
       userPreferences,
     );
+    expect(mockSet).toHaveBeenCalledWith(
+      APPEARANCE_COOKIE_NAME,
+      userPreferences.appearance,
+      expect.objectContaining({
+        path: "/",
+        sameSite: "lax",
+      }),
+    );
     expect(mockRevalidatePath).toHaveBeenCalledWith("/settings");
     expect(mockRevalidatePath).toHaveBeenCalledWith("/dashboard");
     expect(mockRevalidatePath).toHaveBeenCalledWith("/items", "layout");
     expect(mockRevalidatePath).toHaveBeenCalledWith("/collections", "layout");
+    expect(mockRevalidatePath).toHaveBeenCalledWith("/", "layout");
   });
 
   it("returns an error when the database update fails", async () => {

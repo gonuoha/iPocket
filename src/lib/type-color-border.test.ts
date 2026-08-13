@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 
+import { adaptTypeColor } from "./item-type-color";
 import { getTypeColorBorderProps } from "./type-color-border";
 
 describe("getTypeColorBorderProps", () => {
@@ -18,12 +19,12 @@ describe("getTypeColorBorderProps", () => {
     );
   });
 
-  it("applies the color to the matching border side", () => {
+  it("applies the theme-adapted color to the matching border side", () => {
     expect(getTypeColorBorderProps("#ff0000", "left").style).toEqual({
-      borderLeftColor: "#ff0000",
+      borderLeftColor: adaptTypeColor("#ff0000"),
     });
     expect(getTypeColorBorderProps("#ff0000", "top").style).toEqual({
-      borderTopColor: "#ff0000",
+      borderTopColor: adaptTypeColor("#ff0000"),
     });
   });
 

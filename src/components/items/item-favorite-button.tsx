@@ -52,9 +52,9 @@ export function ItemFavoriteButton({
 
   const favoriteButtonClassName = cn(
     isFavorite &&
-      "border-yellow-400/40 bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400/15 hover:text-yellow-400",
+      "border-favorite/40 bg-favorite/10 text-favorite hover:bg-favorite/15 hover:text-favorite",
   );
-  const starClassName = cn(isFavorite && "fill-yellow-400 text-yellow-400");
+  const starClassName = cn(isFavorite && "fill-favorite text-favorite");
 
   if (variant === "button") {
     return (
@@ -80,7 +80,7 @@ export function ItemFavoriteButton({
       size="icon-xs"
       className={cn(
         "text-muted-foreground hover:text-foreground",
-        isFavorite && "text-yellow-400 hover:text-yellow-400",
+        isFavorite && "text-favorite hover:text-favorite",
         className,
       )}
       onClick={handleClick}

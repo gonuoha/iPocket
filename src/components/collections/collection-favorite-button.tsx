@@ -38,7 +38,7 @@ export function CollectionFavoriteButton({
       className={cn(
         "shrink-0",
         isFavorite &&
-          "border-yellow-400/40 bg-yellow-400/10 text-yellow-400 hover:bg-yellow-400/15 hover:text-yellow-400",
+          "border-favorite/40 bg-favorite/10 text-favorite hover:bg-favorite/15 hover:text-favorite",
         className,
       )}
       onClick={handleClick}
@@ -46,7 +46,7 @@ export function CollectionFavoriteButton({
       aria-pressed={isFavorite}
     >
       <Star
-        className={cn(isFavorite && "fill-yellow-400 text-yellow-400")}
+        className={cn(isFavorite && "fill-favorite text-favorite")}
       />
       Favorite
     </Button>

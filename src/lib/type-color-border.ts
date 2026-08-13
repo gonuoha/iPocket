@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react";
 
+import { adaptTypeColor } from "@/lib/item-type-color";
 import type { TypeColorPosition } from "@/lib/user-preferences";
 
 const BORDER_POSITION_CLASS: Record<
@@ -38,7 +39,7 @@ export function getTypeColorBorderProps(
   if (color?.startsWith("#")) {
     return {
       className,
-      style: { [BORDER_COLOR_PROPERTY[position]]: color },
+      style: { [BORDER_COLOR_PROPERTY[position]]: adaptTypeColor(color) },
     };
   }
 

@@ -86,11 +86,11 @@ export function MarkdownEditor({
   return (
     <div
       className={cn(
-        "markdown-editor overflow-hidden rounded-lg border border-border bg-[#1e1e1e]",
+        "markdown-editor overflow-hidden rounded-lg border border-border bg-prose-pre-bg",
         className,
       )}
     >
-      <div className="flex items-center justify-between gap-3 border-b border-white/10 bg-[#2d2d2d] px-3 py-2">
+      <div className="flex items-center justify-between gap-3 border-b border-border bg-muted px-3 py-2">
         <div className="flex items-center gap-1">
           {showOptimizeTabs ? (
             <div className="flex items-center gap-1">
@@ -123,7 +123,7 @@ export function MarkdownEditor({
               </EditorTabButton>
             </>
           ) : (
-            <span className="px-2.5 py-1 text-xs font-medium text-zinc-300">
+            <span className="px-2.5 py-1 text-xs font-medium text-muted-foreground">
               Preview
             </span>
           )}
@@ -142,7 +142,7 @@ export function MarkdownEditor({
             type="button"
             variant="ghost"
             size="icon-xs"
-            className="size-7 text-zinc-400 hover:bg-white/10 hover:text-zinc-100"
+            className="size-7"
             onClick={handleCopy}
             aria-label="Copy markdown"
           >
@@ -157,7 +157,7 @@ export function MarkdownEditor({
           value={value}
           readOnly={readOnly}
           onChange={(event) => onChange?.(event.target.value)}
-          className="w-full resize-none border-0 bg-[#1e1e1e] px-4 py-3 font-mono text-sm leading-5 text-zinc-100 outline-none placeholder:text-zinc-500"
+          className="w-full resize-none border-0 bg-prose-pre-bg px-4 py-3 font-mono text-sm leading-5 text-foreground outline-none placeholder:text-muted-foreground"
           style={{ height }}
           placeholder="Write markdown..."
         />
@@ -168,18 +168,18 @@ export function MarkdownEditor({
         >
           {displayValue.trim() ? (
             isOptimizing && currentView === "optimized" ? (
-              <p className="text-sm text-zinc-500">Optimizing prompt...</p>
+              <p className="text-sm text-muted-foreground">Optimizing prompt...</p>
             ) : (
               <MarkdownContent content={displayValue} />
             )
           ) : (
-            <p className="text-sm text-zinc-500">Nothing to preview</p>
+            <p className="text-sm text-muted-foreground">Nothing to preview</p>
           )}
         </div>
       )}
 
       {currentView === "optimized" && optimizedValue ? (
-        <div className="flex items-center gap-2 border-t border-white/10 bg-[#252526] px-3 py-2">
+        <div className="flex items-center gap-2 border-t border-border bg-muted px-3 py-2">
           <Button
             type="button"
             size="sm"
