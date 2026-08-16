@@ -1,6 +1,6 @@
 "use client";
 
-import { createElement, useState, useTransition } from "react";
+import { createElement, useEffect, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
@@ -39,6 +39,7 @@ import {
 } from "@/lib/validations/items";
 import { UpgradePrompt } from "@/components/shared/upgrade-prompt";
 import { useAiItemSuggestions } from "@/hooks/use-ai-item-suggestions";
+import { cn } from "@/lib/utils";
 
 const CREATABLE_ITEM_TYPES: {
   type: CreatableItemType;
@@ -127,15 +128,27 @@ export function ItemCreateDialog({
     onTagsChange: (tags) => handleFormChange({ tags }),
     onDescriptionChange: (description) => handleFormChange({ description }),
   });
+  const wasOpenRef = useRef(open);
+
+  function initializeCreateForm() {
+    setFormState({
+      ...initialFormState,
+      type: resolveDefaultCreateType(defaultType, isPro),
+    });
+    aiSuggestions.resetSuggestions();
+  }
+
+  useEffect(() => {
+    const justOpened = open && !wasOpenRef.current;
+    wasOpenRef.current = open;
+
+    if (justOpened) {
+      initializeCreateForm();
+    }
+  }, [open, defaultType, isPro]);
 
   function handleOpenChange(nextOpen: boolean) {
-    if (nextOpen) {
-      setFormState({
-        ...initialFormState,
-        type: resolveDefaultCreateType(defaultType, isPro),
-      });
-      aiSuggestions.resetSuggestions();
-    } else {
+    if (!nextOpen) {
       setFormState(initialFormState);
       aiSuggestions.resetSuggestions();
     }
@@ -201,15 +214,20 @@ export function ItemCreateDialog({
   return (
     <>
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="max-h-[calc(100vh-2rem)] overflow-y-auto sm:max-w-lg">
-        <DialogHeader>
+      <DialogContent
+        className={cn(
+          "inset-0 top-0 left-0 flex h-dvh max-h-dvh w-full max-w-none translate-x-0 translate-y-0 flex-col gap-0 overflow-hidden rounded-none p-0",
+          "sm:inset-auto sm:top-1/2 sm:left-1/2 sm:h-auto sm:max-h-[calc(100vh-2rem)] sm:max-w-lg sm:-translate-x-1/2 sm:-translate-y-1/2 sm:gap-4 sm:overflow-y-auto sm:rounded-xl sm:p-4",
+        )}
+      >
+        <DialogHeader className="shrink-0 px-4 pt-4 sm:px-0 sm:pt-0">
           <DialogTitle>New Item</DialogTitle>
           <DialogDescription>
             Choose a type and fill in the details for your new item.
           </DialogDescription>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="min-h-0 flex-1 space-y-6 overflow-y-auto px-4 sm:px-0">
           <div className="space-y-2">
             <Label htmlFor="item-create-type">Type</Label>
             <Select
@@ -274,7 +292,7 @@ export function ItemCreateDialog({
           />
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="mx-0 mb-0 shrink-0 rounded-none sm:-mx-4 sm:-mb-4 sm:rounded-b-xl">
           <Button
             type="button"
             variant="outline"
